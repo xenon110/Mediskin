@@ -13,10 +13,10 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { FirebaseError } from 'firebase/app';
 import { auth } from '@/lib/firebase';
-import { getUserProfile } from '@/lib/firebase-services';
+import { getUserProfile, createUserProfile } from '@/lib/firebase-services';
 import React, { useState } from 'react';
 
 const loginSchema = z.object({
@@ -37,6 +37,57 @@ export default function LoginForm() {
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   });
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    if (!auth) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Firebase is not configured.' });
+      setIsLoading(false);
+      return;
+    }
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      let userProfile = await getUserProfile(user.uid);
+
+      if (!userProfile) {
+        // If user signs in with Google but has no profile, create one.
+        const profileData = {
+          email: user.email!,
+          role: role,
+          name: user.displayName || 'New User',
+          age: 30,
+          gender: 'Other',
+          ...(role === 'patient' && { skinTone: 'Type III', region: 'Delhi' }),
+          ...(role === 'doctor' && { experience: 0, verificationStatus: 'pending' }),
+        };
+        userProfile = await createUserProfile(user.uid, profileData as any);
+        toast({ title: 'Account Created', description: 'Welcome to MediSkin!' });
+      }
+
+      if (userProfile.role !== role) {
+        await auth.signOut();
+        toast({
+          variant: 'destructive',
+          title: 'Role Mismatch',
+          description: `This account is registered as a ${userProfile.role}. Please log in on the correct page.`,
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      toast({ title: 'Login Successful', description: 'Welcome back!' });
+      router.push(role === 'doctor' ? '/doctor/dashboard' : '/patient/dashboard');
+
+    } catch (error: any) {
+      console.error('Google Sign-In error:', error);
+      toast({ variant: 'destructive', title: 'Sign-In Failed', description: error.message });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
@@ -60,7 +111,6 @@ export default function LoginForm() {
           throw new Error("Unable to find user profile.");
         }
         
-        // Role-based redirection logic
         if (role === 'doctor' && userProfile.role === 'doctor') {
             toast({ title: 'Login Successful', description: 'Welcome back, Doctor!' });
             router.push('/doctor/dashboard');
@@ -68,21 +118,19 @@ export default function LoginForm() {
             toast({ title: 'Login Successful', description: 'Welcome back!' });
             router.push('/patient/dashboard');
         } else {
-             // If roles don't match, sign out and show an error
              await auth.signOut();
              throw new Error(`This account is not a ${role} account. Please use the correct login form.`);
         }
     } catch (error) {
         let description = 'An unexpected error occurred. Please try again.';
-
         if (error instanceof FirebaseError) {
             switch (error.code) {
                 case 'auth/user-not-found':
                 case 'auth/invalid-email':
-                    description = 'No account found with this email address.';
+                case 'auth/invalid-credential':
+                    description = 'Invalid credentials. Please check your email and password.';
                     break;
                 case 'auth/wrong-password':
-                case 'auth/invalid-credential':
                     description = 'Incorrect password. Please try again.';
                     break;
                 case 'auth/too-many-requests':
@@ -94,12 +142,7 @@ export default function LoginForm() {
         } else if (error instanceof Error) {
             description = error.message;
         }
-
-        toast({
-            variant: 'destructive',
-            title: 'Login Failed',
-            description: description,
-        });
+        toast({ variant: 'destructive', title: 'Login Failed', description });
     } finally {
         setIsLoading(false);
     }
@@ -114,49 +157,59 @@ export default function LoginForm() {
             Enter your credentials to access your {role} account.
           </CardDescription>
         </CardHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="you@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+        <CardContent className="space-y-4">
+            <Button onClick={handleGoogleSignIn} disabled={isLoading} variant="outline" className="w-full">
+                {isLoading ? <Loader2 className="animate-spin" /> : (
+                  <>
+                    <svg className="w-5 h-5 mr-2" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
+                      <path fill="currentColor" d="M488 261.8C488 403.3 381.5 512 244 512S0 403.3 0 261.8 106.5 11.6 244 11.6c67.7 0 121.1 26.1 165.2 65.5l-65.5 63.5c-21.4-20.3-49-32.3-80.7-32.3-62.3 0-113.5 51.2-113.5 113.5s51.2 113.5 113.5 113.5c71.2 0 98.7-52.9 101.7-79.5H244V243.3h185.3c3.1 16.3 4.7 34.5 4.7 53.5z"></path>
+                    </svg>
+                    Sign in with Google
+                  </>
                 )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-            <CardFooter className="flex flex-col items-stretch gap-4">
-              <Button type="submit" disabled={isLoading} className="w-full bg-gradient-login text-white">
-                {isLoading ? <Loader2 className="animate-spin" /> : 'Login'}
-              </Button>
-              <div className="text-center text-sm text-muted-foreground">
-                Don't have an account?{' '}
-                <Button variant="link" asChild className="p-0 h-auto">
-                  <Link href={`/signup?role=${role}`}>Sign up</Link>
-                </Button>
-              </div>
-            </CardFooter>
-          </form>
-        </Form>
+            </Button>
+
+             <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+                </div>
+            </div>
+            
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField control={form.control} name="email" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl><Input type="email" placeholder="you@example.com" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField control={form.control} name="password" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" disabled={isLoading} className="w-full bg-gradient-login text-white">
+                    {isLoading ? <Loader2 className="animate-spin" /> : 'Login'}
+                  </Button>
+              </form>
+            </Form>
+        </CardContent>
+        <CardFooter className="flex flex-col items-stretch gap-4">
+          <div className="text-center text-sm text-muted-foreground">
+            Don't have an account?{' '}
+            <Button variant="link" asChild className="p-0 h-auto">
+              <Link href={`/signup?role=${role}`}>Sign up</Link>
+            </Button>
+          </div>
+        </CardFooter>
       </Card>
     </div>
   );

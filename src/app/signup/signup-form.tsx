@@ -14,26 +14,25 @@ import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { FileUp, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { createUserProfile } from '@/lib/firebase-services';
+import { createUserProfile, getUserProfile } from '@/lib/firebase-services';
 import { indianStates } from '@/lib/indian-states';
 
 
 const patientSignupSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
   email: z.string().email('Invalid email address.'),
-  password: z.string().min(6, 'Password must be at least 6 characters.'),
   age: z.coerce.number().min(1, 'Age is required.').max(120),
   gender: z.string().min(1, 'Gender is required.'),
   skinTone: z.string().min(1, 'Skin tone is required.'),
   region: z.string().min(1, 'Region is required.'),
 });
 
+// We keep the schema for validation but will populate it from Google Sign-In
 const doctorSignupSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
   email: z.string().email('Invalid email address.'),
-  password: z.string().min(6, 'Password must be at least 6 characters.'),
   age: z.coerce.number().min(18, 'You must be at least 18.').max(100),
   gender: z.string().min(1, 'Gender is required.'),
   experience: z.coerce.number().min(0, 'Experience cannot be negative.'),
@@ -55,213 +54,77 @@ export default function SignupForm() {
   const form = useForm<PatientSignupForm | DoctorSignupForm>({
     resolver: zodResolver(role === 'doctor' ? doctorSignupSchema : patientSignupSchema),
     defaultValues: role === 'doctor' 
-      ? { name: '', email: '', password: '', age: 30, gender: 'Other', experience: 5 }
-      : { name: '', email: '', password: '', age: 30, gender: '', skinTone: '', region: '' },
+      ? { name: '', email: '', age: 30, gender: 'Other', experience: 5 }
+      : { name: '', email: '', age: 30, gender: '', skinTone: '', region: '' },
   });
-
-  const onSubmit = async (data: PatientSignupForm | DoctorSignupForm) => {
+  
+  const handleGoogleSignIn = async () => {
     setIsLoading(true);
-     if (!auth) {
-        toast({
-            variant: 'destructive',
-            title: 'Error',
-            description: 'Firebase is not configured. Please check your setup.',
-        });
-        setIsLoading(false);
-        return;
+    if (!auth) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Firebase is not configured.' });
+      setIsLoading(false);
+      return;
     }
-
+    const provider = new GoogleAuthProvider();
     try {
-        // Check if email already exists
-        const signInMethods = await fetchSignInMethodsForEmail(auth, data.email);
-        if (signInMethods.length > 0) {
-            toast({
-                title: 'Account Exists',
-                description: 'This email is already registered. Redirecting to payment page.',
-            });
-            if (role === 'doctor') {
-                router.push('/doctor/payment');
-            } else {
-                router.push('/payment');
-            }
-            setIsLoading(false);
-            return;
-        }
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
-        const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-        const user = userCredential.user;
+      let userProfile = await getUserProfile(user.uid);
 
+      if (!userProfile) {
+        // User is new, create a profile
         const profileData = {
           email: user.email!,
           role: role,
-          name: data.name,
-          age: data.age,
-          gender: data.gender,
-          ...(role === 'patient' && { skinTone: (data as PatientSignupForm).skinTone, region: (data as PatientSignupForm).region }),
-          ...(role === 'doctor' && { experience: (data as DoctorSignupForm).experience }),
+          name: user.displayName || 'New User',
+          age: 30, // Default age, can be collected later
+          gender: 'Other', // Default gender
+          ...(role === 'patient' && { skinTone: 'Type III', region: 'Delhi' }),
+          ...(role === 'doctor' && { experience: 0, verificationStatus: 'pending' }),
         };
+        userProfile = await createUserProfile(user.uid, profileData as any);
+        toast({ title: 'Account Created', description: 'Welcome to MediSkin!' });
+      }
 
-        // TODO: Add file upload logic here for doctor's degree and additional files.
-        
-        await createUserProfile(user.uid, profileData);
-
-        toast({ title: 'Account Created', description: 'You have been successfully signed up!' });
-
-        if (role === 'doctor') {
-            router.push('/doctor/dashboard');
-        } else {
-            router.push('/patient/dashboard');
-        }
-    } catch (error: any) {
-        console.error('Signup error:', error);
-        let description = 'An unexpected error occurred. Please try again.';
-        // This specific error might not be needed anymore due to the check above, but it's good for fallback.
-        if (error.code === 'auth/email-already-in-use') {
-          description = 'This email address is already in use. Please log in or use a different email.';
-        }
+      if (userProfile.role !== role) {
+        await auth.signOut();
         toast({
-            variant: 'destructive',
-            title: 'Signup Failed',
-            description: description,
+          variant: 'destructive',
+          title: 'Role Mismatch',
+          description: `This account is registered as a ${userProfile.role}. Please log in on the correct page.`,
         });
-    } finally {
         setIsLoading(false);
+        return;
+      }
+      
+      toast({ title: 'Login Successful', description: 'Welcome back!' });
+      router.push(role === 'doctor' ? '/doctor/dashboard' : '/patient/dashboard');
+
+    } catch (error: any) {
+      console.error('Google Sign-In error:', error);
+      toast({ variant: 'destructive', title: 'Sign-In Failed', description: error.message });
+    } finally {
+      setIsLoading(false);
     }
   };
 
+
   const renderPatientForm = () => (
     <>
-      <FormField control={form.control} name="name" render={({ field }) => (
-        <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="e.g., John Doe" {...field} /></FormControl><FormMessage /></FormItem>
-      )} />
-      <FormField control={form.control} name="email" render={({ field }) => (
-        <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="you@example.com" {...field} /></FormControl><FormMessage /></FormItem>
-      )} />
-      <FormField control={form.control} name="password" render={({ field }) => (
-        <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormItem>
-      )} />
-      <div className="grid grid-cols-2 gap-4">
-        <FormField control={form.control} name="age" render={({ field }) => (
-          <FormItem><FormLabel>Age</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
-        <FormField control={form.control} name="gender" render={({ field }) => (
-          <FormItem>
-            <FormLabel>Gender</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <FormControl><SelectTrigger><SelectValue placeholder="Select gender" /></SelectTrigger></FormControl>
-              <SelectContent>
-                <SelectItem value="Male">Male</SelectItem>
-                <SelectItem value="Female">Female</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )} />
-      </div>
-      <FormField control={form.control} name="skinTone" render={({ field }) => (
-        <FormItem>
-          <FormLabel>Skin Tone (Fitzpatrick scale)</FormLabel>
-          <Select onValueChange={field.onChange} defaultValue={field.value}>
-            <FormControl><SelectTrigger><SelectValue placeholder="Select your skin tone" /></SelectTrigger></FormControl>
-            <SelectContent>
-              <SelectItem value="Type I">Type I (Very fair, always burns)</SelectItem>
-              <SelectItem value="Type II">Type II (Fair, usually burns)</SelectItem>
-              <SelectItem value="Type III">Type III (Medium, sometimes burns)</SelectItem>
-              <SelectItem value="Type IV">Type IV (Olive, rarely burns)</SelectItem>
-              <SelectItem value="Type V">Type V (Brown, very rarely burns)</SelectItem>
-              <SelectItem value="Type VI">Type VI (Black, never burns)</SelectItem>
-            </SelectContent>
-          </Select>
-          <FormMessage />
-        </FormItem>
-      )} />
-      <FormField control={form.control} name="region" render={({ field }) => (
-        <FormItem>
-          <FormLabel>Region</FormLabel>
-          <Select onValueChange={field.onChange} defaultValue={field.value}>
-            <FormControl><SelectTrigger><SelectValue placeholder="Select your state" /></SelectTrigger></FormControl>
-            <SelectContent>
-              {indianStates.map(state => <SelectItem key={state} value={state}>{state}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          <FormMessage />
-        </FormItem>
-      )} />
+      <p className="text-center text-sm text-muted-foreground mb-4">
+        Create your patient account by signing in with Google. This ensures your email is valid and your account is secure.
+      </p>
     </>
   );
 
   const renderDoctorForm = () => {
-      const degreeRef = form.register("degree");
-      const additionalFileRef = form.register("additionalFile");
-
       return (
         <>
-            <FormField control={form.control} name="name" render={({ field }) => (
-                <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Dr. Jane Doe" {...field} /></FormControl><FormMessage /></FormItem>
-            )} />
-            <FormField control={form.control} name="email" render={({ field }) => (
-                <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="you@hospital.com" {...field} /></FormControl><FormMessage /></FormItem>
-            )} />
-            <FormField control={form.control} name="password" render={({ field }) => (
-                <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormItem>
-            )} />
-            <div className="grid grid-cols-3 gap-4">
-                <FormField control={form.control} name="age" render={({ field }) => (
-                    <FormItem><FormLabel>Age</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
-                <FormField control={form.control} name="experience" render={({ field }) => (
-                    <FormItem><FormLabel>Experience (years)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
-                <FormField control={form.control} name="gender" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Gender</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl><SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger></FormControl>
-                      <SelectContent>
-                        <SelectItem value="Male">Male</SelectItem>
-                        <SelectItem value="Female">Female</SelectItem>
-                        <SelectItem value="Other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-            </div>
-            <FormField control={form.control} name="degree" render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Degree Certificate</FormLabel>
-                    <FormControl>
-                        <div className="relative flex items-center justify-center w-full">
-                            <label htmlFor="degree-upload" className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/50">
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
-                                    <p className="text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> your degree</p>
-                                </div>
-                                <Input id="degree-upload" type="file" className="hidden" {...degreeRef} />
-                            </label>
-                        </div>
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-            )} />
-            <FormField control={form.control} name="additionalFile" render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Additional Verification (Optional)</FormLabel>
-                    <FormControl>
-                        <div className="relative flex items-center justify-center w-full">
-                            <label htmlFor="additional-upload" className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/50">
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
-                                    <p className="text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> e.g. license, etc.</p>
-                                </div>
-                                <Input id="additional-upload" type="file" className="hidden" {...additionalFileRef} />
-                            </label>
-                        </div>
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-            )} />
+            <p className="text-center text-sm text-muted-foreground mb-4">
+                To create a doctor account, please sign in with your professional Google account.
+            </p>
+            {/* The rest of the form for file uploads could be shown after initial sign-in */}
         </>
       );
   }
@@ -271,17 +134,23 @@ export default function SignupForm() {
       <Card className="w-full max-w-lg shadow-2xl">
         <CardHeader className="text-center">
           <CardTitle className="font-headline text-3xl">Create a {role === 'doctor' ? 'Doctor' : 'Patient'} Account</CardTitle>
-          <CardDescription>Join MEDISKIN to get started on your health journey.</CardDescription>
+          <CardDescription>Join MEDISKIN by using a secure Google account.</CardDescription>
         </CardHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+        
             <CardContent className="space-y-4">
                 {role === 'doctor' ? renderDoctorForm() : renderPatientForm()}
+                 <Button onClick={handleGoogleSignIn} disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                    {isLoading ? <Loader2 className="animate-spin" /> : (
+                      <>
+                        <svg className="w-5 h-5 mr-2" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
+                          <path fill="currentColor" d="M488 261.8C488 403.3 381.5 512 244 512S0 403.3 0 261.8 106.5 11.6 244 11.6c67.7 0 121.1 26.1 165.2 65.5l-65.5 63.5c-21.4-20.3-49-32.3-80.7-32.3-62.3 0-113.5 51.2-113.5 113.5s51.2 113.5 113.5 113.5c71.2 0 98.7-52.9 101.7-79.5H244V243.3h185.3c3.1 16.3 4.7 34.5 4.7 53.5z"></path>
+                        </svg>
+                        Sign up with Google
+                      </>
+                    )}
+                </Button>
             </CardContent>
             <CardFooter className="flex flex-col items-stretch gap-4">
-              <Button type="submit" disabled={isLoading} className="w-full">
-                {isLoading ? <Loader2 className="animate-spin" /> : 'Create Account'}
-              </Button>
               <div className="text-center text-sm text-muted-foreground">
                 Already have an account?{' '}
                 <Button variant="link" asChild className="p-0 h-auto">
@@ -289,8 +158,6 @@ export default function SignupForm() {
                 </Button>
               </div>
             </CardFooter>
-          </form>
-        </Form>
       </Card>
     </div>
   );
