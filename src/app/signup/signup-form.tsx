@@ -19,6 +19,7 @@ import { auth } from '@/lib/firebase';
 import { createUserProfile, CreateUserProfileData } from '@/lib/firebase-services';
 import { indianStates } from '@/lib/indian-states';
 import { FirebaseError } from 'firebase/app';
+import { Separator } from '@/components/ui/separator';
 
 
 const signupSchema = z.object({
