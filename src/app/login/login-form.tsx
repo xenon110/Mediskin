@@ -53,15 +53,11 @@ export default function LoginForm() {
       let userProfile = await getUserProfile(user.uid);
 
       if (!userProfile) {
-        // If user signs in with Google but has no profile, create one.
+        // If user signs in with Google but has no profile, create one with only basic info
         const profileData = {
           email: user.email!,
           role: role,
           name: user.displayName || 'New User',
-          age: 30,
-          gender: 'Other',
-          ...(role === 'patient' && { skinTone: 'Type III', region: 'Delhi' }),
-          ...(role === 'doctor' && { experience: 0, verificationStatus: 'pending' }),
         };
         userProfile = await createUserProfile(user.uid, profileData as any);
         toast({ title: 'Account Created', description: 'Welcome to MediSkin!' });
@@ -79,6 +75,7 @@ export default function LoginForm() {
       }
       
       toast({ title: 'Login Successful', description: 'Welcome back!' });
+      // Redirect to the dashboard, the layout will handle profile completion check
       router.push(role === 'doctor' ? '/doctor/dashboard' : '/patient/dashboard');
 
     } catch (error: any) {
@@ -116,6 +113,7 @@ export default function LoginForm() {
             router.push('/doctor/dashboard');
         } else if (role === 'patient' && userProfile.role === 'patient') {
             toast({ title: 'Login Successful', description: 'Welcome back!' });
+            // Redirect to dashboard, layout handles profile check
             router.push('/patient/dashboard');
         } else {
              await auth.signOut();
@@ -214,5 +212,3 @@ export default function LoginForm() {
     </div>
   );
 }
-
-    

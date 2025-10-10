@@ -36,8 +36,8 @@ export type CreateUserProfileData = {
   email: string;
   role: 'patient' | 'doctor';
   name: string;
-  age: number;
-  gender: string;
+  age?: number;
+  gender?: string;
   skinTone?: string;
   region?: string;
   experience?: number;
@@ -64,19 +64,10 @@ export const createUserProfile = async (uid: string, data: CreateUserProfileData
     email: data.email,
     role: data.role,
     name: data.name,
-    age: data.age,
-    gender: data.gender,
     createdAt: serverTimestamp(),
     photoURL: '',
+    ...data
   };
-
-  if (data.role === 'doctor') {
-    (userData as Partial<DoctorProfile>).verificationStatus = 'pending';
-    (userData as Partial<DoctorProfile>).experience = data.experience;
-  } else {
-    (userData as Partial<PatientProfile>).skinTone = data.skinTone;
-    (userData as Partial<PatientProfile>).region = data.region;
-  }
 
   await setDoc(userRef, userData, { merge: true });
   return userData;
@@ -104,6 +95,11 @@ export const getUserProfile = async (uid: string): Promise<(PatientProfile | Doc
   return null;
 };
 
+export const updatePatientProfile = async (uid: string, data: Partial<PatientProfile>) => {
+    if (!db) throw new Error("Firestore is not initialized.");
+    const patientRef = doc(db, 'patients', uid);
+    await updateDoc(patientRef, data);
+};
 
 export type Report = {
   id: string;

@@ -20,20 +20,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const isDashboard = pathname.startsWith('/doctor/dashboard');
-  const isPatientDashboard = pathname.startsWith('/patient/dashboard');
-  const isConsultPage = pathname.startsWith('/patient/consult');
+  const isDoctorRoute = pathname.startsWith('/doctor');
+  const isPatientRoute = pathname.startsWith('/patient');
   const isLandingPage = pathname === '/';
   
-  const showHeader = !isDashboard && !isPatientDashboard && !isConsultPage && !isLandingPage;
+  const showHeader = !isDoctorRoute && !isPatientRoute && !isLandingPage;
 
   let bodyClassName = 'font-sans antialiased min-h-screen bg-background';
   if (isLandingPage) {
     bodyClassName += ' landing-body';
-  } else if (isPatientDashboard) {
+  } else if (isPatientRoute) {
     bodyClassName += ' new-dashboard-bg';
-  } else if (isConsultPage) {
-    bodyClassName += ' new-consult-bg';
   } else {
     bodyClassName += ' bg-gradient-subtle';
   }
@@ -55,7 +52,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className={cn("flex flex-col min-h-screen", {"bg-transparent": isDashboard})}>
+          <div className={cn("flex flex-col min-h-screen", {"bg-transparent": isDoctorRoute})}>
             {showHeader && <Header />}
             <main className={cn("flex-1", {"pt-24": showHeader && !isLandingPage})}>{children}</main>
           </div>
