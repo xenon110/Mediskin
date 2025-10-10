@@ -36,11 +36,11 @@ export type CreateUserProfileData = {
   email: string;
   role: 'patient' | 'doctor';
   name: string;
-  age?: number;
-  gender?: string;
-  skinTone?: string;
-  region?: string;
-  experience?: number;
+  age: number;
+  gender: string;
+  skinTone: string;
+  region: string;
+  experience: number;
 };
 
 export type DoctorNote = {
@@ -64,10 +64,18 @@ export const createUserProfile = async (uid: string, data: CreateUserProfileData
     email: data.email,
     role: data.role,
     name: data.name,
+    age: data.age,
+    gender: data.gender,
+    region: data.region,
+    skinTone: data.skinTone,
     createdAt: serverTimestamp(),
     photoURL: '',
-    ...data
   };
+
+  if (data.role === 'doctor') {
+    (userData as Partial<DoctorProfile>).experience = data.experience;
+    (userData as Partial<DoctorProfile>).verificationStatus = 'pending';
+  }
 
   await setDoc(userRef, userData, { merge: true });
   return userData;

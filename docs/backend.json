@@ -23,7 +23,8 @@
       "properties": {
         "region": { "type": "string" },
         "skinTone": { "type": "string" }
-      }
+      },
+       "required": ["region", "skinTone"]
     },
     "DoctorProfile": {
       "title": "Doctor Profile",
@@ -53,7 +54,7 @@
     }
   },
   "auth": {
-    "providers": ["password"]
+    "providers": ["password", "google.com"]
   },
   "firestore": {
     "/patients/{patientId}": {

@@ -3,14 +3,36 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { createUserProfile, getUserProfile } from '@/lib/firebase-services';
+import { createUserProfile, CreateUserProfileData } from '@/lib/firebase-services';
+import { indianStates } from '@/lib/indian-states';
+import { FirebaseError } from 'firebase/app';
+
+
+const signupSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters.'),
+  age: z.coerce.number().min(1, 'Age must be a positive number.').max(120),
+  gender: z.string().min(1, 'Please select a gender.'),
+  skinTone: z.string().min(1, 'Please select a skin tone.'),
+  region: z.string().min(1, 'Please select your state.'),
+  mobile: z.string().regex(/^\d{10}$/, 'Please enter a valid 10-digit mobile number.'),
+  email: z.string().email().regex(/^[a-zA-Z0-9._%+-]+@gmail\.com$/, 'Please enter a valid Gmail address.'),
+  password: z.string().min(6, 'Password must be at least 6 characters.'),
+});
+
+type SignupFormValues = z.infer<typeof signupSchema>;
 
 
 export default function SignupForm() {
@@ -20,76 +42,164 @@ export default function SignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const role = searchParams.get('role') === 'doctor' ? 'doctor' : 'patient';
 
-  const handleGoogleSignIn = async () => {
+  const form = useForm<SignupFormValues>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      name: '',
+      age: undefined,
+      gender: '',
+      skinTone: '',
+      region: '',
+      mobile: '',
+      email: '',
+      password: '',
+    },
+  });
+
+  const onSubmit = async (data: SignupFormValues) => {
     setIsLoading(true);
     if (!auth) {
       toast({ variant: 'destructive', title: 'Error', description: 'Firebase is not configured.' });
       setIsLoading(false);
       return;
     }
-    const provider = new GoogleAuthProvider();
+
     try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      let userProfile = await getUserProfile(user.uid);
-
-      if (!userProfile) {
-        // User is new, create a profile with only basic info.
-        // The new patient layout will force them to complete it.
-        const profileData = {
-          email: user.email!,
-          role: role,
-          name: user.displayName || 'New User',
-        };
-        userProfile = await createUserProfile(user.uid, profileData as any);
-        toast({ title: 'Account Created', description: "Let's complete your profile." });
-      }
-
-      if (userProfile.role !== role) {
-        await auth.signOut();
-        toast({
-          variant: 'destructive',
-          title: 'Role Mismatch',
-          description: `This account is registered as a ${userProfile.role}. Please log in on the correct page.`,
-        });
-        setIsLoading(false);
-        return;
-      }
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const user = userCredential.user;
       
-      // Redirect to the dashboard. The layout will handle redirecting to profile completion if needed.
-      router.push(role === 'doctor' ? '/doctor/dashboard' : '/patient/dashboard');
+      const profileData: CreateUserProfileData = {
+        role,
+        email: user.email!,
+        name: data.name,
+        age: data.age,
+        gender: data.gender,
+        skinTone: data.skinTone,
+        region: data.region,
+        experience: 0, // Default for doctor, unused for patient
+      };
+      
+      await createUserProfile(user.uid, profileData);
+      await sendEmailVerification(user);
 
-    } catch (error: any) {
-      console.error('Google Sign-In error:', error);
-      toast({ variant: 'destructive', title: 'Sign-In Failed', description: error.message });
+      toast({
+        title: 'Verification Email Sent!',
+        description: 'Please check your Gmail and verify your account before logging in.',
+        duration: 8000
+      });
+      
+      await auth.signOut();
+      router.push(`/login?role=${role}`);
+
+    } catch (error) {
+       let description = 'An unexpected error occurred. Please try again.';
+        if (error instanceof FirebaseError) {
+            switch (error.code) {
+                case 'auth/email-already-in-use':
+                    description = 'This email address is already in use. Please login or use a different email.';
+                    break;
+                case 'auth/weak-password':
+                    description = 'The password is too weak. Please choose a stronger password.';
+                    break;
+                 case 'auth/invalid-email':
+                    description = 'The email address is not valid.';
+                    break;
+                default:
+                    description = 'An error occurred during sign up. Please try again.';
+            }
+        } else if (error instanceof Error) {
+            description = error.message;
+        }
+        toast({ variant: 'destructive', title: 'Sign Up Failed', description });
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-subtle">
-      <Card className="w-full max-w-lg shadow-2xl">
+      <Card className="w-full max-w-2xl shadow-2xl">
         <CardHeader className="text-center">
           <CardTitle className="font-headline text-3xl">Create a {role === 'doctor' ? 'Doctor' : 'Patient'} Account</CardTitle>
-          <CardDescription>Join MEDISKIN by using a secure Google account.</CardDescription>
+          <CardDescription>Please fill in your details to get started.</CardDescription>
         </CardHeader>
         
-        <CardContent className="space-y-4">
-            <p className="text-center text-sm text-muted-foreground mb-4">
-                To create a secure {role} account and ensure your email is valid, please sign up using Google.
-            </p>
-            <Button onClick={handleGoogleSignIn} disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                {isLoading ? <Loader2 className="animate-spin" /> : (
-                  <>
-                    <svg className="w-5 h-5 mr-2" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
-                      <path fill="currentColor" d="M488 261.8C488 403.3 381.5 512 244 512S0 403.3 0 261.8 106.5 11.6 244 11.6c67.7 0 121.1 26.1 165.2 65.5l-65.5 63.5c-21.4-20.3-49-32.3-80.7-32.3-62.3 0-113.5 51.2-113.5 113.5s51.2 113.5 113.5 113.5c71.2 0 98.7-52.9 101.7-79.5H244V243.3h185.3c3.1 16.3 4.7 34.5 4.7 53.5z"></path>
-                    </svg>
-                    Sign up with Google
-                  </>
-                )}
-            </Button>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField control={form.control} name="name" render={({ field }) => (
+                  <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter your full name" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="age" render={({ field }) => (
+                  <FormItem><FormLabel>Age</FormLabel><FormControl><Input type="number" placeholder="Enter your age" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+              </div>
+
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <FormField control={form.control} name="gender" render={({ field }) => (
+                    <FormItem><FormLabel>Gender</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Select your gender" /></SelectTrigger></FormControl>
+                        <SelectContent>
+                          <SelectItem value="Male">Male</SelectItem>
+                          <SelectItem value="Female">Female</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                 <FormField control={form.control} name="mobile" render={({ field }) => (
+                  <FormItem><FormLabel>Mobile Number</FormLabel><FormControl><Input type="tel" placeholder="10-digit mobile number" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+              </div>
+
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <FormField control={form.control} name="region" render={({ field }) => (
+                    <FormItem><FormLabel>State / Region</FormLabel>
+                       <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Select your state" /></SelectTrigger></FormControl>
+                        <SelectContent>
+                          {indianStates.map(state => (
+                            <SelectItem key={state} value={state}>{state}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                 <FormField control={form.control} name="skinTone" render={({ field }) => (
+                    <FormItem><FormLabel>Skin Tone</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Select your skin tone" /></SelectTrigger></FormControl>
+                        <SelectContent>
+                          <SelectItem value="Fair">Fair</SelectItem>
+                          <SelectItem value="Wheatish">Wheatish</SelectItem>
+                          <SelectItem value="Dusky">Dusky</SelectItem>
+                          <SelectItem value="Dark">Dark</SelectItem>
+                          <SelectItem value="Olive">Olive</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+              </div>
+              
+              <Separator />
+
+              <FormField control={form.control} name="email" render={({ field }) => (
+                <FormItem><FormLabel>Gmail Address</FormLabel><FormControl><Input type="email" placeholder="you@gmail.com" {...field} /></FormControl><FormMessage /></FormItem>
+              )} />
+              <FormField control={form.control} name="password" render={({ field }) => (
+                <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormItem>
+              )} />
+
+              <Button type="submit" disabled={isLoading} className="w-full bg-gradient-login text-white">
+                {isLoading ? <Loader2 className="animate-spin" /> : 'Create Account'}
+              </Button>
+            </form>
+          </Form>
         </CardContent>
         <CardFooter className="flex flex-col items-stretch gap-4">
           <div className="text-center text-sm text-muted-foreground">
