@@ -13,13 +13,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { createUserWithEmailAndPassword, sendEmailVerification, signOut } from 'firebase/auth';
+import { auth, db } from '@/lib/firebase';
+import { createUserProfile } from '@/lib/firebase-services';
 import { indianStates } from '@/lib/indian-states';
 import { FirebaseError } from 'firebase/app';
 import { Separator } from '@/components/ui/separator';
-
 
 const signupSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -58,40 +57,51 @@ export default function SignupForm() {
 
   const onSubmit = async (data: SignupFormValues) => {
     setIsLoading(true);
-    
+    if (!auth) {
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Firebase is not configured. Please check your setup.',
+        });
+        setIsLoading(false);
+        return;
+    }
     try {
-      const functions = getFunctions();
-      const sendOtpEmail = httpsCallable(functions, 'sendOtpEmail');
-      const verifyOtpAndCreateUser = httpsCallable(functions, 'verifyOtpAndCreateUser');
+        // Step 1: Create the user in Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+        const user = userCredential.user;
 
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        // Step 2: Create the user profile in Firestore
+        await createUserProfile(user.uid, { ...data, role: role as 'patient' | 'doctor', experience: 0 });
+        
+        // Step 3: Send the verification email
+        await sendEmailVerification(user);
 
-      // Store verification data temporarily in a session or pass it securely
-      sessionStorage.setItem('verificationData', JSON.stringify({ ...data, role }));
-      sessionStorage.setItem('userEmail', data.email);
+        // Step 4: Sign the user out to force them to log in after verifying
+        await signOut(auth);
 
-      // Save temporary data to Firestore for server-side verification
-      const verificationRef = doc(db, "verifications", data.email);
-      await setDoc(verificationRef, {
-        otp: otp, // In a real app, you'd hash this OTP
-        expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes expiry
-        userData: { ...data, role }
-      });
-      
-      // Call the Cloud Function to send the email
-      await sendOtpEmail({ email: data.email, otp });
+        toast({
+            title: 'Verification Email Sent!',
+            description: 'Please check your Gmail inbox and click the link to verify your account before logging in.',
+            duration: 8000,
+        });
+        
+        // Step 5: Redirect to the login page
+        router.push(`/login?role=${role}`);
 
-      toast({
-        title: 'Verification Code Sent!',
-        description: 'A 6-digit code has been sent to your Gmail. Please use it to verify your account.',
-      });
-      
-      router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`);
-
-    } catch (error: any) {
+    } catch (error) {
         let description = 'An unexpected error occurred. Please try again.';
-        if (error.code === 'functions/internal') {
-             description = error.message;
+        if (error instanceof FirebaseError) {
+            switch (error.code) {
+                case 'auth/email-already-in-use':
+                    description = 'This email is already registered. Please log in instead.';
+                    break;
+                case 'auth/weak-password':
+                    description = 'The password is too weak. Please choose a stronger password.';
+                    break;
+                default:
+                    description = 'Failed to create an account. Please check the details and try again.';
+            }
         }
         toast({ variant: 'destructive', title: 'Sign Up Failed', description });
     } finally {
@@ -179,7 +189,7 @@ export default function SignupForm() {
               )} />
 
               <Button type="submit" disabled={isLoading} className="w-full bg-gradient-login text-white">
-                {isLoading ? <Loader2 className="animate-spin" /> : 'Get Verification Code'}
+                {isLoading ? <Loader2 className="animate-spin" /> : 'Create Account'}
               </Button>
             </form>
           </Form>

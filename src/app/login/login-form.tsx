@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Suspense } from 'react';
@@ -13,11 +12,11 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { FirebaseError } from 'firebase/app';
 import { auth } from '@/lib/firebase';
 import { getUserProfile } from '@/lib/firebase-services';
-import React, 'useState' from 'react';
+import React, { useState } from 'react';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address.'),
@@ -54,8 +53,16 @@ export default function LoginForm() {
         const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
         const user = userCredential.user;
         
-        // This check is removed because the OTP flow ensures only verified users can be created.
-        // if (!user.emailVerified) { ... }
+        if (!user.emailVerified) {
+          await signOut(auth); // Sign out the user immediately
+          toast({
+            variant: 'destructive',
+            title: 'Email Not Verified',
+            description: 'Please check your inbox and verify your email address before logging in.',
+          });
+          setIsLoading(false);
+          return;
+        }
 
         const userProfile = await getUserProfile(user.uid);
         
