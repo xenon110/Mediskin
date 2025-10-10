@@ -3,6 +3,8 @@ import { initializeApp, getApps, getApp, FirebaseOptions } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAuth } from 'firebase/auth';
+import { getFunctions } from 'firebase/functions';
+
 
 // This is a public configuration and is safe to be exposed on the client-side.
 // Security is enforced by Firebase Security Rules.
@@ -33,5 +35,7 @@ if (!getApps().length) {
 const db = app ? getFirestore(app) : null;
 const storage = app ? getStorage(app) : null;
 const auth = app ? getAuth(app) : null;
+const functions = app ? getFunctions(app) : null;
 
-export { app, db, storage, auth };
+
+export { app, db, storage, auth, functions };

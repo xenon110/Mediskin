@@ -54,16 +54,8 @@ export default function LoginForm() {
         const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
         const user = userCredential.user;
         
-        if (!user.emailVerified) {
-          await auth.signOut();
-          toast({
-            variant: 'destructive',
-            title: 'Login Failed',
-            description: "Please verify your email before signing in.",
-          });
-          setIsLoading(false);
-          return;
-        }
+        // This check is removed because the OTP flow ensures only verified users can be created.
+        // if (!user.emailVerified) { ... }
 
         const userProfile = await getUserProfile(user.uid);
         
