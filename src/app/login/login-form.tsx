@@ -17,7 +17,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { FirebaseError } from 'firebase/app';
 import { auth } from '@/lib/firebase';
 import { getUserProfile } from '@/lib/firebase-services';
-import React, 'useState } from 'react';
+import React, 'useState' from 'react';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address.'),
@@ -56,7 +56,13 @@ export default function LoginForm() {
         
         if (!user.emailVerified) {
           await auth.signOut();
-          throw new Error("Please verify your email before signing in.");
+          toast({
+            variant: 'destructive',
+            title: 'Login Failed',
+            description: "Please verify your email before signing in.",
+          });
+          setIsLoading(false);
+          return;
         }
 
         const userProfile = await getUserProfile(user.uid);
