@@ -154,7 +154,7 @@ export default function LoginForm() {
         <CardHeader className="text-center">
           <CardTitle className="font-headline text-3xl">Login</CardTitle>
           <CardDescription>
-            Enter your credentials to access your {role} account.
+            Access your {role} account.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -197,7 +197,7 @@ export default function LoginForm() {
                     )}
                   />
                   <Button type="submit" disabled={isLoading} className="w-full bg-gradient-login text-white">
-                    {isLoading ? <Loader2 className="animate-spin" /> : 'Login'}
+                    {isLoading ? <Loader2 className="animate-spin" /> : 'Login with Email'}
                   </Button>
               </form>
             </Form>
@@ -214,3 +214,5 @@ export default function LoginForm() {
     </div>
   );
 }
+
+    

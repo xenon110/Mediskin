@@ -3,45 +3,14 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import { FileUp, Loader2 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Loader2 } from 'lucide-react';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { createUserProfile, getUserProfile } from '@/lib/firebase-services';
-import { indianStates } from '@/lib/indian-states';
-
-
-const patientSignupSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters.'),
-  email: z.string().email('Invalid email address.'),
-  age: z.coerce.number().min(1, 'Age is required.').max(120),
-  gender: z.string().min(1, 'Gender is required.'),
-  skinTone: z.string().min(1, 'Skin tone is required.'),
-  region: z.string().min(1, 'Region is required.'),
-});
-
-// We keep the schema for validation but will populate it from Google Sign-In
-const doctorSignupSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters.'),
-  email: z.string().email('Invalid email address.'),
-  age: z.coerce.number().min(18, 'You must be at least 18.').max(100),
-  gender: z.string().min(1, 'Gender is required.'),
-  experience: z.coerce.number().min(0, 'Experience cannot be negative.'),
-  degree: z.any().refine(file => file?.length == 1, 'Degree certificate is required.'),
-  additionalFile: z.any().optional(),
-});
-
-type PatientSignupForm = z.infer<typeof patientSignupSchema>;
-type DoctorSignupForm = z.infer<typeof doctorSignupSchema>;
 
 
 export default function SignupForm() {
@@ -51,13 +20,6 @@ export default function SignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const role = searchParams.get('role') === 'doctor' ? 'doctor' : 'patient';
 
-  const form = useForm<PatientSignupForm | DoctorSignupForm>({
-    resolver: zodResolver(role === 'doctor' ? doctorSignupSchema : patientSignupSchema),
-    defaultValues: role === 'doctor' 
-      ? { name: '', email: '', age: 30, gender: 'Other', experience: 5 }
-      : { name: '', email: '', age: 30, gender: '', skinTone: '', region: '' },
-  });
-  
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     if (!auth) {
@@ -81,7 +43,7 @@ export default function SignupForm() {
           age: 30, // Default age, can be collected later
           gender: 'Other', // Default gender
           ...(role === 'patient' && { skinTone: 'Type III', region: 'Delhi' }),
-          ...(role === 'doctor' && { experience: 0, verificationStatus: 'pending' }),
+          ...(role === 'doctor' && { experience: 0, specialization: 'Dermatology', verificationStatus: 'pending' }),
         };
         userProfile = await createUserProfile(user.uid, profileData as any);
         toast({ title: 'Account Created', description: 'Welcome to MediSkin!' });
@@ -109,25 +71,13 @@ export default function SignupForm() {
     }
   };
 
-
-  const renderPatientForm = () => (
+  const renderContent = () => (
     <>
       <p className="text-center text-sm text-muted-foreground mb-4">
-        Create your patient account by signing in with Google. This ensures your email is valid and your account is secure.
+        To create a secure {role} account and ensure your email is valid, please sign up using Google.
       </p>
     </>
   );
-
-  const renderDoctorForm = () => {
-      return (
-        <>
-            <p className="text-center text-sm text-muted-foreground mb-4">
-                To create a doctor account, please sign in with your professional Google account.
-            </p>
-            {/* The rest of the form for file uploads could be shown after initial sign-in */}
-        </>
-      );
-  }
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-subtle">
@@ -138,7 +88,7 @@ export default function SignupForm() {
         </CardHeader>
         
             <CardContent className="space-y-4">
-                {role === 'doctor' ? renderDoctorForm() : renderPatientForm()}
+                {renderContent()}
                  <Button onClick={handleGoogleSignIn} disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                     {isLoading ? <Loader2 className="animate-spin" /> : (
                       <>
@@ -162,3 +112,6 @@ export default function SignupForm() {
     </div>
   );
 }
+
+
+    
