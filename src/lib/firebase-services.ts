@@ -121,9 +121,10 @@ export type Report = {
   createdAt: FieldValue | Timestamp | { seconds: number, nanoseconds: number };
   doctorNotes?: string;
   prescription?: string;
+  photoDataUri?: string;
 }
 
-export const saveReport = async (patientId: string, reportName: string, reportData: GenerateInitialReportOutput): Promise<Report> => {
+export const saveReport = async (patientId: string, reportName: string, reportData: GenerateInitialReportOutput, photoDataUri: string): Promise<Report> => {
     if (!db) throw new Error("Firestore is not initialized.");
 
     const reportsCollection = collection(db, 'reports');
@@ -137,6 +138,7 @@ export const saveReport = async (patientId: string, reportName: string, reportDa
         doctorId: null,
         doctorNotes: '',
         prescription: '',
+        photoDataUri: photoDataUri,
     };
 
     const reportDocRef = await addDoc(reportsCollection, newReportData);

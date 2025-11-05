@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Paperclip, Send, CheckCircle, Pencil, Loader2, Inbox, XCircle, ThumbsUp, Search, Stethoscope, FileText, Edit3, MessageSquare, LayoutGrid, Calendar, Settings, User, Phone, MoreVertical, Star, Bot, Home, Pill, AlertTriangle, LogOut } from 'lucide-react';
+import { Paperclip, Send, CheckCircle, Pencil, Loader2, Inbox, XCircle, ThumbsUp, Search, Stethoscope, FileText, Edit3, MessageSquare, LayoutGrid, Calendar, Settings, User, Phone, MoreVertical, Star, Bot, Home, Pill, AlertTriangle, LogOut, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,7 @@ import { Report, getUserProfile, PatientProfile, DoctorProfile, updateReportByDo
 import { formatDistanceToNow } from 'date-fns';
 import { collection, query, where, onSnapshot, orderBy, Unsubscribe } from 'firebase/firestore';
 import { useRouter, usePathname } from 'next/navigation';
+import Image from 'next/image';
 
 
 type PatientCase = Report & {
@@ -350,12 +351,15 @@ export default function DoctorDashboard() {
                             <div className="symptoms-content">{selectedCase.aiReport.symptomInputs}</div>
                         </div>
 
-                        <div className="image-analysis">
-                            <div className="uploaded-image">
-                                📸 Uploaded Skin Image<br />
-                                <small>Click to view full image</small>
+                        {selectedCase.photoDataUri && (
+                            <div className="image-analysis">
+                                <h4 className="font-semibold text-sm text-gray-700 mb-2 flex items-center gap-2"><Camera /> Uploaded Skin Image</h4>
+                                <div className="relative w-full aspect-video rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+                                    <Image src={selectedCase.photoDataUri} alt="Patient's skin condition" layout="fill" objectFit="contain" />
+                                </div>
                             </div>
-                        </div>
+                        )}
+
 
                         <div className="analysis-sections">
                              <div className="analysis-section">
@@ -432,5 +436,3 @@ export default function DoctorDashboard() {
     </div>
   );
 }
-
-    

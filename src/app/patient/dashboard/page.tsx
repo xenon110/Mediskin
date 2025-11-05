@@ -188,7 +188,7 @@ export default function PatientDashboard() {
         skinTone: user.skinTone || 'not specified',
       });
       
-      const savedReport = await saveReport(user.uid, reportName.trim(), result);
+      const savedReport = await saveReport(user.uid, reportName.trim(), result, imageDataUri);
 
       sessionStorage.setItem('latestReport', JSON.stringify(savedReport));
 
@@ -460,5 +460,3 @@ export default function PatientDashboard() {
     </>
   );
 }
-
-    

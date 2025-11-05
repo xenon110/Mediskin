@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, AlertTriangle, FileText, Pill, Home, Stethoscope, Languages, ChevronLeft, Download } from 'lucide-react';
+import { Loader2, AlertTriangle, FileText, Pill, Home, Stethoscope, Languages, ChevronLeft, Download, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,7 @@ import { translateReport, TranslateReportOutput } from '@/ai/flows/translate-rep
 import { Separator } from '@/components/ui/separator';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import Image from 'next/image';
 
 type TranslatedReport = Omit<TranslateReportOutput, 'potentialConditions'> & {
   potentialConditions: { name: string; description: string }[];
@@ -206,6 +207,18 @@ export default function ReportPage() {
                     </div>
                 </CardHeader>
                 <CardContent className="space-y-8">
+                     {/* Uploaded Image Section */}
+                    {report.photoDataUri && (
+                    <section>
+                        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Camera /> Uploaded Image</h2>
+                        <div className="relative w-full aspect-video rounded-lg overflow-hidden border-2 border-border">
+                            <Image src={report.photoDataUri} alt="Uploaded skin condition" layout="fill" objectFit="contain" />
+                        </div>
+                    </section>
+                    )}
+                    
+                    <Separator/>
+
                     {/* Potential Conditions */}
                     <section>
                         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Pill /> Potential Conditions</h2>
@@ -277,7 +290,3 @@ export default function ReportPage() {
     </div>
   );
 }
-
-    
-
-    
