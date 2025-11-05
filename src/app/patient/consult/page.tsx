@@ -125,7 +125,7 @@ export default function ConsultPage() {
                             <ChevronLeft size={20} /> Back
                         </button>
 
-                        <div className="page-header">
+                        <div className="page-header" style={{ textAlign: 'center' }}>
                             <h1 className="page-title">Consult a Doctor</h1>
                             <p className="page-subtitle">Send a new report to our network of professionals for review.</p>
                         </div>
