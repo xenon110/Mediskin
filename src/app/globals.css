@@ -129,79 +129,132 @@
   .notification-close { @apply bg-transparent border-none text-white text-xl cursor-pointer ml-2.5; }
 
   /* DOCTOR DASHBOARD STYLES */
-  .dashboard-container {
-      display: grid;
-      grid-template-columns: 80px 1fr;
-      height: 100vh;
-      overflow: hidden;
+  .main-content-bg {
+      background-color: #f5f7fa;
   }
   .sidebar {
-      background-color: #ffffff;
-      border-right: 1px solid #e5e7eb;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 1.5rem 0;
+      @apply fixed left-0 top-0 flex h-screen w-[70px] flex-col items-center  p-5 shadow-lg;
+      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+      z-index: 100;
   }
   .logo-sidebar {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 12px;
-      font-weight: bold;
-      font-size: 1.5rem;
-      margin-bottom: 2rem;
-      text-decoration: none;
+      @apply mb-8 flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl text-xl font-bold text-white;
+      background: rgba(255,255,255,0.2);
+      transition: all 0.3s ease;
+  }
+  .logo-sidebar:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateX(5px);
   }
   .sidebar-nav {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
+      @apply flex flex-col gap-4;
   }
   .nav-item {
-      width: 44px;
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      color: #6b7280;
-      transition: all 0.2s ease;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
+      @apply flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl text-white;
+      background: rgba(255,255,255,0.2);
+      transition: all 0.3s ease;
   }
   .nav-item:hover {
-      background-color: hsl(var(--secondary));
-      color: hsl(var(--primary));
+      background: rgba(255,255,255,0.3);
+      transform: translateX(5px);
   }
   .nav-item.active {
-      background-color: hsl(var(--primary));
-      color: white;
+      background: white;
+      color: #667eea;
   }
   .user-profile {
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      background-color: hsl(var(--secondary));
-      color: #4b5563;
-      margin-bottom: 0.5rem;
-      text-decoration: none;
+      @apply flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl text-white;
+      background: rgba(255,255,255,0.2);
+      transition: all 0.3s ease;
+      margin-top: auto;
   }
-  .status-badge {
-    @apply inline-block px-2.5 py-1 text-xs font-semibold rounded-full;
+
+  .patient-card {
+      @apply mb-4 cursor-pointer rounded-xl border-2 border-transparent p-4 transition-all duration-300;
+      background: #f8f9fa;
   }
-  .status-badge.status-pending {
-    @apply bg-amber-100 text-amber-800;
+  .patient-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
   }
+  .patient-card.active {
+      border-color: #667eea;
+      background: #f0f3ff;
+  }
+  .patient-initial {
+      @apply mr-4 inline-flex h-11 w-11 items-center justify-center rounded-lg text-lg font-bold text-white;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      vertical-align: middle;
+  }
+  .patient-info {
+      @apply inline-block;
+      vertical-align: middle;
+  }
+  .patient-name {
+      @apply mb-1 text-base font-semibold;
+      color: #2c3e50;
+  }
+  .patient-meta {
+      @apply text-xs;
+      color: #7f8c8d;
+  }
+  .alert-badge {
+      @apply absolute top-4 right-4 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white;
+      background: #e74c3c;
+  }
+
+  .report-panel {
+      @apply rounded-2xl p-8 shadow-lg;
+      background-color: white;
+  }
+  .report-title {
+      @apply text-2xl font-bold;
+      color: #2c3e50;
+  }
+  .detail-grid {
+      @apply grid grid-cols-2 md:grid-cols-3 gap-4 text-sm;
+  }
+  .detail-item {
+    background: #f8f9fa;
+    padding: 18px;
+    border-radius: 10px;
+  }
+  .detail-label {
+    @apply mb-2 text-xs font-semibold uppercase tracking-wider;
+    color: #7f8c8d;
+  }
+  .detail-value {
+    @apply text-base font-semibold;
+    color: #2c3e50;
+  }
+  .section-title {
+    @apply mb-4 text-base font-bold;
+    color: #2c3e50;
+  }
+  .report-item.active {
+    border-color: #667eea;
+    background: #f0f3ff;
+  }
+  .recommendation-box {
+      background: #e8f5e9;
+      border-left: 4px solid #4caf50;
+      padding: 20px;
+      border-radius: 8px;
+  }
+  .recommendation-title {
+      color: #2e7d32;
+      @apply font-bold text-sm mb-2;
+  }
+  .recommendation-text {
+      color: #1b5e20;
+      @apply text-sm;
+  }
+
+  .text-dark-slate { color: #2c3e50; }
+  .text-gray { color: #7f8c8d; }
+  .bg-light-gray { background-color: #f5f7fa; }
+  .text-lavender-blue { color: #667eea; }
+  .border-silver-gray { border-color: #e1e8ed; }
 
   /* NEW CONSULT PAGE STYLES */
   .new-consult-bg { color: #1e293b; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); }
