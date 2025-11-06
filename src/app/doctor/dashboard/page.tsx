@@ -137,7 +137,13 @@ export default function DoctorDashboard() {
 
   const handleSelectGroup = (group: PatientGroup) => {
     setSelectedGroup(group);
-    setSelectedReport(group.reports[0] || null);
+    // Select the first report in the group that matches the active tab's criteria, or just the first report overall
+    const reportsForTab = group.reports.filter(r => {
+        if (activeTab === 'Pending') return r.status === 'pending-doctor-review';
+        if (activeTab === 'Reviewed') return r.status === 'doctor-approved' || r.status === 'doctor-modified';
+        return true;
+    });
+    setSelectedReport(reportsForTab[0] || group.reports[0] || null);
   };
   
   const handleSelectReport = (report: Report) => {
@@ -250,8 +256,7 @@ export default function DoctorDashboard() {
         </div>
 
         <div className="content-grid">
-          <div>
-            <div className="patients-list mb-8">
+          <div className="patients-list">
              {filteredPatientGroups.length > 0 ? filteredPatientGroups.map((group) => (
               <div 
                 key={group.patientProfile.uid} 
@@ -272,11 +277,11 @@ export default function DoctorDashboard() {
                 <p>No {activeTab.toLowerCase()} patient reports.</p>
               </div>
              )}
-            </div>
+          </div>
 
-            {selectedGroup && selectedReport && (
-              <div className="report-panel">
-                <div className="report-header">
+          {selectedGroup && selectedReport ? (
+            <div className="report-panel">
+               <div className="report-header">
                   <div>
                     <div className="report-title">Reports for {selectedGroup.patientProfile.name}</div>
                     <p className="report-subtitle">Dermatology Case • Age: {selectedGroup.patientProfile.age} • {selectedGroup.patientProfile.gender}</p>
@@ -297,18 +302,14 @@ export default function DoctorDashboard() {
                           <span className={cn('status-badge', {
                               'status-pending': report.status === 'pending-doctor-review',
                               'status-reviewed': report.status === 'doctor-approved' || report.status === 'doctor-modified',
+                              'status-rejected': report.status === 'rejected'
                           })}>
-                              {report.status === 'pending-doctor-review' ? 'Pending' : 'Reviewed'}
+                              {report.status.includes('pending') ? 'Pending' : (report.status.includes('doctor') ? 'Reviewed' : 'Rejected')}
                           </span>
                       </div>
                   ))}
                 </div>
-              </div>
-            )}
-          </div>
 
-          {selectedGroup && selectedReport ? (
-            <div className="report-panel">
               <div className="ai-report-section">
                 <span className="ai-badge"><Bot size={14}/> AI GENERATED REPORT</span>
                 <h3 className="ai-report-title">{selectedReport.reportName}</h3>
@@ -342,7 +343,7 @@ export default function DoctorDashboard() {
               </div>
 
                 <div className="symptoms-section">
-                  <h3 className="section-title">📝 AI Report & Patient Symptoms</h3>
+                  <h3 className="section-title">📝 Reported Symptoms & AI Analysis</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {selectedReport.photoDataUri && (
                       <div className="md:col-span-1">
@@ -366,7 +367,6 @@ export default function DoctorDashboard() {
                     </div>
                   </div>
                 </div>
-
 
               {/* Action Section */}
               <div className="action-section">
@@ -402,3 +402,5 @@ export default function DoctorDashboard() {
     </div>
   );
 }
+
+    
