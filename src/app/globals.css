@@ -161,8 +161,8 @@
   .patient-status { @apply flex flex-col items-end gap-1; }
   .unread-count { @apply bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold; }
   
-  .main-content-area { @apply flex-1 grid grid-cols-2 min-h-0; }
-  .report-list-column { @apply w-full border-r border-gray-200 flex flex-col; }
+  .main-content-area { @apply flex-1 flex min-h-0; }
+  .report-list-column { @apply w-[320px] flex-shrink-0 border-r border-gray-200 flex flex-col; }
   .report-detail-panel { @apply flex-1 flex flex-col min-h-0; }
   .report-list-container { @apply flex-1 overflow-y-auto; }
   .report-list-title { @apply text-sm font-semibold text-gray-600 px-6 pt-4 pb-2; }
