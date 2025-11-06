@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -256,7 +255,7 @@ export default function DoctorDashboard() {
         <div className="patient-list-panel-v3">
             <header className="patient-list-header-v3">
                 <div>
-                    <h1 className="patient-list-title-v3">Dr. {doctorProfile?.name}'s Cases</h1>
+                    <h1 className="patient-list-title-v3">Dr. {doctorProfile?.name}'s Dashboard</h1>
                     <p className="patient-list-subtitle-v3">{patientGroups.reduce((acc, g) => acc + g.unreadCount, 0)} pending reviews</p>
                 </div>
             </header>
@@ -264,6 +263,12 @@ export default function DoctorDashboard() {
                 <Search className="patient-search-icon-v3" size={18} />
                 <input type="text" className="patient-search-input-v3" placeholder="Search patients..." />
             </div>
+            
+             <div className="flex items-center p-2 space-x-2 bg-gray-100 m-4 rounded-lg">
+                <Button size="sm" variant={filter === 'All' ? 'default' : 'ghost'} onClick={() => setFilter('All')} className="flex-1">All</Button>
+                <Button size="sm" variant={filter === 'Pending' ? 'default' : 'ghost'} onClick={() => setFilter('Pending')} className="flex-1">Pending</Button>
+                <Button size="sm" variant={filter === 'Reviewed' ? 'default' : 'ghost'} onClick={() => setFilter('Reviewed')} className="flex-1">Reviewed</Button>
+             </div>
 
             <div className="patient-list-v3">
                 {filteredGroups.map(group => (
@@ -271,7 +276,7 @@ export default function DoctorDashboard() {
                         <div className="patient-avatar-v3">{getPatientInitials(group.patientProfile.name)}</div>
                         <div className="patient-info-v3">
                             <div className="patient-name-v3">{group.patientProfile.name}</div>
-                            <div className="patient-last-update-v3">Updated {group.lastUpdate}</div>
+                            <div className="patient-last-update-v3">{group.reports.length} reports • {group.lastUpdate}</div>
                         </div>
                         {group.unreadCount > 0 && <div className="patient-unread-badge-v3">{group.unreadCount}</div>}
                     </div>
@@ -284,33 +289,49 @@ export default function DoctorDashboard() {
           {selectedGroup && selectedReport ? (
               <div className="report-details-wrapper-v3">
                   <header className="report-header-v3">
-                      <h2 className="report-title-v3">Report for {selectedGroup.patientProfile.name}</h2>
-                      <div className="report-meta-v3">
-                        <span>Age: {selectedGroup.patientProfile.age}</span>
-                        <span>{selectedGroup.patientProfile.gender}</span>
-                      </div>
+                      <h2 className="report-title-v3">Reports for {selectedGroup.patientProfile.name}</h2>
                   </header>
 
                    <div className="report-content-grid-v3">
                        {/* Left side: Report list and details */}
                        <div className="report-column-v3">
                            <div className="report-list-container-v3">
-                             {selectedGroup.reports.map(report => (
+                            <h3 className="text-md font-semibold text-gray-600 px-2 pb-2">Pending Reports ({selectedGroup.reports.filter(r => r.status === 'pending-doctor-review').length})</h3>
+                             {selectedGroup.reports.filter(r => r.status === 'pending-doctor-review').map(report => (
                                <div key={report.id} className={cn("report-item-v3", {"active": report.id === selectedReport.id})} onClick={() => setSelectedReport(report)}>
-                                   <p className="report-item-name-v3">{report.reportName}</p>
+                                   <div className="flex-1">
+                                    <p className="report-item-name-v3">{report.reportName}</p>
+                                    <p className="text-xs text-gray-500">{new Date((report.createdAt as any).seconds * 1000).toLocaleString()}</p>
+                                   </div>
                                    <Badge variant={statusMap[report.status].variant} className={cn(statusMap[report.status].badgeClass, "text-xs")}>{statusMap[report.status].label}</Badge>
                                </div>
                              ))}
                            </div>
 
                            <div className="report-analysis-v3">
-                                <h3 className="section-title-v3">AI Analysis</h3>
+                                <h3 className="section-title-v3">{selectedReport.reportName}</h3>
                                 {selectedReport.aiReport.doctorConsultationSuggestion && (
                                     <div className="consultation-alert-v3">
                                         <AlertTriangle size={16} /> Professional Consultation Required
                                     </div>
                                 )}
-                                <p className="analysis-text-v3">{selectedReport.aiReport.report}</p>
+                                
+                                <div className="p-4 bg-gray-50 rounded-lg mb-4">
+                                    <h4 className="font-semibold text-sm mb-2 text-gray-600">Patient Details</h4>
+                                    <div className="grid grid-cols-3 gap-2 text-sm">
+                                        <div><strong className="text-gray-500">Name:</strong> {selectedGroup.patientProfile.name}</div>
+                                        <div><strong className="text-gray-500">Age:</strong> {selectedGroup.patientProfile.age}</div>
+                                        <div><strong className="text-gray-500">Gender:</strong> {selectedGroup.patientProfile.gender}</div>
+                                        <div><strong className="text-gray-500">Region:</strong> {selectedGroup.patientProfile.region}</div>
+                                        <div><strong className="text-gray-500">Skin Tone:</strong> {selectedGroup.patientProfile.skinTone}</div>
+                                    </div>
+                                </div>
+                                
+                                <h4 className="font-semibold text-sm mb-2 text-gray-600">Reported Symptoms</h4>
+                                <p className="analysis-text-v3 mb-4">{selectedReport.aiReport.symptomInputs || "No symptoms reported."}</p>
+
+                                <h4 className="font-semibold text-sm mb-2 text-gray-600">Home Remedies</h4>
+                                <p className="analysis-text-v3 mb-4">{selectedReport.aiReport.homeRemedies}</p>
                                 
                                 {selectedReport.photoDataUri && (
                                   <div className="mt-4">

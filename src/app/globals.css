@@ -130,42 +130,42 @@
   .notification-close { @apply bg-transparent border-none text-white text-xl cursor-pointer ml-2.5; }
 
   /* Doctor Dashboard New Design v3 */
-    .dashboard-container-v3 { @apply grid h-screen w-screen bg-gray-100 overflow-hidden; grid-template-columns: 80px 320px 1fr; }
+    .dashboard-container-v3 { @apply grid h-screen w-screen bg-gray-100 overflow-hidden; grid-template-columns: 240px 320px 1fr; }
     
     /* Sidebar */
-    .sidebar-v3 { @apply bg-[#1a2e44] flex flex-col items-center py-6 px-4 text-white border-r border-white/10; }
-    .logo-sidebar-v3 { @apply flex flex-col items-center gap-2 text-xs font-bold mb-8; }
-    .logo-icon-v3 { @apply w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-xl font-bold; }
-    .sidebar-nav-v3 { @apply flex flex-col gap-4 w-full; }
-    .nav-item-v3 { @apply w-full flex items-center justify-center py-3 rounded-lg text-gray-400 cursor-pointer transition-colors duration-200 h-12; }
-    .nav-item-v3:hover { @apply bg-white/5 text-white; }
-    .nav-item-v3.active { @apply bg-[#3d5a80] text-white; }
-    .user-profile-v3 { @apply w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-xl font-bold; }
+    .sidebar-v3 { @apply bg-[#3730a3] flex flex-col items-start py-6 px-4 text-white border-r border-white/10; }
+    .logo-sidebar-v3 { @apply flex items-center gap-3 text-xl font-bold mb-8 px-2; }
+    .logo-icon-v3 { @apply w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-xl font-bold; }
+    .sidebar-nav-v3 { @apply flex flex-col gap-2 w-full; }
+    .nav-item-v3 { @apply w-full flex items-center justify-start py-2.5 px-4 rounded-lg text-gray-300 cursor-pointer transition-colors duration-200; }
+    .nav-item-v3:hover { @apply bg-white/10 text-white; }
+    .nav-item-v3.active { @apply bg-white/20 text-white font-semibold; }
+    .user-profile-v3 { @apply w-full flex items-center justify-start py-2.5 px-4 rounded-lg text-gray-300 cursor-pointer transition-colors duration-200; }
 
     /* Patient List Panel */
     .patient-list-panel-v3 { @apply bg-white flex flex-col border-r border-gray-200; }
     .patient-list-header-v3 { @apply p-6 border-b border-gray-200; }
-    .patient-list-title-v3 { @apply text-xl font-bold text-gray-800; }
+    .patient-list-title-v3 { @apply text-2xl font-bold text-gray-800; }
     .patient-list-subtitle-v3 { @apply text-sm text-gray-500; }
     .patient-search-v3 { @apply relative p-4; }
-    .patient-search-input-v3 { @apply w-full bg-gray-100 border-none text-gray-700 placeholder-gray-500 rounded-lg pl-10 pr-4 py-2.5 text-sm; }
+    .patient-search-input-v3 { @apply w-full bg-gray-100 border-gray-200 border text-gray-700 placeholder-gray-500 rounded-md pl-10 pr-4 py-2 text-sm; }
     .patient-search-icon-v3 { @apply absolute left-7 top-1/2 -translate-y-1/2 text-gray-500; }
-    .patient-list-v3 { @apply flex-1 overflow-y-auto p-4 space-y-2; }
-    .patient-card-v3 { @apply flex items-center gap-4 p-3 rounded-lg cursor-pointer transition-colors hover:bg-gray-100; }
+    .patient-list-v3 { @apply flex-1 overflow-y-auto p-2; }
+    .patient-card-v3 { @apply flex items-center gap-4 p-3 rounded-lg cursor-pointer transition-colors hover:bg-gray-50; }
     .patient-card-v3.active { @apply bg-blue-50; }
-    .patient-avatar-v3 { @apply w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg; }
-    .patient-name-v3 { @apply font-semibold text-gray-800; }
+    .patient-avatar-v3 { @apply w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm; }
+    .patient-info-v3 { @apply flex-1 min-w-0;}
+    .patient-name-v3 { @apply font-semibold text-gray-800 truncate; }
     .patient-last-update-v3 { @apply text-xs text-gray-500; }
-    .patient-unread-badge-v3 { @apply ml-auto bg-blue-600 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center; }
+    .patient-unread-badge-v3 { @apply ml-auto bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center; }
 
     /* Main Content Area */
-    .main-content-v3 { @apply flex flex-col min-h-0 overflow-y-auto; }
+    .main-content-v3 { @apply flex flex-col min-h-0 bg-gray-50; }
     .report-details-wrapper-v3 { @apply flex flex-col h-full; }
     .report-header-v3 { @apply p-6 border-b border-gray-200 bg-white; }
-    .report-title-v3 { @apply text-xl font-bold text-gray-800; }
-    .report-meta-v3 { @apply text-sm text-gray-500 mt-1 space-x-2; }
-
-    .report-content-grid-v3 { @apply flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 overflow-y-auto; }
+    .report-title-v3 { @apply text-2xl font-bold text-gray-800; }
+    
+    .report-content-grid-v3 { @apply flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 p-6 overflow-y-auto; }
     .report-column-v3 { @apply flex flex-col gap-6; }
     .assessment-column-v3 { @apply bg-white p-6 rounded-xl border border-gray-200; }
     .section-title-v3 { @apply text-lg font-bold text-gray-700 mb-4; }
