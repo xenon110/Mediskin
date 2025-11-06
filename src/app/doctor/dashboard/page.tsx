@@ -1,10 +1,9 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Inbox, Search, Settings, User, LogOut, FileText, Phone, Bot, Home, Pill } from 'lucide-react';
+import { Loader2, Inbox, Search, Settings, User, LogOut, FileText, Bot, Check, X, MessageSquare, LayoutGrid, Pill, Home } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -15,6 +14,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { collection, query, where, onSnapshot, Unsubscribe } from 'firebase/firestore';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
+import { Textarea } from '@/components/ui/textarea';
 
 type PatientGroup = {
     patientProfile: PatientProfile;
@@ -24,10 +24,10 @@ type PatientGroup = {
 };
 
 const statusMap: { [key in Report['status']]: { label: string; badgeClass: string; variant: 'default' | 'destructive' | 'secondary' | 'outline' } } = {
-  'pending-doctor-review': { label: 'Pending', badgeClass: 'status-badge status-pending', variant: 'outline' },
-  'doctor-approved': { label: 'Reviewed', badgeClass: 'bg-green-100 text-green-800', variant: 'default' },
-  'doctor-modified': { label: 'Reviewed', badgeClass: 'bg-green-100 text-green-800', variant: 'default' },
-  'rejected': { label: 'Disqualified', badgeClass: 'bg-red-100 text-red-800', variant: 'destructive' },
+  'pending-doctor-review': { label: 'Pending', badgeClass: 'bg-amber-100 text-amber-800', variant: 'outline' },
+  'doctor-approved': { label: 'Approved', badgeClass: 'bg-green-100 text-green-800', variant: 'default' },
+  'doctor-modified': { label: 'Approved', badgeClass: 'bg-green-100 text-green-800', variant: 'default' },
+  'rejected': { label: 'Rejected', badgeClass: 'bg-red-100 text-red-800', variant: 'destructive' },
   'pending-patient-input': { label: 'Draft', badgeClass: 'bg-gray-100 text-gray-800', variant: 'secondary' },
 };
 
@@ -35,15 +35,14 @@ const statusMap: { [key in Report['status']]: { label: string; badgeClass: strin
 export default function DoctorDashboard() {
   const { toast } = useToast();
   const router = useRouter();
+  const pathname = usePathname();
   const [doctorProfile, setDoctorProfile] = useState<DoctorProfile | null>(null);
   const [patientGroups, setPatientGroups] = useState<PatientGroup[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<PatientGroup | null>(null);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  const [filter, setFilter] = useState('Pending');
   const [isLoading, setIsLoading] = useState(true);
 
-  // State for doctor's response (functionality preserved but UI removed as per new design)
-  const [assessment, setAssessment] = useState('');
+  const [doctorNotes, setDoctorNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   useEffect(() => {
@@ -65,7 +64,8 @@ export default function DoctorDashboard() {
     });
 
     const reportsRef = collection(db, 'reports');
-    const q = query(reportsRef, where('doctorId', '==', currentUser.uid));
+    // This query ensures doctors only see reports assigned to them
+    const q = query(reportsRef, where('doctorId', '==', currentUser.uid), where('status', '==', 'pending-doctor-review'));
 
     unsubscribe = onSnapshot(q, async (querySnapshot) => {
       const reportsPromises = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Report));
@@ -114,11 +114,11 @@ export default function DoctorDashboard() {
       if (currentSelectedGroup) {
          setSelectedGroup(currentSelectedGroup);
          const currentSelectedReport = currentSelectedGroup.reports.find(r => r.id === selectedReport?.id);
-         setSelectedReport(currentSelectedReport || currentSelectedGroup.reports.find(r => r.status === 'pending-doctor-review') || currentSelectedGroup.reports[0] || null);
+         setSelectedReport(currentSelectedReport || currentSelectedGroup.reports[0] || null);
       } else if (patientGroupsArray.length > 0) {
-        const firstGroup = patientGroupsArray.find(g => g.unreadCount > 0) || patientGroupsArray[0];
+        const firstGroup = patientGroupsArray[0];
         setSelectedGroup(firstGroup);
-        setSelectedReport(firstGroup.reports.find(r => r.status === 'pending-doctor-review') || firstGroup.reports[0] || null);
+        setSelectedReport(firstGroup.reports[0] || null);
       } else {
         setSelectedGroup(null);
         setSelectedReport(null);
@@ -137,22 +137,19 @@ export default function DoctorDashboard() {
   
   useEffect(() => {
     if (selectedReport) {
-      setAssessment(selectedReport.doctorNotes || '');
+      setDoctorNotes(selectedReport.doctorNotes || '');
+    } else {
+      setDoctorNotes('');
     }
   }, [selectedReport]);
 
 
   const handleSelectGroup = (group: PatientGroup) => {
     setSelectedGroup(group);
+    // Select the first pending report in that group
     setSelectedReport(group.reports.find(r => r.status === 'pending-doctor-review') || group.reports[0] || null);
   };
   
-  const filteredGroups = patientGroups.filter(g => {
-    if (filter === 'Pending') return g.reports.some(r => r.status === 'pending-doctor-review');
-    if (filter === 'Reviewed') return g.reports.every(r => r.status !== 'pending-doctor-review');
-    return true;
-  });
-
   const handleSignOut = async () => {
     if (auth) {
         await auth.signOut();
@@ -160,6 +157,24 @@ export default function DoctorDashboard() {
         router.push('/login?role=doctor');
     }
   };
+
+  const handleDecision = async (decision: 'doctor-approved' | 'rejected') => {
+    if (!selectedReport || !selectedReport.id) {
+        toast({ title: 'Error', description: 'No report selected.', variant: 'destructive'});
+        return;
+    }
+    setIsSubmitting(true);
+    try {
+        await updateReportByDoctor(selectedReport.id, decision, doctorNotes);
+        toast({ title: 'Success', description: `Report has been ${decision === 'doctor-approved' ? 'approved' : 'rejected'}.` });
+        // The real-time listener will automatically update the UI
+    } catch (e) {
+        console.error("Failed to update report:", e);
+        toast({ title: 'Error', description: 'Could not update the report status.', variant: 'destructive'});
+    } finally {
+        setIsSubmitting(false);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -176,161 +191,160 @@ export default function DoctorDashboard() {
   };
   
   const sidebarNavItems = [
-    { href: '/doctor/dashboard', icon: 'M', title: 'Dashboard' },
-    { href: '/doctor/analytics', icon: '⊞', title: 'Analytics' },
-    { href: '/doctor/settings', icon: <Settings size={20}/>, title: 'Settings' },
+    { href: '/doctor/dashboard', icon: MessageSquare, title: 'Dashboard' },
+    { href: '/doctor/analytics', icon: LayoutGrid, title: 'Analytics' },
+    { href: '/doctor/settings', icon: Settings, title: 'Settings' },
   ];
 
-  const pendingReviewsCount = patientGroups.reduce((acc, g) => acc + g.unreadCount, 0);
 
   return (
-    <>
+    <div className="grid h-screen w-screen overflow-hidden" style={{gridTemplateColumns: '80px 1fr'}}>
+        {/* Sidebar */}
         <div className="sidebar">
-            {sidebarNavItems.map((item, index) => (
-                <Link href={item.href} key={item.title} className={cn('sidebar-icon', { active: router.pathname === item.href })} title={item.title}>
-                    {typeof item.icon === 'string' ? item.icon : item.icon}
+            <Link href="/doctor/dashboard" className="logo-sidebar">M</Link>
+            <nav className="sidebar-nav">
+               {sidebarNavItems.map(item => (
+                  <Link href={item.href} key={item.title} className={cn('nav-item', { active: pathname === item.href })} title={item.title}>
+                      <item.icon size={24} />
+                  </Link>
+               ))}
+            </nav>
+            <div className="flex flex-col gap-2 items-center mt-auto">
+                <Link href="/doctor/profile" className="user-profile" title="Dr. Profile">
+                  <User size={24} />
                 </Link>
-            ))}
-            <Link href="/doctor/profile" className="sidebar-icon" style={{ marginTop: 'auto' }} title="Profile">
-                <User size={20} />
-            </Link>
-            <button onClick={handleSignOut} className="sidebar-icon" title="Sign Out">
-                <LogOut size={20}/>
-            </button>
+                 <button onClick={handleSignOut} className="nav-item !w-10 !h-10" title="Sign Out">
+                    <LogOut size={22} />
+                </button>
+            </div>
         </div>
 
-        <div className="main-content">
-            <div className="header">
-                <h1>{doctorProfile ? `Dr. ${doctorProfile.name}'s Dashboard` : 'Doctor Dashboard'}</h1>
-                <span className="pending-badge">{pendingReviewsCount} pending reviews</span>
-                <div className="search-bar">
-                    <span className="search-icon"><Search size={18}/></span>
-                    <input type="text" placeholder="Search patients..."/>
+        {/* Main Content */}
+        <main className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 bg-gray-50 h-full overflow-hidden">
+            {/* Patient List Column */}
+            <div className="md:col-span-1 xl:col-span-1 border-r border-gray-200 h-full overflow-y-auto">
+                <div className="p-4 sticky top-0 bg-gray-50 z-10 border-b">
+                    <h2 className="text-xl font-bold text-gray-800">Patient Queue</h2>
+                    <p className="text-sm text-gray-500">{patientGroups.length} case(s) pending review</p>
                 </div>
-                <div className="tabs">
-                    <button className={cn('tab', { 'active': filter === 'Pending' })} onClick={() => setFilter('Pending')}>Pending</button>
-                    <button className={cn('tab', { 'active': filter === 'Reviewed' })} onClick={() => setFilter('Reviewed')}>Reviewed</button>
-                </div>
-            </div>
-
-            <div className="content-grid">
-                <div className="patients-list">
-                    {filteredGroups.length > 0 ? filteredGroups.map((group) => (
-                        <div 
+                <div className="p-2">
+                    {patientGroups.length > 0 ? patientGroups.map((group) => (
+                        <button 
                           key={group.patientProfile.uid} 
-                          className={cn('patient-card', { 'active': selectedGroup?.patientProfile.uid === group.patientProfile.uid })}
+                          className={cn('w-full text-left p-3 rounded-lg flex items-center gap-3 transition-colors', { 'bg-primary/10': selectedGroup?.patientProfile.uid === group.patientProfile.uid })}
                           onClick={() => handleSelectGroup(group)}
                         >
-                            {group.unreadCount > 0 && <span className="alert-badge">{group.unreadCount}</span>}
-                            <div className="patient-initial">{getPatientInitials(group.patientProfile?.name)}</div>
-                            <div className="patient-info">
-                                <div className="patient-name">{group.patientProfile?.name || 'Unknown Patient'}</div>
-                                <div className="patient-meta">{group.reports.length} report{group.reports.length > 1 ? 's' : ''} • {group.lastUpdate}</div>
+                            <div className="relative">
+                                <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center font-bold text-primary">
+                                    {getPatientInitials(group.patientProfile?.name)}
+                                </div>
+                                {group.unreadCount > 0 && <span className="absolute top-0 right-0 block h-3 w-3 rounded-full bg-red-500 ring-2 ring-white"></span>}
                             </div>
-                        </div>
+                            <div className="flex-1 truncate">
+                                <div className="font-semibold text-gray-800 truncate">{group.patientProfile?.name || 'Unknown Patient'}</div>
+                                <div className="text-xs text-gray-500">{group.reports.length} report{group.reports.length > 1 ? 's' : ''} • {group.lastUpdate}</div>
+                            </div>
+                        </button>
                     )) : (
                       <div className="text-center p-8 text-gray-500">
                           <Inbox size={32} className="mx-auto mb-2" />
-                          <p>No {filter.toLowerCase()} patient cases found.</p>
+                          <p className="font-semibold">All clear!</p>
+                          <p className="text-sm">There are no pending reports to review.</p>
                       </div>
                     )}
                 </div>
+            </div>
 
+            {/* Report Details Column */}
+            <div className="md:col-span-2 xl:col-span-3 h-full overflow-y-auto">
                 {selectedGroup && selectedReport ? (
-                    <div className="report-panel">
-                        <div className="report-header">
-                            <div>
-                                <div className="report-title">Reports for {selectedGroup.patientProfile.name}</div>
-                                <p style={{color: '#7f8c8d', fontSize: '14px', marginTop: '5px'}}>
-                                    Dermatology Case • Age: {selectedGroup.patientProfile.age} • {selectedGroup.patientProfile.gender}
-                                </p>
-                            </div>
-                            <div className="action-buttons">
-                                <button className="btn btn-icon"><FileText size={14} className="mr-2"/> History</button>
-                                <button className="btn btn-icon"><Phone size={14} className="mr-2"/> Call</button>
-                            </div>
-                        </div>
-
-                        <div className="report-items">
-                            {selectedGroup.reports.map(report => (
-                                <div 
-                                    key={report.id} 
-                                    className={cn('report-item', {'report-item-active': selectedReport?.id === report.id})}
-                                    onClick={() => setSelectedReport(report)}
-                                >
-                                    <div className="report-item-info">
-                                        <h4>{report.reportName}</h4>
-                                        <p>{report.createdAt ? new Date((report.createdAt as any).seconds * 1000).toLocaleString() : ''}</p>
-                                    </div>
-                                    <span className={cn(statusMap[report.status]?.badgeClass || '')}>
-                                        {statusMap[report.status]?.label || 'Unknown'}
-                                    </span>
+                    <div className="p-6 space-y-6">
+                        {/* Patient Profile Card */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Patient Information</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                    <div><p className="text-muted-foreground">Name</p><p className="font-semibold">{selectedGroup.patientProfile.name}</p></div>
+                                    <div><p className="text-muted-foreground">Age</p><p className="font-semibold">{selectedGroup.patientProfile.age}</p></div>
+                                    <div><p className="text-muted-foreground">Gender</p><p className="font-semibold">{selectedGroup.patientProfile.gender}</p></div>
+                                    <div><p className="text-muted-foreground">Region</p><p className="font-semibold">{selectedGroup.patientProfile.region}</p></div>
+                                    <div><p className="text-muted-foreground">Skin Tone</p><p className="font-semibold">{selectedGroup.patientProfile.skinTone}</p></div>
+                                    <div><p className="text-muted-foreground">Case Submitted</p><p className="font-semibold">{selectedReport.createdAt ? new Date((selectedReport.createdAt as any).seconds * 1000).toLocaleString() : 'N/A'}</p></div>
                                 </div>
-                            ))}
-                        </div>
+                            </CardContent>
+                        </Card>
                         
-                        <div className="ai-report-section">
-                            <span className="ai-badge"><Bot size={14} className="inline mr-1"/> AI GENERATED REPORT</span>
-                            <h3 className="ai-report-title">{selectedReport.reportName}</h3>
-                        </div>
-
-                        <div className="detail-grid">
-                            <div className="detail-item">
-                                <div className="detail-label">Patient Name</div>
-                                <div className="detail-value">{selectedGroup.patientProfile.name}</div>
-                            </div>
-                            <div className="detail-item">
-                                <div className="detail-label">Age</div>
-                                <div className="detail-value">{selectedGroup.patientProfile.age} years</div>
-                            </div>
-                             <div className="detail-item">
-                                <div className="detail-label">Gender</div>
-                                <div className="detail-value">{selectedGroup.patientProfile.gender}</div>
-                            </div>
-                            <div className="detail-item">
-                                <div className="detail-label">Region</div>
-                                <div className="detail-value">{selectedGroup.patientProfile.region}</div>
-                            </div>
-                             <div className="detail-item">
-                                <div className="detail-label">Skin Tone</div>
-                                <div className="detail-value">{selectedGroup.patientProfile.skinTone}</div>
-                            </div>
-                             <div className="detail-item">
-                                <div className="detail-label">Submitted</div>
-                                <div className="detail-value">{selectedReport.createdAt ? new Date((selectedReport.createdAt as any).seconds * 1000).toLocaleString() : 'N/A'}</div>
-                            </div>
-                        </div>
-
-                        <div className="symptoms-section">
-                            <h3 className="section-title">📝 Reported Symptoms:</h3>
-                            <p className="p-4 bg-gray-100 rounded-lg text-sm text-gray-700 mb-4">{selectedReport.aiReport.symptomInputs || "No symptoms were described."}</p>
-                            
-                            <h3 className="section-title">💡 AI Recommendations:</h3>
-                            <div className="recommendation-box mb-4">
-                                <div className="recommendation-title">
-                                    <Home size={16}/> Home Remedies Recommendation
+                        {/* Report Details */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2"><Bot size={20} className="text-primary"/> AI Report: {selectedReport.reportName}</CardTitle>
+                            </CardHeader>
+                            <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div className="space-y-4">
+                                     <div className="relative aspect-square w-full rounded-lg overflow-hidden border">
+                                        <Image src={selectedReport.photoDataUri || '/placeholder.svg'} alt="Patient's skin condition" layout="fill" objectFit="cover" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-gray-800">📝 Reported Symptoms</h3>
+                                        <p className="text-sm text-gray-600 mt-1">{selectedReport.aiReport.symptomInputs || "No additional symptoms were described by the patient."}</p>
+                                    </div>
                                 </div>
-                                <p className="recommendation-text whitespace-pre-wrap">{selectedReport.aiReport.homeRemedies}</p>
-                            </div>
-                             <div className="recommendation-box" style={{background: '#fff3e0', borderLeftColor: '#ff9800'}}>
-                                <div className="recommendation-title" style={{color: '#e65100'}}>
-                                    <Pill size={16}/> Medical Recommendation
+                                <div className="space-y-4">
+                                    <div>
+                                        <h3 className="font-semibold text-gray-800 flex items-center gap-2"><Pill/> Potential Conditions Identified by AI</h3>
+                                        <div className="mt-2 space-y-2">
+                                            {selectedReport.aiReport.potentialConditions.map((c, i) => (
+                                                <div key={i} className="p-2 bg-gray-100 rounded-md text-sm">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="font-medium">{c.name}</span>
+                                                        <Badge variant={c.likelihood === 'High' ? 'destructive' : c.likelihood === 'Medium' ? 'secondary' : 'default'}>
+                                                            {c.likelihood}
+                                                        </Badge>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="p-4 bg-blue-50 border-l-4 border-blue-400 rounded">
+                                        <h4 className="font-semibold flex items-center gap-2"><Home size={16}/> AI Home Remedy Suggestion</h4>
+                                        <p className="text-sm text-blue-800 mt-1 whitespace-pre-wrap">{selectedReport.aiReport.homeRemedies}</p>
+                                    </div>
+                                    <div className="p-4 bg-amber-50 border-l-4 border-amber-400 rounded">
+                                        <h4 className="font-semibold flex items-center gap-2"><FileText size={16}/> AI Medical Recommendation</h4>
+                                        <p className="text-sm text-amber-800 mt-1 whitespace-pre-wrap">{selectedReport.aiReport.medicalRecommendation}</p>
+                                    </div>
                                 </div>
-                                <p className="recommendation-text whitespace-pre-wrap" style={{color: '#bf360c'}}>{selectedReport.aiReport.medicalRecommendation}</p>
-                            </div>
-                        </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Doctor's Action Card */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Doctor's Assessment & Action</CardTitle>
+                                <CardDescription>Add your notes and approve or reject the AI's findings. Your notes will be visible to the patient.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Textarea 
+                                    placeholder="Enter your key notes and assessment here..." 
+                                    className="min-h-[120px]"
+                                    value={doctorNotes}
+                                    onChange={(e) => setDoctorNotes(e.target.value)}
+                                />
+                                <div className="flex justify-end gap-2 mt-4">
+                                    <Button variant="destructive" onClick={() => handleDecision('rejected')} disabled={isSubmitting}>
+                                        {isSubmitting ? <Loader2 className="animate-spin" /> : <X className="mr-2 h-4 w-4"/>} Reject
+                                    </Button>
+                                    <Button onClick={() => handleDecision('doctor-approved')} disabled={isSubmitting}>
+                                        {isSubmitting ? <Loader2 className="animate-spin" /> : <Check className="mr-2 h-4 w-4"/>} Approve
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
                 ) : (
-                  <div className="report-panel flex items-center justify-center text-center">
-                    <div>
-                      <Inbox size={48} className="mx-auto text-gray-300 mb-4" />
-                      <h3 className="text-xl font-semibold text-gray-700">Select a Patient</h3>
-                      <p className="text-gray-500">Choose a patient from the list to view their case details.</p>
-                    </div>
-                  </div>
-                )}
-            </div>
-        </div>
-    </>
-  );
-}
+                  <div className="flex flex-col h-full items-center justify-center text-center text-gray-500 p-8">
+                    <Inbox size={48} className="mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-700">Select a Patient</h3>
+                    <p>Choose a patient from the list on the left to view their case details.</
