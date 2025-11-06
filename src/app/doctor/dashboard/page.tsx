@@ -15,6 +15,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 
 type PatientGroup = {
     patientProfile: PatientProfile;
@@ -433,5 +434,3 @@ export default function DoctorDashboard() {
     </div>
   );
 }
-
-    
