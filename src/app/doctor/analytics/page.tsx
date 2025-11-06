@@ -114,7 +114,7 @@ export default function DoctorAnalytics() {
   }
 
   return (
-    <div className="dashboard-container">
+    <div className="grid h-screen w-screen overflow-hidden" style={{gridTemplateColumns: '80px 1fr'}}>
         {/* Sidebar */}
         <div className="sidebar">
             <Link href="/doctor/dashboard" className="logo-sidebar">M</Link>
@@ -231,5 +231,3 @@ export default function DoctorAnalytics() {
     </div>
   );
 }
-
-    
