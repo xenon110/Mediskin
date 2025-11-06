@@ -221,117 +221,136 @@ export default function DoctorDashboard() {
     { href: '/doctor/dashboard', icon: LayoutGrid, title: 'Dashboard' },
     { href: '#', icon: User, title: 'Patients' },
     { href: '/doctor/calendar', icon: Calendar, title: 'Calendar' },
-    { href: '/doctor/analytics', icon: BarChart, title: 'Reports' },
+    { href: '/doctor/analytics', icon: MessageSquare, title: 'Reports' },
     { href: '/doctor/settings', icon: Settings, title: 'Settings' },
   ];
 
   return (
-    <div className="dashboard-container-v2">
+    <div className="dashboard-container-v3">
         {/* Sidebar */}
-        <div className="sidebar-v2">
-            <Link href="/doctor/dashboard" className="logo-sidebar-v2">
-                <div className="logo-icon-v2">M</div>
-                MediScan AI
+        <div className="sidebar-v3">
+            <Link href="/doctor/dashboard" className="logo-sidebar-v3">
+                <div className="logo-icon-v3">M</div>
+                MediScan
             </Link>
             
-            <div className="sidebar-search-v2">
-                <Search className="sidebar-search-icon-v2" size={18} />
-                <input type="text" className="sidebar-search-input-v2" placeholder="Search patients..." />
-            </div>
-
-            <nav className="sidebar-nav-v2">
+            <nav className="sidebar-nav-v3">
                {sidebarNavItems.map(item => (
-                  <Link href={item.href} key={item.title} className={cn('nav-item-v2', { active: pathname === item.href })} title={item.title}>
+                  <Link href={item.href} key={item.title} className={cn('nav-item-v3', { active: pathname === item.href })} title={item.title}>
                       <item.icon size={20} />
-                      <span>{item.title}</span>
-                      {item.title === 'Patients' && <span className="nav-item-badge-v2">2</span>}
                   </Link>
                ))}
             </nav>
-            <div className="user-profile-v2">
-                <div className="user-avatar-v2">{getPatientInitials(selectedGroup?.patientProfile.name)}</div>
-                <div className="user-info-v2">
-                    <div className="user-name">{selectedGroup?.patientProfile.name}</div>
-                    <div className="user-reports">{selectedGroup?.reports.length} reports</div>
-                </div>
-                 {selectedGroup?.unreadCount > 0 && <div className="nav-item-badge-v2">{selectedGroup?.unreadCount}</div>}
+
+            <div className="flex flex-col gap-2 items-center mt-auto">
+                 <Link href="/doctor/profile" className="user-profile-v3" title="My Profile">
+                   <User size={24} />
+                 </Link>
+                 <button onClick={handleSignOut} className="nav-item-v3 !w-10 !h-10" title="Sign Out">
+                    <LogOut size={22} />
+                </button>
             </div>
         </div>
         
+        {/* Patient List Panel */}
+        <div className="patient-list-panel-v3">
+            <header className="patient-list-header-v3">
+                <div>
+                    <h1 className="patient-list-title-v3">Dr. {doctorProfile?.name}'s Cases</h1>
+                    <p className="patient-list-subtitle-v3">{patientGroups.reduce((acc, g) => acc + g.unreadCount, 0)} pending reviews</p>
+                </div>
+            </header>
+             <div className="patient-search-v3">
+                <Search className="patient-search-icon-v3" size={18} />
+                <input type="text" className="patient-search-input-v3" placeholder="Search patients..." />
+            </div>
+
+            <div className="patient-list-v3">
+                {filteredGroups.map(group => (
+                    <div key={group.patientProfile.uid} className={cn("patient-card-v3", {"active": selectedGroup?.patientProfile.uid === group.patientProfile.uid})} onClick={() => handleSelectGroup(group)}>
+                        <div className="patient-avatar-v3">{getPatientInitials(group.patientProfile.name)}</div>
+                        <div className="patient-info-v3">
+                            <div className="patient-name-v3">{group.patientProfile.name}</div>
+                            <div className="patient-last-update-v3">Updated {group.lastUpdate}</div>
+                        </div>
+                        {group.unreadCount > 0 && <div className="patient-unread-badge-v3">{group.unreadCount}</div>}
+                    </div>
+                ))}
+            </div>
+        </div>
+
         {/* Main Content Area */}
-        <div className="main-content-v2">
-          <header className="main-header-v2">
-            <h1 className="main-title-v2">Dr. {doctorProfile?.name}'s Dashboard</h1>
-            <p className="main-subtitle-v2">{patientGroups.reduce((acc, g) => acc + g.unreadCount, 0)} pending reviews</p>
-          </header>
+        <div className="main-content-v3">
+          {selectedGroup && selectedReport ? (
+              <div className="report-details-wrapper-v3">
+                  <header className="report-header-v3">
+                      <h2 className="report-title-v3">Report for {selectedGroup.patientProfile.name}</h2>
+                      <div className="report-meta-v3">
+                        <span>Age: {selectedGroup.patientProfile.age}</span>
+                        <span>{selectedGroup.patientProfile.gender}</span>
+                      </div>
+                  </header>
 
-          {selectedGroup ? (
-            <>
-              <section className="reports-section-v2">
-                <h2 className="reports-header-v2">Reports for {selectedGroup.patientProfile.name}</h2>
-                <div className="report-tabs-v2">
-                  {['All', 'Pending', 'Reviewed'].map(tab => (
-                    <div key={tab} className={cn('report-tab-v2', {'active': filter === tab})} onClick={() => setFilter(tab)}>
-                      {tab}
-                    </div>
-                  ))}
-                </div>
-                <div className="report-list-v2">
-                  {selectedGroup.reports.map(report => (
-                     <div key={report.id} className={cn("report-card-v2", { "active": selectedReport?.id === report.id })} onClick={() => setSelectedReport(report)}>
-                        <div>
-                          <p className="report-card-info-v2">{report.reportName}</p>
-                          <p className="report-card-date-v2">{new Date((report.createdAt as any).seconds * 1000).toLocaleString()}</p>
-                        </div>
-                        <Badge variant={statusMap[report.status].variant} className={cn(statusMap[report.status].badgeClass, "text-xs")}>{statusMap[report.status].label}</Badge>
-                     </div>
-                  ))}
-                </div>
-              </section>
+                   <div className="report-content-grid-v3">
+                       {/* Left side: Report list and details */}
+                       <div className="report-column-v3">
+                           <div className="report-list-container-v3">
+                             {selectedGroup.reports.map(report => (
+                               <div key={report.id} className={cn("report-item-v3", {"active": report.id === selectedReport.id})} onClick={() => setSelectedReport(report)}>
+                                   <p className="report-item-name-v3">{report.reportName}</p>
+                                   <Badge variant={statusMap[report.status].variant} className={cn(statusMap[report.status].badgeClass, "text-xs")}>{statusMap[report.status].label}</Badge>
+                               </div>
+                             ))}
+                           </div>
 
-              {selectedReport && (
-                <section className="report-detail-v2">
-                    <div className="report-detail-header-v2">
-                        <div className="report-detail-avatar-v2">{getPatientInitials(selectedGroup.patientProfile.name)}</div>
-                        <div>
-                            <h3 className="report-detail-name-v2">{selectedGroup.patientProfile.name}</h3>
-                            <p className="report-detail-meta-v2">
-                                Dermatology Case • Age: {selectedGroup.patientProfile.age} • {selectedGroup.patientProfile.gender}
-                            </p>
-                        </div>
-                        <div className="report-detail-actions-v2">
-                            <button className="report-detail-btn-v2"><MessageSquare size={16}/></button>
-                            <button className="report-detail-btn-v2"><Phone size={16}/></button>
-                        </div>
-                    </div>
-                    
-                    {selectedReport.aiReport.doctorConsultationSuggestion && (
-                    <div className="consultation-alert-v2">
-                        <p className="consultation-alert-title-v2"><AlertTriangle className="inline-block mr-2" />Professional Consultation Required</p>
-                        <p className="text-sm">Based on the analysis, we recommend sharing this report with a doctor.</p>
-                    </div>
-                    )}
-                    
-                    <div className="assessment-section-v2">
-                      <h4 className="assessment-title-v2">Your Professional Assessment</h4>
-                      <Textarea 
-                        className="assessment-textarea-v2"
-                        placeholder="Add your professional assessment, modifications, or additional recommendations..."
-                        value={assessment}
-                        onChange={(e) => setAssessment(e.target.value)}
-                        disabled={isSubmitting}
-                      />
-                    </div>
-                </section>
-              )}
-
-            </>
+                           <div className="report-analysis-v3">
+                                <h3 className="section-title-v3">AI Analysis</h3>
+                                {selectedReport.aiReport.doctorConsultationSuggestion && (
+                                    <div className="consultation-alert-v3">
+                                        <AlertTriangle size={16} /> Professional Consultation Required
+                                    </div>
+                                )}
+                                <p className="analysis-text-v3">{selectedReport.aiReport.report}</p>
+                                
+                                {selectedReport.photoDataUri && (
+                                  <div className="mt-4">
+                                      <h4 className="font-semibold text-sm mb-2 text-gray-600">Uploaded Image</h4>
+                                      <div className="relative aspect-video w-full max-w-sm rounded-lg overflow-hidden border">
+                                          <Image src={selectedReport.photoDataUri} alt="Patient's skin condition" layout="fill" objectFit="cover" />
+                                      </div>
+                                  </div>
+                                )}
+                           </div>
+                       </div>
+                       
+                       {/* Right side: Doctor's assessment */}
+                       <div className="assessment-column-v3">
+                           <h3 className="section-title-v3">Your Professional Assessment</h3>
+                           <Textarea 
+                              className="assessment-textarea-v3"
+                              placeholder="Add your professional assessment, modifications, or additional recommendations..."
+                              value={assessment}
+                              onChange={(e) => setAssessment(e.target.value)}
+                              disabled={isSubmitting}
+                            />
+                            <div className="flex items-center gap-2 mt-4">
+                                <Button size="sm" onClick={handleSendAssessment} disabled={isSubmitting}>
+                                  {isSubmitting ? <Loader2 className="animate-spin mr-2"/> : <Send size={16} className="mr-2"/>}
+                                  Send Assessment
+                                </Button>
+                                 <Button size="sm" variant="outline" onClick={() => setActiveResponseTab('approve')} disabled={isSubmitting}>
+                                  Approve AI Report
+                                </Button>
+                            </div>
+                       </div>
+                   </div>
+              </div>
           ) : (
-             <div className="flex-1 flex items-center justify-center bg-gray-100 text-center rounded-lg">
+             <div className="flex-1 flex items-center justify-center bg-gray-50 text-center rounded-lg">
                 <div>
                   <MessageSquare size={48} className="mx-auto text-gray-400 mb-4" />
                   <h3 className="text-xl font-semibold text-gray-700">Select a patient case</h3>
-                  <p className="text-gray-500">Choose a case from the list to view details, or wait for new cases to arrive.</p>
+                  <p className="text-gray-500">Choose a case from the list to view details.</p>
                 </div>
             </div>
           )}
