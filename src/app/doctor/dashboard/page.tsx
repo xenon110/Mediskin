@@ -16,6 +16,7 @@ import { collection, query, where, onSnapshot, Unsubscribe } from 'firebase/fire
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 
 type PatientGroup = {
     patientProfile: PatientProfile;
@@ -23,15 +24,6 @@ type PatientGroup = {
     lastUpdate: string;
     unreadCount: number;
 };
-
-const statusMap: { [key in Report['status']]: { label: string; badgeClass: string; variant: 'default' | 'destructive' | 'secondary' | 'outline' } } = {
-  'pending-doctor-review': { label: 'Pending', badgeClass: 'bg-amber-100 text-amber-800', variant: 'outline' },
-  'doctor-approved': { label: 'Approved', badgeClass: 'bg-green-100 text-green-800', variant: 'default' },
-  'doctor-modified': { label: 'Approved', badgeClass: 'bg-green-100 text-green-800', variant: 'default' },
-  'rejected': { label: 'Rejected', badgeClass: 'bg-red-100 text-red-800', variant: 'destructive' },
-  'pending-patient-input': { label: 'Draft', badgeClass: 'bg-gray-100 text-gray-800', variant: 'secondary' },
-};
-
 
 export default function DoctorDashboard() {
   const { toast } = useToast();

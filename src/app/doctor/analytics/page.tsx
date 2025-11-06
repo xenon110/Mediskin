@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -112,24 +113,48 @@ export default function DoctorAnalytics() {
   }
 
   return (
-    <div className="grid h-screen w-screen overflow-hidden" style={{gridTemplateColumns: '80px 1fr'}}>
-        {/* Sidebar */}
-        <div className="sidebar">
-            <Link href="/doctor/dashboard" className="logo-sidebar">M</Link>
-            <nav className="sidebar-nav">
-               {sidebarNavItems.map(item => (
-                  <Link href={item.href} key={item.title} className={cn('nav-item', { active: pathname === item.href })} title={item.title}>
-                      <item.icon size={24} />
-                  </Link>
-               ))}
-            </nav>
-            <div className="flex flex-col gap-2 items-center mt-auto">
-                <Link href="/doctor/profile" className="user-profile" title="Dr. Profile">
-                  <User size={24} />
-                </Link>
-                 <button onClick={handleSignOut} className="nav-item !w-10 !h-10" title="Sign Out">
-                    <LogOut size={22} />
-                </button>
+    <div className="grid h-screen w-screen grid-cols-1 overflow-hidden md:grid-cols-[280px_1fr]">
+       {/* Sidebar */}
+       <div className="hidden border-r bg-muted/40 md:block">
+            <div className="flex h-full max-h-screen flex-col gap-2">
+                <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+                    <Link href="/" className="flex items-center gap-2 font-semibold">
+                        <Bot className="h-6 w-6" />
+                        <span>Doctor Portal</span>
+                    </Link>
+                </div>
+                <div className="flex-1">
+                    <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+                        {sidebarNavItems.map(item => (
+                            <Link
+                                key={item.title}
+                                href={item.href}
+                                className={cn(
+                                    'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
+                                    { 'bg-muted text-primary': pathname === item.href }
+                                )}
+                            >
+                                <item.icon className="h-4 w-4" />
+                                {item.title}
+                            </Link>
+                        ))}
+                    </nav>
+                </div>
+                <div className="mt-auto p-4 border-t">
+                     <div className="flex items-center gap-2 mb-4">
+                        <div className="relative inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gray-100 dark:bg-gray-600">
+                             <span className="font-medium text-gray-600 dark:text-gray-300">{(doctorProfile?.name || '?').split(' ').map(n=>n[0]).join('').toUpperCase()}</span>
+                        </div>
+                        <div>
+                            <p className="text-sm font-semibold">{doctorProfile?.name || 'Doctor'}</p>
+                            <p className="text-xs text-muted-foreground">{doctorProfile?.email}</p>
+                        </div>
+                     </div>
+                    <Button variant="ghost" size="sm" className="w-full justify-start" onClick={handleSignOut}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Sign Out
+                    </Button>
+                </div>
             </div>
         </div>
 
