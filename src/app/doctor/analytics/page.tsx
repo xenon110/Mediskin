@@ -81,15 +81,15 @@ export default function DoctorAnalytics() {
   };
 
   const statusData = [
-    { name: 'Pending', value: stats.pending, fill: 'hsl(var(--chart-2))' },
-    { name: 'Reviewed', value: stats.reviewed, fill: 'hsl(var(--chart-1))' },
-    { name: 'Rejected', value: stats.rejected, fill: 'hsl(var(--chart-3))' },
+    { name: 'Pending', value: stats.pending, fill: 'hsl(221.2 83.2% 53.3%)' },
+    { name: 'Reviewed', value: stats.reviewed, fill: 'hsl(142.1 76.2% 36.3%)' },
+    { name: 'Rejected', value: stats.rejected, fill: 'hsl(0 84.2% 60.2%)' },
   ];
   
   const chartConfig = {
-    pending: { label: 'Pending', color: 'hsl(var(--chart-2))' },
-    reviewed: { label: 'Reviewed', color: 'hsl(var(--chart-1))' },
-    rejected: { label: 'Rejected', color: 'hsl(var(--chart-3))' },
+    pending: { label: 'Pending', color: 'hsl(221.2 83.2% 53.3%)' },
+    reviewed: { label: 'Reviewed', color: 'hsl(142.1 76.2% 36.3%)' },
+    rejected: { label: 'Rejected', color: 'hsl(0 84.2% 60.2%)' },
   }
 
   const weeklyActivity = reports.reduce((acc, report) => {
