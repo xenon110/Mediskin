@@ -13,6 +13,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { collection, query, where, onSnapshot, Unsubscribe } from 'firebase/firestore';
 import { useRouter, usePathname } from 'next/navigation';
 import { Textarea } from '@/components/ui/textarea';
+import Image from 'next/image';
+import { Badge } from '@/components/ui/badge';
 
 type PatientGroup = {
     patientProfile: PatientProfile;
@@ -177,6 +179,16 @@ export default function DoctorDashboard() {
     { href: '/doctor/analytics', icon: MessageSquare, title: 'Analytics' },
     { href: '/doctor/settings', icon: Settings, title: 'Settings' },
   ];
+  
+  const getLikelihoodColor = (likelihood: 'High' | 'Medium' | 'Low') => {
+    switch (likelihood) {
+      case 'High': return 'bg-red-100 text-red-800';
+      case 'Medium': return 'bg-yellow-100 text-yellow-800';
+      case 'Low': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
 
   if (isLoading) {
     return (
@@ -275,12 +287,12 @@ export default function DoctorDashboard() {
                   </div>
                 </div>
                 
-                <div className="report-items">
+                 <div className="horizontal-report-items">
                   {selectedGroup.reports.map(report => (
-                      <div key={report.id} className={cn('report-item', {'active': report.id === selectedReport.id})} onClick={() => handleSelectReport(report)}>
+                      <div key={report.id} className={cn('report-item-h', {'active': report.id === selectedReport.id})} onClick={() => handleSelectReport(report)}>
                           <div className="report-item-info">
                               <h4>{report.reportName}</h4>
-                              <p>{new Date((report.createdAt as any).seconds * 1000).toLocaleString()}</p>
+                              <p>{new Date((report.createdAt as any).seconds * 1000).toLocaleDateString()}</p>
                           </div>
                           <span className={cn('status-badge', {
                               'status-pending': report.status === 'pending-doctor-review',
@@ -329,17 +341,32 @@ export default function DoctorDashboard() {
                 </div>
               </div>
 
-              <div className="symptoms-section">
-                <h3 className="section-title">📝 Reported Symptoms:</h3>
-                <div className="recommendation-box">
-                    <div className="recommendation-title">
-                        <Home size={16}/> Home Remedies Recommendation
+                <div className="symptoms-section">
+                  <h3 className="section-title">📝 AI Report & Patient Symptoms</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {selectedReport.photoDataUri && (
+                      <div className="md:col-span-1">
+                        <Image src={selectedReport.photoDataUri} alt="Uploaded skin condition" width={300} height={200} className="rounded-lg object-cover w-full" />
+                      </div>
+                    )}
+                    <div className="md:col-span-2 space-y-4">
+                      <div className="recommendation-box !bg-blue-50 !border-blue-200">
+                          <p className="recommendation-text !text-blue-800">
+                            {selectedReport.aiReport.report}
+                          </p>
+                      </div>
+                       <div className="space-y-2">
+                        {selectedReport.aiReport.potentialConditions.map((condition, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <Badge className={cn('text-sm', getLikelihoodColor(condition.likelihood))}>{condition.name}</Badge>
+                            <span className="text-xs text-gray-500 font-mono">({condition.likelihood}, {((condition.confidence || 0) * 100).toFixed(0)}%)</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <p className="recommendation-text">
-                      {selectedReport.aiReport.homeRemedies}
-                    </p>
+                  </div>
                 </div>
-              </div>
+
 
               {/* Action Section */}
               <div className="action-section">
@@ -375,5 +402,3 @@ export default function DoctorDashboard() {
     </div>
   );
 }
-
-    

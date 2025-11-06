@@ -204,7 +204,7 @@
 
   .content-grid {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: 350px 1fr;
       gap: 30px;
   }
 
@@ -213,7 +213,7 @@
       border-radius: 16px;
       padding: 20px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      max-height: calc(100vh - 320px);
+      max-height: calc(100vh - 120px);
       overflow-y: auto;
   }
 
@@ -287,6 +287,7 @@
       padding: 30px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
       overflow-y: auto;
+      max-height: calc(100vh - 120px);
   }
 
   .report-header {
@@ -324,32 +325,38 @@
       background: #e9ecef;
   }
 
-  .report-items {
-      display: grid;
+  .horizontal-report-items {
+      display: flex;
       gap: 15px;
       margin-bottom: 25px;
+      overflow-x: auto;
+      padding-bottom: 10px;
   }
 
-  .report-item {
+  .report-item-h {
       background: #f8f9fa;
       padding: 16px 20px;
       border-radius: 10px;
       display: flex;
+      flex-direction: column;
       justify-content: space-between;
       align-items: center;
       transition: all 0.3s ease;
       border: 2px solid transparent;
       cursor: pointer;
+      min-width: 200px;
+      flex-shrink: 0;
   }
 
-  .report-item.active {
+  .report-item-h.active {
     border-color: #667eea;
     background: #f0f3ff;
   }
   
-  .report-item:hover {
+  .report-item-h:hover {
       border-color: #cbd5e0;
   }
+  .report-item-info { text-align: center;}
   .report-item-info h4 {
       font-size: 15px;
       font-weight: 600;
@@ -367,6 +374,7 @@
       border-radius: 6px;
       font-size: 12px;
       font-weight: 600;
+      margin-top: 10px;
   }
 
   .status-pending {
@@ -520,5 +528,3 @@
       background: #a0aec0;
   }
 }
-
-    
