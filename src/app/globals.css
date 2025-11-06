@@ -129,41 +129,45 @@
   .notification-close { @apply bg-transparent border-none text-white text-xl cursor-pointer ml-2.5; }
 
   /* Doctor Dashboard New Design */
-  .dashboard-container { @apply flex h-screen w-screen bg-white overflow-hidden; }
-  .sidebar { @apply w-20 bg-gradient-to-b from-[#667eea] to-[#764ba2] flex flex-col items-center py-6 relative z-50; }
+  .dashboard-container { @apply grid h-screen w-screen bg-white overflow-hidden; grid-template-columns: 80px 384px 384px 1fr; }
+  .sidebar { @apply w-20 bg-gradient-to-b from-[#4F46E5] to-[#7C3AED] flex flex-col items-center py-6 relative z-50; }
   .logo-sidebar { @apply w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-white text-2xl font-bold mb-8 backdrop-blur-sm; }
   .sidebar-nav { @apply flex flex-col gap-4 w-full items-center; }
   .nav-item { @apply w-12 h-12 rounded-xl flex items-center justify-center text-white/70 cursor-pointer transition-all duration-300 relative; }
   .nav-item:hover, .nav-item.active { @apply bg-white/20 text-white backdrop-blur-sm; }
   .nav-item.active::after { @apply content-[''] absolute right-[-14px] w-1 h-8 bg-white rounded-l-md; }
   .user-profile { @apply mt-auto w-11 h-11 rounded-full bg-white/20 flex items-center justify-center text-white cursor-pointer backdrop-blur-sm transition-transform hover:scale-110; }
-  .patient-list { @apply w-96 bg-white border-r border-gray-200 flex flex-col; }
-  .list-header { @apply p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50/30 to-blue-50/30; }
+  .patient-list { @apply bg-white border-r border-gray-200 flex flex-col; }
+  .list-header { @apply p-6 border-b border-gray-200; }
   .search-bar { @apply m-4 relative; }
-  .search-input { @apply w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-full text-sm transition-all duration-300 bg-gray-50 focus:outline-none focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20; }
+  .search-input { @apply w-full pl-11 pr-4 py-3 border border-gray-200 rounded-lg text-sm transition-all duration-300 bg-gray-50 focus:outline-none focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20; }
   .search-icon { @apply absolute left-4 top-1/2 -translate-y-1/2 text-gray-400; }
-  .filter-tabs { @apply flex mx-4 mb-4 bg-gray-100 rounded-full p-1; }
-  .filter-tab { @apply flex-1 py-2 px-4 rounded-full text-center text-xs font-semibold cursor-pointer transition-all duration-300 text-gray-500; }
-  .filter-tab.active { @apply bg-white text-primary shadow-md; }
-  .patients-container { @apply flex-1 overflow-y-auto px-4; }
+  .filter-tabs { @apply flex mx-4 mb-4 bg-gray-100 rounded-lg p-1; }
+  .filter-tab { @apply flex-1 py-2 px-4 rounded-lg text-center text-sm font-semibold cursor-pointer transition-all duration-300 text-gray-600; }
+  .filter-tab.active { @apply bg-white text-primary shadow-sm; }
+  .patients-container { @apply flex-1 overflow-y-auto px-2; }
   .patients-container::-webkit-scrollbar { @apply w-1.5; }
   .patients-container::-webkit-scrollbar-track { @apply bg-gray-100; }
-  .patients-container::-webkit-scrollbar-thumb { @apply bg-gradient-to-b from-[#667eea] to-[#764ba2] rounded-full; }
+  .patients-container::-webkit-scrollbar-thumb { @apply bg-gray-300 rounded-full; }
   .patient-item { @apply flex items-center p-4 rounded-xl mb-2 cursor-pointer transition-all duration-300 relative; }
   .patient-item:hover { @apply bg-gray-50; }
-  .patient-item.active { @apply bg-gradient-to-r from-purple-50/50 to-blue-50/50; }
+  .patient-item.active { @apply bg-indigo-50; }
   .patient-item.active::before { @apply content-[''] absolute top-1/2 -translate-y-1/2 left-0 w-1 h-3/4 rounded-r-md bg-primary; }
-  .patient-avatar { @apply w-12 h-12 rounded-full bg-gradient-secondary flex items-center justify-center text-white font-bold mr-4 flex-shrink-0; }
+  .patient-avatar { @apply w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold mr-4 flex-shrink-0; }
   .patient-info { @apply flex-1; }
   .patient-name { @apply font-semibold text-gray-800 mb-0.5; }
-  .patient-condition { @apply text-xs text-gray-500 mb-0.5; }
+  .patient-condition { @apply text-xs text-gray-500; }
   .patient-time { @apply text-xs text-gray-400; }
   .patient-status { @apply flex flex-col items-end gap-1; }
-  .status-badge { @apply py-1 px-2.5 rounded-full text-[10px] font-bold; }
-  .status-pending { @apply bg-amber-100 text-amber-600; }
-  .status-urgent { @apply bg-red-100 text-red-600; }
-  .status-reviewed { @apply bg-green-100 text-green-600; }
   .unread-count { @apply bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold; }
+  .report-detail-panel { @apply flex-1 flex flex-col min-h-0; border-l: 1px solid theme('colors.gray.200'); }
+
+  .chat-header-new { @apply p-6 border-b border-gray-200 flex items-center justify-between; }
+  .report-card { @apply p-3 mb-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors; }
+  .report-card.active { @apply bg-blue-50 border-blue-400; }
+
+  .report-header-new { @apply bg-cyan-500 text-white p-6 rounded-t-lg; }
+  .report-title-new { @apply text-xl font-bold; }
   
   .chat-panel { @apply flex-1 flex flex-col bg-white; }
   .chat-header { @apply p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50/30 to-blue-50/30 flex items-center justify-between; }
@@ -177,7 +181,7 @@
   .btn-secondary { @apply bg-gray-100 text-gray-600; }
   .action-btn:hover { @apply -translate-y-px shadow-md; }
   
-  .chat-messages { @apply flex-1 overflow-y-auto p-6 bg-gradient-to-b from-gray-50 to-white; }
+  .chat-messages { @apply flex-1 overflow-y-auto bg-gradient-to-b from-gray-50 to-white; }
   .chat-messages::-webkit-scrollbar { @apply w-1.5; }
   .chat-messages::-webkit-scrollbar-thumb { @apply bg-gradient-to-b from-[#667eea] to-[#764ba2] rounded-full; }
   .message-group { @apply mb-8; }
@@ -185,22 +189,22 @@
   .message-date::before, .message-date::after { @apply content-[''] absolute top-1/2 w-[calc(50%-4rem)] h-px bg-gray-200; }
   .message-date::before { @apply left-0; }
   .message-date::after { @apply right-0; }
-  .ai-report { @apply bg-white rounded-2xl p-6 mb-4 shadow-lg shadow-gray-200/50 border; }
+  .ai-report { @apply bg-white rounded-b-lg p-6 mb-4 shadow-lg shadow-gray-200/50 border; }
   .report-header { @apply flex items-center mb-4; }
   .ai-badge { @apply bg-gradient-secondary text-white py-1.5 px-3 rounded-md text-xs font-bold mr-4; }
   .report-title { @apply font-bold text-gray-800 text-lg; }
-  .patient-details-section { @apply bg-gray-50 rounded-lg p-4 mb-6; }
+  .patient-details-section { @apply bg-cyan-500/10 rounded-lg p-4 mb-6; }
   .details-grid { @apply grid grid-cols-2 md:grid-cols-3 gap-4; }
-  .detail-item { @apply flex flex-col; }
-  .detail-label { @apply text-xs text-gray-500 font-semibold uppercase mb-1; }
-  .detail-value { @apply text-gray-800 font-medium text-sm; }
-  .symptoms-list { @apply bg-blue-50 rounded-lg p-4 mb-6; }
-  .symptoms-title { @apply font-semibold text-blue-800 mb-2 text-sm; }
-  .symptoms-content { @apply text-blue-700 text-sm; }
+  .detail-item { @apply flex flex-col bg-cyan-500/10 text-cyan-900 p-3 rounded-lg; }
+  .detail-label { @apply text-xs text-cyan-800 font-semibold uppercase mb-1; }
+  .detail-value { @apply font-medium text-sm; }
+  .symptoms-list { @apply bg-gray-100 rounded-lg p-4 mb-6; }
+  .symptoms-title { @apply font-semibold text-gray-800 mb-2 text-sm; }
+  .symptoms-content { @apply text-gray-600 text-sm; }
   .image-analysis { @apply mb-6; }
   .uploaded-image { @apply w-48 h-48 rounded-lg bg-gray-100 flex items-center justify-center mb-4 border-2 border-dashed border-gray-300 text-gray-500 text-sm cursor-pointer hover:border-primary; }
   .analysis-sections { @apply grid gap-6; }
-  .analysis-section { @apply bg-gray-50 rounded-xl p-6 border-l-4; }
+  .analysis-section { @apply bg-gray-100 rounded-xl p-6 border-l-4; }
   .analysis-section h4 { @apply font-bold mb-4 flex items-center gap-2; }
   .analysis-section.medical { @apply border-amber-400 bg-amber-50/50; }
   .analysis-section.consultation { @apply border-red-400 bg-red-50/50; }
