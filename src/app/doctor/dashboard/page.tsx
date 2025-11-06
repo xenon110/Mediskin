@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Paperclip, Send, CheckCircle, Pencil, Loader2, Inbox, XCircle, ThumbsUp, Search, Stethoscope, FileText, Edit3, MessageSquare, LayoutGrid, Calendar, Settings, User, Phone, MoreVertical, Star, Bot, Home, Pill, AlertTriangle, LogOut, Camera } from 'lucide-react';
+import { Paperclip, Send, CheckCircle, Pencil, Loader2, Inbox, XCircle, ThumbsUp, Search, Stethoscope, FileText, Edit3, MessageSquare, LayoutGrid, Calendar, Settings, User, Phone, MoreVertical, Star, Bot, Home, Pill, AlertTriangle, LogOut, Camera, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -20,10 +20,11 @@ import { collection, query, where, onSnapshot, orderBy, Unsubscribe } from 'fire
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 
-
-type PatientCase = Report & {
-    time: string;
-    unread: number;
+type PatientGroup = {
+    patientProfile: PatientProfile;
+    reports: Report[];
+    lastUpdate: string;
+    unreadCount: number;
 };
 
 const statusMap: { [key in Report['status']]: { label: string; badgeClass: string; } } = {
@@ -40,8 +41,9 @@ export default function DoctorDashboard() {
   const router = useRouter();
   const pathname = usePathname();
   const [doctorProfile, setDoctorProfile] = useState<DoctorProfile | null>(null);
-  const [patientCases, setPatientCases] = useState<PatientCase[]>([]);
-  const [selectedCase, setSelectedCase] = useState<PatientCase | null>(null);
+  const [patientGroups, setPatientGroups] = useState<PatientGroup[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<PatientGroup | null>(null);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [filter, setFilter] = useState('All');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -56,7 +58,6 @@ export default function DoctorDashboard() {
     const currentUser = auth.currentUser;
 
     if (!currentUser || !db) {
-      // This should be handled by the layout now, but as a fallback.
       router.push('/login?role=doctor');
       return;
     }
@@ -70,94 +71,102 @@ export default function DoctorDashboard() {
     });
 
     const reportsRef = collection(db, 'reports');
-    // Firestore security rules require that we can only query for reports where the doctorId is the current user's UID.
     const q = query(reportsRef, where('doctorId', '==', currentUser.uid));
 
     unsubscribe = onSnapshot(q, async (querySnapshot) => {
-      const casesPromises = querySnapshot.docs.map(async (doc) => {
-        const report = { id: doc.id, ...doc.data() } as Report;
-        if (!report.patientId) return null;
+      const reportsPromises = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Report));
+      const allReports = await Promise.all(reportsPromises);
 
-        const patientProfile = await getUserProfile(report.patientId) as PatientProfile | null;
+      const groups: { [patientId: string]: { patientProfile: PatientProfile; reports: Report[] } } = {};
+
+      for (const report of allReports) {
+        if (!report.patientId) continue;
         
-        const patientName = patientProfile?.name;
+        if (!groups[report.patientId]) {
+          const patientProfile = await getUserProfile(report.patientId) as PatientProfile | null;
+          if (patientProfile) {
+            groups[report.patientId] = { patientProfile, reports: [] };
+          }
+        }
+        if (groups[report.patientId]) {
+          groups[report.patientId].reports.push(report);
+        }
+      }
 
+      const patientGroupsArray: PatientGroup[] = Object.values(groups).map(group => {
+        group.reports.sort((a, b) => ((b.createdAt as any)?.seconds || 0) - ((a.createdAt as any)?.seconds || 0));
+        const lastReport = group.reports[0];
         return {
-          ...report,
-          patientProfile: patientProfile ?? { name: 'Unknown Patient' } as PatientProfile,
-          time: report.createdAt ? formatDistanceToNow(new Date((report.createdAt as any).seconds * 1000), { addSuffix: true }) : 'N/A',
-          unread: report.status === 'pending-doctor-review' ? 1 : 0,
+          ...group,
+          lastUpdate: lastReport.createdAt ? formatDistanceToNow(new Date((lastReport.createdAt as any).seconds * 1000), { addSuffix: true }) : 'N/A',
+          unreadCount: group.reports.filter(r => r.status === 'pending-doctor-review').length
         };
       });
 
-      let cases = (await Promise.all(casesPromises)).filter((c): c is PatientCase => c !== null);
-      
-      cases.sort((a, b) => {
-        const timeA = (a.createdAt as any)?.seconds || 0;
-        const timeB = (b.createdAt as any)?.seconds || 0;
-        return timeB - timeA;
+      patientGroupsArray.sort((a, b) => {
+          const timeA = (a.reports[0]?.createdAt as any)?.seconds || 0;
+          const timeB = (b.reports[0]?.createdAt as any)?.seconds || 0;
+          return timeB - timeA;
       });
 
-      setPatientCases(cases);
+      setPatientGroups(patientGroupsArray);
       
-      if (cases.length > 0) {
-        const currentSelectedId = selectedCase?.id;
-        const updatedSelectedCase = currentSelectedId ? cases.find(c => c.id === currentSelectedId) : undefined;
-        const newSelectedCase = updatedSelectedCase || cases[0];
+      if (patientGroupsArray.length > 0) {
+        const currentSelectedId = selectedGroup?.patientProfile?.uid;
+        const updatedSelectedGroup = currentSelectedId ? patientGroupsArray.find(g => g.patientProfile.uid === currentSelectedId) : undefined;
         
-        if (newSelectedCase) {
-          setSelectedCase(newSelectedCase);
-          setAssessment(newSelectedCase.doctorNotes || '');
-          if (newSelectedCase.status === 'doctor-approved') {
-              setActiveResponseTab('approve');
-          } else {
-              setActiveResponseTab('customize');
-          }
+        if(updatedSelectedGroup) {
+            setSelectedGroup(updatedSelectedGroup);
+            const currentReportId = selectedReport?.id;
+            const updatedReport = currentReportId ? updatedSelectedGroup.reports.find(r => r.id === currentReportId) : updatedSelectedGroup.reports[0];
+            setSelectedReport(updatedReport || updatedSelectedGroup.reports[0]);
+        } else {
+             const newSelectedGroup = patientGroupsArray[0];
+             setSelectedGroup(newSelectedGroup);
+             setSelectedReport(newSelectedGroup.reports[0] || null);
         }
-
       } else {
-        setSelectedCase(null);
+        setSelectedGroup(null);
+        setSelectedReport(null);
       }
       
       setIsLoading(false);
 
     }, (error) => {
       console.error("Error fetching reports in real-time:", error);
-      if (error.code === 'permission-denied' || error.code === 'unauthenticated') {
-        toast({ title: 'Permissions Error', description: 'Missing or insufficient permissions. Please check your Firestore security rules.', variant: 'destructive' });
-      } else {
-        toast({ title: 'Error', description: 'A problem occurred while fetching patient cases.', variant: 'destructive' });
-      }
+      toast({ title: 'Error', description: 'A problem occurred while fetching patient cases.', variant: 'destructive' });
       setIsLoading(false);
     });
 
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
+    return () => unsubscribe && unsubscribe();
+  }, [router, toast]);
+  
+  useEffect(() => {
+    if (selectedReport) {
+      setAssessment(selectedReport.doctorNotes || '');
+      if (selectedReport.status === 'doctor-approved') {
+          setActiveResponseTab('approve');
+      } else {
+          setActiveResponseTab('customize');
       }
-    };
-  }, [router, toast, selectedCase?.id]);
-
-
-  const handleSelectCase = (patientCase: PatientCase) => {
-    setSelectedCase(patientCase);
-    setAssessment(patientCase.doctorNotes || '');
-    if (patientCase.status === 'doctor-approved') {
-        setActiveResponseTab('approve');
-    } else {
-        setActiveResponseTab('customize');
     }
+  }, [selectedReport]);
+
+
+  const handleSelectGroup = (group: PatientGroup) => {
+    setSelectedGroup(group);
+    setSelectedReport(group.reports[0] || null);
   };
   
-  const filteredCases = patientCases.filter(p => {
+  const filteredGroups = patientGroups.filter(g => {
     if (filter === 'All') return true;
-    if (filter === 'Pending') return p.status === 'pending-doctor-review';
-    if (filter === 'Reviewed') return ['doctor-approved', 'doctor-modified', 'rejected'].includes(p.status);
+    if (filter === 'Pending') return g.unreadCount > 0;
+    if (filter === 'Reviewed') return g.reports.some(r => ['doctor-approved', 'doctor-modified', 'rejected'].includes(r.status));
     return true;
   });
 
   const handleSendAssessment = async () => {
-      if (!selectedCase) return;
+      if (!selectedReport) return;
       
       let newStatus: Report['status'];
       let notes = assessment;
@@ -175,7 +184,7 @@ export default function DoctorDashboard() {
 
       setIsSubmitting(true);
       try {
-          await updateReportByDoctor(selectedCase.id, newStatus, notes);
+          await updateReportByDoctor(selectedReport.id, newStatus, notes);
           toast({ title: 'Success', description: 'Your assessment has been sent to the patient.' });
       } catch (error) {
           console.error("Failed to send assessment:", error);
@@ -215,151 +224,90 @@ export default function DoctorDashboard() {
     { href: '/doctor/settings', icon: Settings, title: 'Settings' },
   ];
 
-
-  return (
-    <div className="dashboard-container">
-        {/* Sidebar */}
-        <div className="sidebar">
-            <Link href="/doctor/dashboard" className="logo-sidebar">M</Link>
-            <nav className="sidebar-nav">
-               {sidebarNavItems.map(item => (
-                  <Link href={item.href} key={item.title} className={cn('nav-item', { active: pathname === item.href })} title={item.title}>
-                      <item.icon size={24} />
-                  </Link>
-               ))}
-            </nav>
-            <div className="flex flex-col gap-2 items-center mt-auto">
-                <Link href="/doctor/profile" className="user-profile" title="Dr. Profile">
-                  <User size={24} />
-                </Link>
-                 <button onClick={handleSignOut} className="nav-item !w-10 !h-10" title="Sign Out">
-                    <LogOut size={22} />
-                </button>
+  const MainChatPanel = () => {
+      if(!selectedReport) {
+        return (
+             <div className="flex-1 flex items-center justify-center bg-gray-50 text-center">
+              <div>
+                <MessageSquare size={48} className="mx-auto text-gray-300 mb-4" />
+                <h3 className="text-xl font-semibold text-gray-700">Select a report</h3>
+                <p className="text-gray-500">Choose a report from the list to view its details.</p>
+              </div>
             </div>
-        </div>
-
-        {/* Patient List Panel */}
-        <div className="patient-list">
-            <div className="list-header">
-                <h2 className="text-xl font-bold text-gray-800">{doctorProfile ? `Dr. ${doctorProfile.name}'s Dashboard` : 'Doctor Dashboard'}</h2>
-                <p className="text-sm text-gray-500">{patientCases.filter(p => p.status === 'pending-doctor-review').length} pending reviews</p>
-            </div>
-
-            <div className="search-bar">
-                <Search className="search-icon" size={18} />
-                <input type="text" className="search-input" placeholder="Search patients..." />
-            </div>
-
-            <div className="filter-tabs">
-                {['All', 'Pending', 'Reviewed'].map(tab => (
-                    <div 
-                      key={tab} 
-                      className={cn('filter-tab', { 'active': filter === tab })}
-                      onClick={() => setFilter(tab)}
-                    >
-                        {tab}
-                    </div>
-                ))}
-            </div>
-
-            <div className="patients-container">
-                {filteredCases.map((pCase) => (
-                    <div 
-                      key={pCase.id} 
-                      className={cn('patient-item', { 'active': selectedCase?.id === pCase.id })}
-                      onClick={() => handleSelectCase(pCase)}
-                    >
-                        <div className="patient-avatar">{getPatientInitials(pCase.patientProfile?.name)}</div>
-                        <div className="patient-info">
-                            <div className="patient-name">{pCase.patientProfile?.name || 'Unknown Patient'}</div>
-                            <p className="patient-condition">Dermatology Case</p>
-                            <p className="patient-time">{pCase.time}</p>
-                        </div>
-                        <div className="patient-status">
-                            {statusMap[pCase.status] && <div className={cn('status-badge', statusMap[pCase.status].badgeClass)}>{statusMap[pCase.status].label}</div>}
-                            {pCase.unread > 0 && <div className="unread-count">{pCase.unread}</div>}
-                        </div>
-                    </div>
-                ))}
-                 {filteredCases.length === 0 && !isLoading && (
-                    <div className="text-center p-8 text-gray-500">
-                        <Inbox size={32} className="mx-auto mb-2" />
-                        <p>No {filter !== 'All' ? filter.toLowerCase() : ''} cases found.</p>
-                    </div>
-                )}
-            </div>
-        </div>
-
-        {/* Chat Panel */}
-        {selectedCase && selectedCase.patientProfile ? (
-          <div className="chat-panel">
+        )
+      }
+      return (
+        <div className="chat-panel">
             <div className="chat-header">
-                <div className="chat-patient-info">
-                    <div className="chat-avatar">{getPatientInitials(selectedCase.patientProfile.name)}</div>
-                    <div className="chat-patient-details">
-                        <h3 id="chat-patient-name">{selectedCase.patientProfile.name || 'Unknown Patient'}</h3>
-                        <p id="chat-patient-condition">Dermatology Case • Age: {selectedCase.patientProfile.age || 'N/A'} • {selectedCase.patientProfile.gender || 'N/A'}</p>
-                    </div>
-                </div>
+                 <div className="chat-patient-info">
+                    {selectedGroup && (
+                        <>
+                            <div className="chat-avatar">{getPatientInitials(selectedGroup.patientProfile.name)}</div>
+                            <div className="chat-patient-details">
+                                <h3 id="chat-patient-name">{selectedGroup.patientProfile.name || 'Unknown Patient'}</h3>
+                                <p id="chat-patient-condition">Dermatology Case • Age: {selectedGroup.patientProfile.age || 'N/A'} • {selectedGroup.patientProfile.gender || 'N/A'}</p>
+                            </div>
+                        </>
+                    )}
+                 </div>
                 <div className="chat-actions">
                     <button className="action-btn btn-secondary"><FileText size={14}/> History</button>
                     <button className="action-btn btn-primary"><Phone size={14} /> Call</button>
                 </div>
             </div>
-
+            
             <div className="chat-messages">
                 <div className="message-group fade-in">
-                    <div className="message-date">{selectedCase.time}</div>
+                    <div className="message-date">{selectedReport.createdAt ? formatDistanceToNow(new Date((selectedReport.createdAt as any).seconds * 1000), { addSuffix: true }) : 'N/A'}</div>
                     
                     <div className="ai-report">
                         <div className="report-header">
                             <div className="ai-badge"><Bot size={14} className="inline mr-1" /> AI GENERATED REPORT</div>
-                            <div className="report-title">Dermatological Analysis</div>
+                            <div className="report-title">{selectedReport.reportName || 'Dermatological Analysis'}</div>
                         </div>
 
-                        <div className="patient-details-section">
+                         <div className="patient-details-section">
                             <div className="details-grid">
                                 <div className="detail-item">
                                     <div className="detail-label">Patient Name</div>
-                                    <div className="detail-value">{selectedCase.patientProfile.name || 'N/A'}</div>
+                                    <div className="detail-value">{selectedGroup?.patientProfile.name || 'N/A'}</div>
                                 </div>
                                 <div className="detail-item">
                                     <div className="detail-label">Age</div>
-                                    <div className="detail-value">{selectedCase.patientProfile.age || 'N/A'} years</div>
+                                    <div className="detail-value">{selectedGroup?.patientProfile.age || 'NA'} years</div>
                                 </div>
                                 <div className="detail-item">
                                     <div className="detail-label">Gender</div>
-                                    <div className="detail-value">{selectedCase.patientProfile.gender || 'N/A'}</div>
+                                    <div className="detail-value">{selectedGroup?.patientProfile.gender || 'N/A'}</div>
                                 </div>
                                 <div className="detail-item">
                                     <div className="detail-label">Region</div>
-                                    <div className="detail-value">{selectedCase.patientProfile.region || 'N/A'}</div>
+                                    <div className="detail-value">{selectedGroup?.patientProfile.region || 'N/A'}</div>
                                 </div>
                                 <div className="detail-item">
                                     <div className="detail-label">Skin Tone</div>
-                                    <div className="detail-value">{selectedCase.patientProfile.skinTone || 'N/A'}</div>
+                                    <div className="detail-value">{selectedGroup?.patientProfile.skinTone || 'N/A'}</div>
                                 </div>
                                 <div className="detail-item">
                                     <div className="detail-label">Submitted</div>
-                                    <div className="detail-value">{selectedCase.createdAt && (selectedCase.createdAt as any).seconds ? new Date((selectedCase.createdAt as any).seconds * 1000).toLocaleString() : 'N/A'}</div>
+                                    <div className="detail-value">{selectedReport.createdAt && (selectedReport.createdAt as any).seconds ? new Date((selectedReport.createdAt as any).seconds * 1000).toLocaleString() : 'N/A'}</div>
                                 </div>
                             </div>
                         </div>
 
                         <div className="symptoms-list">
                             <div className="symptoms-title">Reported Symptoms:</div>
-                            <div className="symptoms-content">{selectedCase.aiReport.symptomInputs}</div>
+                            <div className="symptoms-content">{selectedReport.aiReport.symptomInputs}</div>
                         </div>
 
-                        {selectedCase.photoDataUri && (
+                        {selectedReport.photoDataUri && (
                             <div className="image-analysis">
                                 <h4 className="font-semibold text-sm text-gray-700 mb-2 flex items-center gap-2"><Camera /> Uploaded Skin Image</h4>
                                 <div className="relative w-full aspect-video rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
-                                    <Image src={selectedCase.photoDataUri} alt="Patient's skin condition" layout="fill" objectFit="contain" />
+                                    <Image src={selectedReport.photoDataUri} alt="Patient's skin condition" layout="fill" objectFit="contain" />
                                 </div>
                             </div>
                         )}
-
 
                         <div className="analysis-sections">
                              <div className="analysis-section">
@@ -367,7 +315,7 @@ export default function DoctorDashboard() {
                                     <Home size={18} /> Home Remedies Recommendation
                                 </h4>
                                 <div className="section-content whitespace-pre-wrap">
-                                   {selectedCase.aiReport.homeRemedies}
+                                   {selectedReport.aiReport.homeRemedies}
                                 </div>
                             </div>
 
@@ -376,11 +324,11 @@ export default function DoctorDashboard() {
                                     <Pill size={18} /> Medical Recommendation
                                 </h4>
                                 <div className="section-content whitespace-pre-wrap">
-                                   {selectedCase.aiReport.medicalRecommendation}
+                                   {selectedReport.aiReport.medicalRecommendation}
                                 </div>
                             </div>
 
-                           {selectedCase.aiReport.doctorConsultationSuggestion && (
+                           {selectedReport.aiReport.doctorConsultationSuggestion && (
                              <div className="analysis-section consultation">
                                 <h4 className="section-title text-red-600">
                                     <AlertTriangle size={18}/> Professional Consultation Required
@@ -422,6 +370,108 @@ export default function DoctorDashboard() {
                         {isSubmitting ? <Loader2 className="animate-spin" /> : <>Send Assessment &rarr;</>}
                     </button>
                 </div>
+            </div>
+        </div>
+      );
+  }
+
+
+  return (
+    <div className="dashboard-container">
+        {/* Sidebar */}
+        <div className="sidebar">
+            <Link href="/doctor/dashboard" className="logo-sidebar">M</Link>
+            <nav className="sidebar-nav">
+               {sidebarNavItems.map(item => (
+                  <Link href={item.href} key={item.title} className={cn('nav-item', { active: pathname === item.href })} title={item.title}>
+                      <item.icon size={24} />
+                  </Link>
+               ))}
+            </nav>
+            <div className="flex flex-col gap-2 items-center mt-auto">
+                <Link href="/doctor/profile" className="user-profile" title="Dr. Profile">
+                  <User size={24} />
+                </Link>
+                 <button onClick={handleSignOut} className="nav-item !w-10 !h-10" title="Sign Out">
+                    <LogOut size={22} />
+                </button>
+            </div>
+        </div>
+
+        {/* Patient List Panel */}
+        <div className="patient-list">
+            <div className="list-header">
+                <h2 className="text-xl font-bold text-gray-800">{doctorProfile ? `Dr. ${doctorProfile.name}'s Dashboard` : 'Doctor Dashboard'}</h2>
+                <p className="text-sm text-gray-500">{patientGroups.reduce((acc, g) => acc + g.unreadCount, 0)} pending reviews</p>
+            </div>
+
+            <div className="search-bar">
+                <Search className="search-icon" size={18} />
+                <input type="text" className="search-input" placeholder="Search patients..." />
+            </div>
+
+            <div className="filter-tabs">
+                {['All', 'Pending', 'Reviewed'].map(tab => (
+                    <div 
+                      key={tab} 
+                      className={cn('filter-tab', { 'active': filter === tab })}
+                      onClick={() => setFilter(tab)}
+                    >
+                        {tab}
+                    </div>
+                ))}
+            </div>
+
+            <div className="patients-container">
+                {filteredGroups.map((group) => (
+                    <div 
+                      key={group.patientProfile.uid} 
+                      className={cn('patient-item', { 'active': selectedGroup?.patientProfile.uid === group.patientProfile.uid })}
+                      onClick={() => handleSelectGroup(group)}
+                    >
+                        <div className="patient-avatar">{getPatientInitials(group.patientProfile?.name)}</div>
+                        <div className="patient-info">
+                            <div className="patient-name">{group.patientProfile?.name || 'Unknown Patient'}</div>
+                            <p className="patient-condition">{group.reports.length} report{group.reports.length > 1 ? 's' : ''}</p>
+                            <p className="patient-time">{group.lastUpdate}</p>
+                        </div>
+                        <div className="patient-status">
+                            {group.unreadCount > 0 && <div className="unread-count">{group.unreadCount}</div>}
+                        </div>
+                    </div>
+                ))}
+                 {filteredGroups.length === 0 && !isLoading && (
+                    <div className="text-center p-8 text-gray-500">
+                        <Inbox size={32} className="mx-auto mb-2" />
+                        <p>No {filter !== 'All' ? filter.toLowerCase() : ''} patient cases found.</p>
+                    </div>
+                )}
+            </div>
+        </div>
+
+        {/* Chat Panel */}
+        {selectedGroup ? (
+          <div className="flex-1 flex flex-col bg-white">
+            <div className="p-4 border-b">
+                 <h3 className="font-semibold text-lg">Reports for {selectedGroup.patientProfile.name}</h3>
+            </div>
+            <div className="flex-1 flex">
+                 <div className="w-1/3 border-r overflow-y-auto">
+                    {selectedGroup.reports.map(report => (
+                         <div
+                           key={report.id}
+                           className={cn("p-4 border-b cursor-pointer hover:bg-gray-50", { "bg-blue-50": selectedReport?.id === report.id })}
+                           onClick={() => setSelectedReport(report)}
+                         >
+                            <div className="font-semibold">{report.reportName}</div>
+                            <div className="text-xs text-gray-500">{report.createdAt ? new Date((report.createdAt as any).seconds * 1000).toLocaleString() : ''}</div>
+                            <Badge variant={report.status === 'pending-doctor-review' ? 'default' : 'secondary'} className="mt-1">{statusMap[report.status]?.label}</Badge>
+                         </div>
+                    ))}
+                 </div>
+                 <div className="w-2/3 flex flex-col">
+                    <MainChatPanel />
+                 </div>
             </div>
           </div>
         ) : (
