@@ -3,10 +3,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Inbox, Search, Settings, User, LogOut, FileText, Check, X, MessageSquare, LayoutGrid, Pill, Home, History, Phone, Bot } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { auth, db } from '@/lib/firebase';
@@ -14,9 +12,7 @@ import { Report, getUserProfile, PatientProfile, DoctorProfile, updateReportByDo
 import { formatDistanceToNow } from 'date-fns';
 import { collection, query, where, onSnapshot, Unsubscribe } from 'firebase/firestore';
 import { useRouter, usePathname } from 'next/navigation';
-import Image from 'next/image';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 
 type PatientGroup = {
     patientProfile: PatientProfile;
@@ -34,6 +30,7 @@ export default function DoctorDashboard() {
   const [selectedGroup, setSelectedGroup] = useState<PatientGroup | null>(null);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('Pending');
 
   const [doctorNotes, setDoctorNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -177,7 +174,7 @@ export default function DoctorDashboard() {
   
   const sidebarNavItems = [
     { href: '/doctor/dashboard', icon: LayoutGrid, title: 'Dashboard' },
-    { href: '/doctor/analytics', icon: MessageSquare, title: 'Cases' },
+    { href: '/doctor/analytics', icon: MessageSquare, title: 'Analytics' },
     { href: '/doctor/settings', icon: Settings, title: 'Settings' },
   ];
 
@@ -192,32 +189,42 @@ export default function DoctorDashboard() {
 
   const pendingCount = patientGroups.reduce((acc, group) => acc + group.unreadCount, 0);
 
+  const filteredPatientGroups = patientGroups.filter(group => {
+    if (activeTab === 'Pending') {
+      return group.reports.some(r => r.status === 'pending-doctor-review');
+    }
+    if (activeTab === 'Reviewed') {
+      return group.reports.some(r => r.status === 'doctor-approved' || r.status === 'doctor-modified');
+    }
+    return true;
+  });
+
 
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
       <div className="sidebar">
-        <Link href="/doctor/dashboard" className="logo-sidebar">M</Link>
+        <Link href="/doctor/dashboard" className="sidebar-icon">M</Link>
         <nav className="sidebar-nav">
           {sidebarNavItems.map(item => (
-            <Link key={item.title} href={item.href} className={cn('nav-item', { 'active': pathname === item.href })} title={item.title}>
+            <Link key={item.title} href={item.href} className={cn('sidebar-icon', { 'active': pathname === item.href })} title={item.title}>
               <item.icon size={20} />
             </Link>
           ))}
         </nav>
         <div className="flex flex-col items-center mt-auto gap-4">
-          <Link href="/doctor/profile" className="user-profile" title="Profile">
+          <Link href="/doctor/profile" className="sidebar-icon !mb-0" title="Profile">
              <User size={22} />
           </Link>
-          <button onClick={handleSignOut} className="nav-item !bg-transparent" title="Sign Out">
+          <button onClick={handleSignOut} className="sidebar-icon !bg-transparent" title="Sign Out">
             <LogOut size={22} />
           </button>
         </div>
       </div>
       
       {/* Main Content */}
-      <main className="main-dashboard-content">
-        <div className="dashboard-header">
+      <div className="main-content">
+        <div className="header">
           <h1>Dr. {doctorProfile?.name || "Mayank Raj"}'s Dashboard</h1>
           {pendingCount > 0 && <span className="pending-badge">{pendingCount} pending reviews</span>}
           <div className="search-bar">
@@ -225,33 +232,31 @@ export default function DoctorDashboard() {
             <input type="text" placeholder="Search patients..." />
           </div>
           <div className="tabs">
-            <button className="tab active">Pending</button>
-            <button className="tab">Reviewed</button>
+            <button className={cn('tab', {'active': activeTab === 'Pending'})} onClick={() => setActiveTab('Pending')}>Pending</button>
+            <button className={cn('tab', {'active': activeTab === 'Reviewed'})} onClick={() => setActiveTab('Reviewed')}>Reviewed</button>
           </div>
         </div>
 
         <div className="content-grid">
-          <div className="patients-list">
-             {patientGroups.length > 0 ? patientGroups.map((group) => (
+            <div className="patients-list">
+             {filteredPatientGroups.length > 0 ? filteredPatientGroups.map((group) => (
               <div 
                 key={group.patientProfile.uid} 
                 className={cn('patient-card', { 'active': selectedGroup?.patientProfile.uid === group.patientProfile.uid })}
                 onClick={() => handleSelectGroup(group)}
               >
                 {group.unreadCount > 0 && <span className="alert-badge">{group.unreadCount}</span>}
-                <div className="patient-card-content">
-                  <div className="patient-initial">{getPatientInitials(group.patientProfile?.name)}</div>
-                  <div className="patient-info">
-                    <div className="patient-name">{group.patientProfile?.name || 'Unknown Patient'}</div>
-                    <div className="patient-meta">{group.reports.length} report{group.reports.length !== 1 ? 's' : ''} • {group.lastUpdate}</div>
-                  </div>
+                <div className="patient-initial">{getPatientInitials(group.patientProfile?.name)}</div>
+                <div className="patient-info">
+                  <div className="patient-name">{group.patientProfile?.name || 'Unknown Patient'}</div>
+                  <div className="patient-meta">{group.reports.length} report{group.reports.length !== 1 ? 's' : ''} • {group.lastUpdate}</div>
                 </div>
               </div>
              )) : (
-              <div className="flex h-full flex-col items-center justify-center text-center text-gray-500">
+              <div className="flex h-full flex-col items-center justify-center text-center text-gray-500 p-8">
                 <Inbox size={48} className="mb-4 text-gray-400" />
                 <h3 className="font-semibold text-lg text-gray-700">All Caught Up</h3>
-                <p>No pending patient reports.</p>
+                <p>No {activeTab.toLowerCase()} patient reports.</p>
               </div>
              )}
           </div>
@@ -264,10 +269,28 @@ export default function DoctorDashboard() {
                   <p className="report-subtitle">Dermatology Case • Age: {selectedGroup.patientProfile.age} • {selectedGroup.patientProfile.gender}</p>
                 </div>
                 <div className="action-buttons">
-                  <Button variant="outline" className="btn-icon gap-2"><History size={16}/> History</Button>
-                  <Button variant="outline" className="btn-icon gap-2"><Phone size={16}/> Call</Button>
+                  <Button variant="outline" className="btn btn-icon gap-2"><History size={16}/> History</Button>
+                  <Button variant="outline" className="btn btn-icon gap-2"><Phone size={16}/> Call</Button>
                 </div>
               </div>
+              
+              <div className="report-items">
+                {selectedGroup.reports.map(report => (
+                    <div key={report.id} className={cn('report-item', {'active': report.id === selectedReport.id})} onClick={() => handleSelectReport(report)}>
+                        <div className="report-item-info">
+                            <h4>{report.reportName}</h4>
+                            <p>{new Date((report.createdAt as any).seconds * 1000).toLocaleString()}</p>
+                        </div>
+                        <span className={cn('status-badge', {
+                            'status-pending': report.status === 'pending-doctor-review',
+                            'status-reviewed': report.status === 'doctor-approved' || report.status === 'doctor-modified',
+                        })}>
+                            {report.status === 'pending-doctor-review' ? 'Pending' : 'Reviewed'}
+                        </span>
+                    </div>
+                ))}
+              </div>
+
 
               <div className="ai-report-section">
                 <span className="ai-badge"><Bot size={14}/> AI GENERATED REPORT</span>
@@ -307,7 +330,7 @@ export default function DoctorDashboard() {
                     <div className="recommendation-title">
                         <Home size={16}/> Home Remedies Recommendation
                     </div>
-                    <p>
+                    <p className="recommendation-text">
                       {selectedReport.aiReport.homeRemedies}
                     </p>
                 </div>
@@ -320,6 +343,7 @@ export default function DoctorDashboard() {
                     placeholder="Enter your key notes and assessment here..." 
                     value={doctorNotes}
                     onChange={(e) => setDoctorNotes(e.target.value)}
+                    className="action-textarea"
                 />
                 <div className="final-actions">
                     <Button className="btn-reject gap-2" onClick={() => handleDecision('rejected')} disabled={isSubmitting}>
@@ -331,26 +355,10 @@ export default function DoctorDashboard() {
                 </div>
               </div>
 
-               {/* Horizontal Report Items at the bottom */}
-              <div className="report-items-horizontal-container">
-                  <h3 className="section-title">Patient Case History</h3>
-                  <div className="report-items-horizontal">
-                    {selectedGroup.reports.map(report => (
-                      <div key={report.id} className={cn('report-item-h', {'active': selectedReport.id === report.id})} onClick={() => handleSelectReport(report)}>
-                        <div className="report-item-h-info">
-                          <h4>{report.reportName}</h4>
-                          <p>{new Date((report.createdAt as any).seconds * 1000).toLocaleDateString()}</p>
-                        </div>
-                        <span className="status-badge status-pending">Pending</span>
-                      </div>
-                    ))}
-                  </div>
-              </div>
-
             </div>
           ) : (
-             <div className="report-panel flex items-center justify-center">
-                <div className="text-center text-gray-500">
+             <div className="report-panel flex items-center justify-center text-center text-gray-500">
+                <div>
                     <Inbox size={48} className="mx-auto mb-4 text-gray-400" />
                     <h3 className="text-xl font-semibold text-gray-700">Select a Patient</h3>
                     <p>Choose a patient from the list to view their case details.</p>
@@ -358,7 +366,9 @@ export default function DoctorDashboard() {
             </div>
           )}
         </div>
-      </main>
+      </div>
     </div>
   );
 }
+
+    
