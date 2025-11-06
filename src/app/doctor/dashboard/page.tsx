@@ -335,9 +335,9 @@ export default function DoctorDashboard() {
                                                         <span className="font-medium">{c.name}</span>
                                                         <Badge variant={c.likelihood === 'High' ? 'destructive' : c.likelihood === 'Medium' ? 'secondary' : 'default'} className={
                                                           cn({
-                                                            'bg-red/20 text-red': c.likelihood === 'High',
-                                                            'bg-amber/20 text-amber': c.likelihood === 'Medium',
-                                                            'bg-green/20 text-green': c.likelihood === 'Low',
+                                                            'bg-red-500/20 text-red-500': c.likelihood === 'High',
+                                                            'bg-amber-500/20 text-amber-500': c.likelihood === 'Medium',
+                                                            'bg-green-500/20 text-green-500': c.likelihood === 'Low',
                                                           })
                                                         }>
                                                             {c.likelihood}
@@ -351,7 +351,7 @@ export default function DoctorDashboard() {
                                         <h4 className="font-semibold recommendation-title flex items-center gap-2"><Home size={16}/> AI Home Remedy Suggestion</h4>
                                         <p className="text-sm recommendation-text mt-1 whitespace-pre-wrap">{selectedReport.aiReport.homeRemedies}</p>
                                     </div>
-                                    <div className="p-4 bg-amber text-dark-slate border-l-4 border-amber rounded">
+                                    <div className="p-4 bg-amber-100 text-dark-slate border-l-4 border-amber-400 rounded">
                                         <h4 className="font-semibold section-title flex items-center gap-2"><FileText size={16}/> AI Medical Recommendation</h4>
                                         <p className="text-sm mt-1 whitespace-pre-wrap">{selectedReport.aiReport.medicalRecommendation}</p>
                                     </div>
@@ -395,3 +395,5 @@ export default function DoctorDashboard() {
     </div>
   );
 }
+
+    

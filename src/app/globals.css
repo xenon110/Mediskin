@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -133,24 +134,24 @@
       background-color: #f5f7fa;
   }
   .sidebar {
-      @apply fixed left-0 top-0 flex h-screen w-[70px] flex-col items-center  p-5 shadow-lg;
+      @apply fixed left-0 top-0 flex h-screen w-[80px] flex-col items-center p-5 shadow-lg;
       background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
       z-index: 100;
   }
   .logo-sidebar {
-      @apply mb-8 flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl text-xl font-bold text-white;
+      @apply mb-8 flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl text-xl font-bold text-white;
       background: rgba(255,255,255,0.2);
       transition: all 0.3s ease;
   }
   .logo-sidebar:hover {
     background: rgba(255,255,255,0.3);
-    transform: translateX(5px);
+    transform: rotate(10deg);
   }
   .sidebar-nav {
       @apply flex flex-col gap-4;
   }
   .nav-item {
-      @apply flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl text-white;
+      @apply flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl text-white;
       background: rgba(255,255,255,0.2);
       transition: all 0.3s ease;
   }
@@ -161,28 +162,31 @@
   .nav-item.active {
       background: white;
       color: #667eea;
+      box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
   }
   .user-profile {
-      @apply flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl text-white;
+      @apply flex h-12 w-12 cursor-pointer items-center justify-center rounded-full text-white;
       background: rgba(255,255,255,0.2);
       transition: all 0.3s ease;
       margin-top: auto;
   }
 
   .patient-card {
-      @apply mb-4 cursor-pointer rounded-xl border-2 border-transparent p-4 transition-all duration-300;
-      background: #f8f9fa;
+      @apply mb-2 cursor-pointer rounded-xl border-2 border-transparent p-3 transition-all duration-300;
+      background: #ffffff;
   }
   .patient-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+      border-color: #667eea;
   }
   .patient-card.active {
       border-color: #667eea;
       background: #f0f3ff;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
   }
   .patient-initial {
-      @apply mr-4 inline-flex h-11 w-11 items-center justify-center rounded-lg text-lg font-bold text-white;
+      @apply mr-3 inline-flex h-11 w-11 items-center justify-center rounded-lg text-lg font-bold text-white;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       vertical-align: middle;
   }
@@ -191,7 +195,7 @@
       vertical-align: middle;
   }
   .patient-name {
-      @apply mb-1 text-base font-semibold;
+      @apply mb-0.5 text-base font-semibold;
       color: #2c3e50;
   }
   .patient-meta {
@@ -199,37 +203,43 @@
       color: #7f8c8d;
   }
   .alert-badge {
-      @apply absolute top-4 right-4 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white;
+      @apply absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-white;
       background: #e74c3c;
   }
 
   .report-panel {
-      @apply rounded-2xl p-8 shadow-lg;
+      @apply rounded-2xl p-6 shadow-md;
       background-color: white;
   }
   .report-title {
-      @apply text-2xl font-bold;
+      @apply text-xl font-bold;
       color: #2c3e50;
   }
+  .ai-report-title {
+    @apply text-lg font-bold;
+  }
   .detail-grid {
-      @apply grid grid-cols-2 md:grid-cols-3 gap-4 text-sm;
+      @apply grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 text-sm;
   }
   .detail-item {
     background: #f8f9fa;
-    padding: 18px;
+    padding: 12px;
     border-radius: 10px;
   }
   .detail-label {
-    @apply mb-2 text-xs font-semibold uppercase tracking-wider;
+    @apply mb-1 text-xs font-semibold uppercase tracking-wider;
     color: #7f8c8d;
   }
   .detail-value {
-    @apply text-base font-semibold;
+    @apply text-sm font-semibold;
     color: #2c3e50;
   }
   .section-title {
-    @apply mb-4 text-base font-bold;
+    @apply mb-2 text-base font-bold;
     color: #2c3e50;
+  }
+  .report-item {
+     @apply border-2 border-transparent;
   }
   .report-item.active {
     border-color: #667eea;
@@ -238,17 +248,33 @@
   .recommendation-box {
       background: #e8f5e9;
       border-left: 4px solid #4caf50;
-      padding: 20px;
+      padding: 16px;
       border-radius: 8px;
   }
   .recommendation-title {
       color: #2e7d32;
-      @apply font-bold text-sm mb-2;
+      @apply font-bold text-sm mb-1;
   }
   .recommendation-text {
       color: #1b5e20;
       @apply text-sm;
   }
+  .action-buttons .btn {
+      @apply transition-transform hover:scale-105;
+  }
+  .bg-success {
+    background-color: #4caf50;
+  }
+  .bg-success:hover {
+    background-color: #388e3c;
+  }
+  .bg-red {
+    background-color: #e74c3c;
+  }
+  .bg-red:hover {
+    background-color: #c0392b;
+  }
+
 
   .text-dark-slate { color: #2c3e50; }
   .text-gray { color: #7f8c8d; }
@@ -689,3 +715,5 @@
      background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted) / 0.2) 100%);
   }
 }
+
+    
