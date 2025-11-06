@@ -218,8 +218,6 @@ export default function DoctorDashboard() {
   
   const sidebarNavItems = [
     { href: '/doctor/dashboard', icon: LayoutGrid, title: 'Dashboard' },
-    { href: '#', icon: User, title: 'Patients' },
-    { href: '/doctor/calendar', icon: Calendar, title: 'Calendar' },
     { href: '/doctor/analytics', icon: MessageSquare, title: 'Reports' },
     { href: '/doctor/settings', icon: Settings, title: 'Settings' },
   ];
@@ -237,16 +235,19 @@ export default function DoctorDashboard() {
                {sidebarNavItems.map(item => (
                   <Link href={item.href} key={item.title} className={cn('nav-item-v3', { active: pathname === item.href })} title={item.title}>
                       <item.icon size={20} />
+                      <span className="nav-item-text-v3">{item.title}</span>
                   </Link>
                ))}
             </nav>
 
-            <div className="flex flex-col gap-2 items-center mt-auto">
+            <div className="flex flex-col gap-2 items-center mt-auto w-full">
                  <Link href="/doctor/profile" className="user-profile-v3" title="My Profile">
                    <User size={24} />
+                   <span className="nav-item-text-v3">Profile</span>
                  </Link>
-                 <button onClick={handleSignOut} className="nav-item-v3 !w-10 !h-10" title="Sign Out">
+                 <button onClick={handleSignOut} className="nav-item-v3 !w-full" title="Sign Out">
                     <LogOut size={22} />
+                    <span className="nav-item-text-v3">Sign Out</span>
                 </button>
             </div>
         </div>

@@ -130,17 +130,18 @@
   .notification-close { @apply bg-transparent border-none text-white text-xl cursor-pointer ml-2.5; }
 
   /* Doctor Dashboard New Design v3 */
-    .dashboard-container-v3 { @apply grid h-screen w-screen bg-gray-100 overflow-hidden; grid-template-columns: 240px 320px 1fr; }
+    .dashboard-container-v3 { @apply grid h-screen w-screen bg-gray-100 overflow-hidden; grid-template-columns: 80px 320px 1fr; }
     
     /* Sidebar */
-    .sidebar-v3 { @apply bg-[#3730a3] flex flex-col items-start py-6 px-4 text-white border-r border-white/10; }
-    .logo-sidebar-v3 { @apply flex items-center gap-3 text-xl font-bold mb-8 px-2; }
-    .logo-icon-v3 { @apply w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-xl font-bold; }
+    .sidebar-v3 { @apply bg-[#3730a3] flex flex-col items-center py-6 px-2 text-white border-r border-white/10; }
+    .logo-sidebar-v3 { @apply flex flex-col items-center gap-2 text-xl font-bold mb-8; }
+    .logo-icon-v3 { @apply w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center text-xl font-bold; }
     .sidebar-nav-v3 { @apply flex flex-col gap-2 w-full; }
-    .nav-item-v3 { @apply w-full flex items-center justify-start py-2.5 px-4 rounded-lg text-gray-300 cursor-pointer transition-colors duration-200; }
+    .nav-item-v3 { @apply w-full flex items-center justify-center py-3 rounded-lg text-gray-300 cursor-pointer transition-colors duration-200; }
+    .nav-item-text-v3 { @apply hidden; } /* Hide text by default */
     .nav-item-v3:hover { @apply bg-white/10 text-white; }
     .nav-item-v3.active { @apply bg-white/20 text-white font-semibold; }
-    .user-profile-v3 { @apply w-full flex items-center justify-start py-2.5 px-4 rounded-lg text-gray-300 cursor-pointer transition-colors duration-200; }
+    .user-profile-v3 { @apply w-full flex items-center justify-center py-3 rounded-lg text-gray-300 cursor-pointer transition-colors duration-200; }
 
     /* Patient List Panel */
     .patient-list-panel-v3 { @apply bg-white flex flex-col border-r border-gray-200; }
@@ -614,3 +615,5 @@
      background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted) / 0.2) 100%);
   }
 }
+dont do any changes only implement it
+
