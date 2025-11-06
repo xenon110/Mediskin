@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Inbox, Search, Settings, User, LogOut, FileText, Bot, Check, X, MessageSquare, LayoutGrid, Pill, Home } from 'lucide-react';
+import { Loader2, Inbox, Search, Settings, User, LogOut, FileText, Bot, Check, X, MessageSquare, LayoutGrid, Pill, Home, History } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -151,6 +151,10 @@ export default function DoctorDashboard() {
     setSelectedReport(group.reports.find(r => r.status === 'pending-doctor-review') || group.reports[0] || null);
   };
   
+  const handleSelectReport = (report: Report) => {
+    setSelectedReport(report);
+  }
+
   const handleSignOut = async () => {
     if (auth) {
         await auth.signOut();
@@ -272,15 +276,38 @@ export default function DoctorDashboard() {
                                     <div><p className="text-muted-foreground">Gender</p><p className="font-semibold">{selectedGroup.patientProfile.gender}</p></div>
                                     <div><p className="text-muted-foreground">Region</p><p className="font-semibold">{selectedGroup.patientProfile.region}</p></div>
                                     <div><p className="text-muted-foreground">Skin Tone</p><p className="font-semibold">{selectedGroup.patientProfile.skinTone}</p></div>
-                                    <div><p className="text-muted-foreground">Case Submitted</p><p className="font-semibold">{selectedReport.createdAt ? new Date((selectedReport.createdAt as any).seconds * 1000).toLocaleString() : 'N/A'}</p></div>
                                 </div>
                             </CardContent>
                         </Card>
                         
+                        {/* Report Selector */}
+                         <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2"><History size={20}/> Case History</CardTitle>
+                                <CardDescription>Select a report to view its details.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-2">
+                                {selectedGroup.reports.map(report => (
+                                    <button 
+                                        key={report.id}
+                                        onClick={() => handleSelectReport(report)}
+                                        className={cn(
+                                            "w-full text-left p-3 rounded-md flex justify-between items-center transition-colors",
+                                            selectedReport.id === report.id ? 'bg-primary/10 border border-primary' : 'bg-muted/50 hover:bg-muted'
+                                        )}
+                                    >
+                                        <div className="font-medium">{report.reportName}</div>
+                                        <div className="text-xs text-muted-foreground">{new Date((report.createdAt as any).seconds * 1000).toLocaleString()}</div>
+                                    </button>
+                                ))}
+                            </CardContent>
+                        </Card>
+
                         {/* Report Details */}
                         <Card>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2"><Bot size={20} className="text-primary"/> AI Report: {selectedReport.reportName}</CardTitle>
+                                 <CardDescription>Case Submitted: {selectedReport.createdAt ? new Date((selectedReport.createdAt as any).seconds * 1000).toLocaleString() : 'N/A'}</CardDescription>
                             </CardHeader>
                             <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 <div className="space-y-4">
