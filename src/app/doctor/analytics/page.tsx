@@ -175,40 +175,40 @@ export default function DoctorAnalytics() {
             <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-auto">
                  <p className="text-muted-foreground">Welcome back, {doctorProfile ? `Dr. ${doctorProfile.name}` : 'Doctor'}</p>
                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <Card>
+                    <Card className="rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-primary/10 border-primary/20">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Total Reports</CardTitle>
-                            <Activity className="h-4 w-4 text-muted-foreground" />
+                            <Activity className="h-4 w-4 text-primary" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{stats.total}</div>
                             <p className="text-xs text-muted-foreground">All-time patient reports</p>
                         </CardContent>
                     </Card>
-                    <Card>
+                    <Card className="rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-blue-500/10 border-blue-500/20">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
-                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <Clock className="h-4 w-4 text-blue-500" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{stats.pending}</div>
                             <p className="text-xs text-muted-foreground">Reports awaiting assessment</p>
                         </CardContent>
                     </Card>
-                    <Card>
+                    <Card className="rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-green-500/10 border-green-500/20">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Reviewed Cases</CardTitle>
-                            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                            <CheckCircle className="h-4 w-4 text-green-500" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{stats.reviewed}</div>
                             <p className="text-xs text-muted-foreground">Approved or modified reports</p>
                         </CardContent>
                     </Card>
-                     <Card>
+                     <Card className="rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-red-500/10 border-red-500/20">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Rejected</CardTitle>
-                            <XCircle className="h-4 w-4 text-muted-foreground" />
+                            <XCircle className="h-4 w-4 text-red-500" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{stats.rejected}</div>
