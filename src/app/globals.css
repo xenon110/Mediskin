@@ -11,54 +11,54 @@
     --card-foreground: 224 71.4% 4.1%;
     --popover: 0 0% 100%;
     --popover-foreground: 224 71.4% 4.1%;
-    --primary: 196 42% 43%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 220 14.3% 95.9%;
-    --secondary-foreground: 220.9 39.3% 11%;
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
-    --accent: 174 44% 52%;
-    --accent-foreground: 210 20% 98%;
+    --primary: 210 40% 98%; /* Changed for new design */
+    --primary-foreground: 222.2 47.4% 11.2%; /* Changed for new design */
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive-foreground: 210 40% 98%;
     --success: 142.1 76.2% 36.3%;
     --success-foreground: 210 20% 98%;
     --warning: 47.9 95.8% 53.1%;
     --warning-foreground: 240 5.9% 10%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 196 42% 43%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
     --chart-1: 221 83% 53%;
     --chart-2: 175 44% 52%;
     --chart-3: 0 72% 51%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
   }
- 
+
   .dark {
-    --background: 224 71.4% 4.1%;
-    --foreground: 210 20% 98%;
-    --card: 224 71.4% 4.1%;
-    --card-foreground: 210 20% 98%;
-    --popover: 224 71.4% 4.1%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 196 42% 43%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
-    --accent: 174 44% 52%;
-    --accent-foreground: 210 20% 98%;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive-foreground: 210 40% 98%;
     --success: 142.1 76.2% 36.3%;
     --success-foreground: 210 20% 98%;
     --warning: 47.9 95.8% 53.1%;
     --warning-foreground: 240 5.9% 10%;
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 196 42% 43%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
   }
 }
 
@@ -129,108 +129,59 @@
   .notification { @apply fixed top-5 right-5 bg-gradient-to-r from-green-400 to-blue-500 text-white py-4 px-6 rounded-xl shadow-lg flex items-center gap-3 font-medium z-50; }
   .notification-close { @apply bg-transparent border-none text-white text-xl cursor-pointer ml-2.5; }
 
-  /* Doctor Dashboard New Design */
-  .dashboard-container { @apply grid h-screen w-screen bg-white overflow-hidden; grid-template-columns: 80px 384px 1fr; }
-  .sidebar { @apply w-20 bg-gradient-to-b from-[#4F46E5] to-[#7C3AED] flex flex-col items-center py-6 relative z-50; }
-  .logo-sidebar { @apply w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-white text-2xl font-bold mb-8 backdrop-blur-sm; }
-  .sidebar-nav { @apply flex flex-col gap-4 w-full items-center; }
-  .nav-item { @apply w-12 h-12 rounded-xl flex items-center justify-center text-white/70 cursor-pointer transition-all duration-300 relative; }
-  .nav-item:hover, .nav-item.active { @apply bg-white/20 text-white backdrop-blur-sm; }
-  .nav-item.active::after { @apply content-[''] absolute right-[-14px] w-1 h-8 bg-white rounded-l-md; }
-  .user-profile { @apply mt-auto w-11 h-11 rounded-full bg-white/20 flex items-center justify-center text-white cursor-pointer backdrop-blur-sm transition-transform hover:scale-110; }
-  .patient-list { @apply bg-white border-r border-gray-200 flex flex-col; }
-  .list-header { @apply p-6 border-b border-gray-200; }
-  .search-bar { @apply m-4 relative; }
-  .search-input { @apply w-full pl-11 pr-4 py-3 border border-gray-200 rounded-lg text-sm transition-all duration-300 bg-gray-50 focus:outline-none focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20; }
-  .search-icon { @apply absolute left-4 top-1/2 -translate-y-1/2 text-gray-400; }
-  .filter-tabs { @apply flex mx-4 mb-4 bg-gray-100 rounded-lg p-1; }
-  .filter-tab { @apply flex-1 py-2 px-4 rounded-lg text-center text-sm font-semibold cursor-pointer transition-all duration-300 text-gray-600; }
-  .filter-tab.active { @apply bg-white text-primary shadow-sm; }
-  .patients-container { @apply flex-1 overflow-y-auto px-2; }
-  .patients-container::-webkit-scrollbar { @apply w-1.5; }
-  .patients-container::-webkit-scrollbar-track { @apply bg-gray-100; }
-  .patients-container::-webkit-scrollbar-thumb { @apply bg-gray-300 rounded-full; }
-  .patient-item { @apply flex items-center p-4 rounded-xl mb-2 cursor-pointer transition-all duration-300 relative; }
-  .patient-item:hover { @apply bg-gray-50; }
-  .patient-item.active { @apply bg-indigo-50; }
-  .patient-item.active::before { @apply content-[''] absolute top-1/2 -translate-y-1/2 left-0 w-1 h-3/4 rounded-r-md bg-primary; }
-  .patient-avatar { @apply w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold mr-4 flex-shrink-0; }
-  .patient-info { @apply flex-1 min-w-0; } /* Added min-w-0 */
-  .patient-name { @apply font-semibold text-gray-800 mb-0.5 truncate; } /* Added truncate */
-  .patient-condition { @apply text-xs text-gray-500 truncate; } /* Added truncate */
-  .patient-time { @apply text-xs text-gray-400; }
-  .patient-status { @apply flex flex-col items-end gap-1; }
-  .unread-count { @apply bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold; }
-  
-  .main-content-area { @apply flex-1 flex flex-col min-h-0; }
-  .main-content-header { @apply p-6 border-b border-gray-200 flex-shrink-0; }
-  .main-content-body { @apply flex flex-1 min-h-0; }
+  /* Doctor Dashboard New Design v2 */
+    .dashboard-container-v2 { @apply grid h-screen w-screen bg-gray-50 overflow-hidden; grid-template-columns: 280px 1fr; }
+    .sidebar-v2 { @apply w-full bg-[#1C4E80] flex flex-col items-center py-6 px-4 text-white; }
+    .logo-sidebar-v2 { @apply w-full flex items-center gap-3 text-xl font-bold mb-8 px-2; }
+    .logo-icon-v2 { @apply w-9 h-9 bg-white/20 rounded-lg flex items-center justify-center; }
+    
+    .sidebar-search-v2 { @apply relative w-full mb-6; }
+    .sidebar-search-input-v2 { @apply w-full bg-[#00284D] border-none text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 text-sm; }
+    .sidebar-search-icon-v2 { @apply absolute left-3 top-1/2 -translate-y-1/2 text-gray-400; }
+    
+    .sidebar-nav-v2 { @apply flex flex-col gap-2 w-full; }
+    .nav-item-v2 { @apply w-full flex items-center gap-3 py-3 px-4 rounded-lg text-gray-300 cursor-pointer transition-colors duration-200 text-sm; }
+    .nav-item-v2:hover { @apply bg-white/10 text-white; }
+    .nav-item-v2.active { @apply bg-[#26ADE4] text-white font-semibold; }
+    .nav-item-badge-v2 { @apply ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center; }
 
-  .report-list-column { @apply w-[320px] flex-shrink-0 border-r border-gray-200 flex flex-col; }
-  .report-detail-panel { @apply flex-1 flex flex-col min-h-0; }
-  .report-list-container { @apply flex-1 overflow-y-auto; }
-  .report-list-title { @apply text-sm font-semibold text-gray-600 px-6 pt-4 pb-2; }
+    .user-profile-v2 { @apply mt-auto flex items-center gap-3 w-full p-2 rounded-lg hover:bg-white/10; }
+    .user-avatar-v2 { @apply w-10 h-10 rounded-full bg-gray-500 flex items-center justify-center font-bold text-lg; }
+    .user-info-v2 .user-name { @apply font-semibold; }
+    .user-info-v2 .user-reports { @apply text-xs text-gray-400; }
+    
+    .main-content-v2 { @apply flex-1 flex flex-col min-h-0 overflow-y-auto p-8; }
+    .main-header-v2 { @apply mb-6; }
+    .main-title-v2 { @apply text-3xl font-bold text-gray-800; }
+    .main-subtitle-v2 { @apply text-sm text-gray-500; }
 
-  .report-card { @apply p-3 mb-2 mx-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors; }
-  .report-card.active { @apply bg-blue-50 border-blue-400; }
+    .reports-section-v2 { @apply mb-6; }
+    .reports-header-v2 { @apply text-xl font-bold text-gray-700 mb-4; }
+    .report-tabs-v2 { @apply flex border-b border-gray-200 mb-4; }
+    .report-tab-v2 { @apply py-2 px-4 text-sm font-medium text-gray-500 cursor-pointer border-b-2 border-transparent -mb-px; }
+    .report-tab-v2.active { @apply text-[#1C4E80] border-[#1C4E80] font-semibold; }
 
-  .report-header-new { @apply bg-cyan-500 text-white p-6 rounded-t-lg; }
-  .report-title-new { @apply text-xl font-bold; }
-  
-  .chat-panel { @apply flex-1 flex flex-col bg-white; }
-  .chat-header { @apply p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50/30 to-blue-50/30 flex items-center justify-between; }
-  .chat-patient-info { @apply flex items-center flex-1; }
-  .chat-avatar { @apply w-11 h-11 rounded-full bg-gradient-secondary flex items-center justify-center text-white font-bold mr-4; }
-  .chat-patient-details h3 { @apply font-semibold text-gray-800; }
-  .chat-patient-details p { @apply text-xs text-gray-500; }
-  .chat-actions { @apply flex gap-2; }
-  .action-btn { @apply py-2 px-4 rounded-full text-xs font-semibold cursor-pointer transition-all duration-300; }
-  .btn-primary { @apply bg-gradient-primary text-white; }
-  .btn-secondary { @apply bg-gray-100 text-gray-600; }
-  .action-btn:hover { @apply -translate-y-px shadow-md; }
-  
-  .chat-messages { @apply flex-1 overflow-y-auto bg-gradient-to-b from-gray-50 to-white; }
-  .chat-messages::-webkit-scrollbar { @apply w-1.5; }
-  .chat-messages::-webkit-scrollbar-thumb { @apply bg-gradient-to-b from-[#667eea] to-[#764ba2] rounded-full; }
-  .message-group { @apply mb-8; }
-  .message-date { @apply text-center text-xs text-gray-500 mb-4 relative; }
-  .message-date::before, .message-date::after { @apply content-[''] absolute top-1/2 w-[calc(50%-4rem)] h-px bg-gray-200; }
-  .message-date::before { @apply left-0; }
-  .message-date::after { @apply right-0; }
-  .ai-report { @apply bg-white rounded-b-lg p-6 mb-4 shadow-lg shadow-gray-200/50 border; }
-  .report-header { @apply flex items-center mb-4; }
-  .ai-badge { @apply bg-gradient-secondary text-white py-1.5 px-3 rounded-md text-xs font-bold mr-4; }
-  .report-title { @apply font-bold text-gray-800 text-lg; }
-  .patient-details-section { @apply bg-cyan-500/10 rounded-lg p-4 mb-6; }
-  .details-grid { @apply grid grid-cols-2 md:grid-cols-3 gap-4; }
-  .detail-item { @apply flex flex-col bg-cyan-500/10 text-cyan-900 p-3 rounded-lg; }
-  .detail-label { @apply text-xs text-cyan-800 font-semibold uppercase mb-1; }
-  .detail-value { @apply font-medium text-sm; }
-  .symptoms-list { @apply bg-gray-100 rounded-lg p-4 mb-6; }
-  .symptoms-title { @apply font-semibold text-gray-800 mb-2 text-sm; }
-  .symptoms-content { @apply text-gray-600 text-sm; }
-  .image-analysis { @apply mb-6; }
-  .uploaded-image { @apply w-48 h-48 rounded-lg bg-gray-100 flex items-center justify-center mb-4 border-2 border-dashed border-gray-300 text-gray-500 text-sm cursor-pointer hover:border-primary; }
-  .analysis-sections { @apply grid gap-6; }
-  .analysis-section { @apply bg-gray-100 rounded-xl p-6 border-l-4; }
-  .analysis-section h4 { @apply font-bold mb-4 flex items-center gap-2; }
-  .analysis-section.medical { @apply border-amber-400 bg-amber-50/50; }
-  .analysis-section.consultation { @apply border-red-400 bg-red-50/50; }
-  .section-content { @apply text-gray-600 text-sm leading-relaxed; }
-  
-  .doctor-response { @apply bg-white border-t border-gray-200 p-6; }
-  .response-header { @apply flex justify-between items-center mb-4; }
-  .response-title { @apply font-semibold text-gray-800; }
-  .response-actions { @apply flex gap-2; }
-  .quick-action { @apply py-1.5 px-3 border-2 border-gray-200 rounded-full bg-white text-xs cursor-pointer transition-all duration-300; }
-  .quick-action:hover { @apply border-primary text-primary; }
-  .quick-action.active { @apply bg-primary text-white border-primary; }
-  .response-editor { @apply border-2 border-gray-200 rounded-xl min-h-[120px] p-4 text-sm w-full resize-y transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20; }
-  .editor-toolbar { @apply flex gap-4 mt-4 items-center; }
-  .file-upload { @apply flex items-center gap-2 text-gray-500 cursor-pointer text-sm hover:text-primary; }
-  .send-response { @apply bg-gradient-primary text-white py-3 px-6 rounded-full font-semibold cursor-pointer transition-all duration-300 ml-auto hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/30; }
+    .report-list-v2 { @apply space-y-3; }
+    .report-card-v2 { @apply bg-white p-4 rounded-lg border border-gray-200 flex justify-between items-center cursor-pointer transition-shadow hover:shadow-md; }
+    .report-card-v2.active { @apply border-2 border-[#1C4E80] bg-blue-50; }
+    .report-card-info-v2 { @apply font-semibold text-sm text-gray-800; }
+    .report-card-date-v2 { @apply text-xs text-gray-500; }
 
+    .report-detail-v2 { @apply bg-white p-6 rounded-lg border border-gray-200; }
+    .report-detail-header-v2 { @apply flex items-center gap-4 mb-4; }
+    .report-detail-avatar-v2 { @apply w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xl; }
+    .report-detail-name-v2 { @apply text-lg font-bold; }
+    .report-detail-meta-v2 { @apply text-sm text-gray-500; }
+    .report-detail-actions-v2 { @apply ml-auto flex gap-2; }
+    .report-detail-btn-v2 { @apply w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200; }
 
+    .consultation-alert-v2 { @apply bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-r-lg mb-6; }
+    .consultation-alert-title-v2 { @apply font-bold; }
+
+    .assessment-section-v2 { @apply mt-6; }
+    .assessment-title-v2 { @apply text-lg font-bold text-gray-700 mb-4; }
+    .assessment-textarea-v2 { @apply w-full min-h-[120px] p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#1C4E80] focus:border-[#1C4E80]; }
+    
   /* NEW CONSULT PAGE STYLES */
   .new-consult-bg { color: #1e293b; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); }
   .new-consult-bg .main-content { padding: 48px 0; }
