@@ -342,31 +342,31 @@ export default function DoctorDashboard() {
                 </div>
               </div>
 
-                <div className="symptoms-section">
-                  <h3 className="section-title">📝 Reported Symptoms & AI Analysis</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {selectedReport.photoDataUri && (
-                      <div className="md:col-span-1">
-                        <Image src={selectedReport.photoDataUri} alt="Uploaded skin condition" width={300} height={200} className="rounded-lg object-cover w-full" />
-                      </div>
-                    )}
-                    <div className="md:col-span-2 space-y-4">
-                      <div className="recommendation-box !bg-blue-50 !border-blue-200">
-                          <p className="recommendation-text !text-blue-800">
-                            {selectedReport.aiReport.report}
-                          </p>
-                      </div>
-                       <div className="space-y-2">
-                        {selectedReport.aiReport.potentialConditions.map((condition, index) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <Badge className={cn('text-sm', getLikelihoodColor(condition.likelihood))}>{condition.name}</Badge>
-                            <span className="text-xs text-gray-500 font-mono">({condition.likelihood}, {((condition.confidence || 0) * 100).toFixed(0)}%)</span>
-                          </div>
-                        ))}
-                      </div>
+              <div className="symptoms-section">
+                <h3 className="section-title">📝 Reported Symptoms &amp; AI Analysis</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {selectedReport.photoDataUri && (
+                    <div className="md:col-span-1">
+                      <Image src={selectedReport.photoDataUri} alt="Uploaded skin condition" width={300} height={200} className="rounded-lg object-cover w-full" />
+                    </div>
+                  )}
+                  <div className="md:col-span-2 space-y-4">
+                    <div className="recommendation-box !bg-blue-50 !border-blue-200">
+                        <p className="recommendation-text !text-blue-800">
+                          {selectedReport.aiReport.report}
+                        </p>
+                    </div>
+                      <div className="space-y-2">
+                      {selectedReport.aiReport.potentialConditions.map((condition, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <Badge className={cn('text-sm', getLikelihoodColor(condition.likelihood))}>{condition.name}</Badge>
+                          <span className="text-xs text-gray-500 font-mono">({condition.likelihood}, {((condition.confidence || 0) * 100).toFixed(0)}%)</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
+              </div>
 
               {/* Action Section */}
               <div className="action-section">
@@ -402,3 +402,5 @@ export default function DoctorDashboard() {
     </div>
   );
 }
+
+    
