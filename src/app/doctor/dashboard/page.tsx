@@ -196,7 +196,7 @@ export default function DoctorDashboard() {
     if (activeTab === 'Reviewed') {
       return group.reports.some(r => r.status === 'doctor-approved' || r.status === 'doctor-modified');
     }
-    return true;
+    return true; // for an "All" tab if you add one
   });
 
 
@@ -238,7 +238,8 @@ export default function DoctorDashboard() {
         </div>
 
         <div className="content-grid">
-            <div className="patients-list">
+          <div>
+            <div className="patients-list mb-8">
              {filteredPatientGroups.length > 0 ? filteredPatientGroups.map((group) => (
               <div 
                 key={group.patientProfile.uid} 
@@ -259,39 +260,43 @@ export default function DoctorDashboard() {
                 <p>No {activeTab.toLowerCase()} patient reports.</p>
               </div>
              )}
+            </div>
+
+            {selectedGroup && selectedReport && (
+              <div className="report-panel">
+                <div className="report-header">
+                  <div>
+                    <div className="report-title">Reports for {selectedGroup.patientProfile.name}</div>
+                    <p className="report-subtitle">Dermatology Case • Age: {selectedGroup.patientProfile.age} • {selectedGroup.patientProfile.gender}</p>
+                  </div>
+                  <div className="action-buttons">
+                    <Button variant="outline" className="btn btn-icon gap-2"><History size={16}/> History</Button>
+                    <Button variant="outline" className="btn btn-icon gap-2"><Phone size={16}/> Call</Button>
+                  </div>
+                </div>
+                
+                <div className="report-items">
+                  {selectedGroup.reports.map(report => (
+                      <div key={report.id} className={cn('report-item', {'active': report.id === selectedReport.id})} onClick={() => handleSelectReport(report)}>
+                          <div className="report-item-info">
+                              <h4>{report.reportName}</h4>
+                              <p>{new Date((report.createdAt as any).seconds * 1000).toLocaleString()}</p>
+                          </div>
+                          <span className={cn('status-badge', {
+                              'status-pending': report.status === 'pending-doctor-review',
+                              'status-reviewed': report.status === 'doctor-approved' || report.status === 'doctor-modified',
+                          })}>
+                              {report.status === 'pending-doctor-review' ? 'Pending' : 'Reviewed'}
+                          </span>
+                      </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {selectedGroup && selectedReport ? (
             <div className="report-panel">
-              <div className="report-header">
-                <div>
-                  <div className="report-title">Reports for {selectedGroup.patientProfile.name}</div>
-                  <p className="report-subtitle">Dermatology Case • Age: {selectedGroup.patientProfile.age} • {selectedGroup.patientProfile.gender}</p>
-                </div>
-                <div className="action-buttons">
-                  <Button variant="outline" className="btn btn-icon gap-2"><History size={16}/> History</Button>
-                  <Button variant="outline" className="btn btn-icon gap-2"><Phone size={16}/> Call</Button>
-                </div>
-              </div>
-              
-              <div className="report-items">
-                {selectedGroup.reports.map(report => (
-                    <div key={report.id} className={cn('report-item', {'active': report.id === selectedReport.id})} onClick={() => handleSelectReport(report)}>
-                        <div className="report-item-info">
-                            <h4>{report.reportName}</h4>
-                            <p>{new Date((report.createdAt as any).seconds * 1000).toLocaleString()}</p>
-                        </div>
-                        <span className={cn('status-badge', {
-                            'status-pending': report.status === 'pending-doctor-review',
-                            'status-reviewed': report.status === 'doctor-approved' || report.status === 'doctor-modified',
-                        })}>
-                            {report.status === 'pending-doctor-review' ? 'Pending' : 'Reviewed'}
-                        </span>
-                    </div>
-                ))}
-              </div>
-
-
               <div className="ai-report-section">
                 <span className="ai-badge"><Bot size={14}/> AI GENERATED REPORT</span>
                 <h3 className="ai-report-title">{selectedReport.reportName}</h3>
