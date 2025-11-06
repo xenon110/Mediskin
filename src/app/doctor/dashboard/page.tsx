@@ -1,9 +1,8 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader2, Inbox, Search, Settings, User, LogOut, FileText, Check, X, MessageSquare, LayoutGrid, Pill, Home, History, Phone, Bot } from 'lucide-react';
+import { Loader2, Inbox, Search, Settings, User, LogOut, FileText, Check, X, MessageSquare, LayoutGrid, Pill, Home, History, Phone, Bot, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -108,7 +107,7 @@ export default function DoctorDashboard() {
          const currentSelectedReport = currentSelectedGroup.reports.find(r => r.id === selectedReport?.id);
          setSelectedReport(currentSelectedReport || currentSelectedGroup.reports[0] || null);
       } else if (patientGroupsArray.length > 0) {
-        const firstGroup = patientGroupsArray[0];
+        const firstGroup = patientGroupsArray.find(g => g.unreadCount > 0) || patientGroupsArray[0];
         setSelectedGroup(firstGroup);
         setSelectedReport(firstGroup.reports[0] || null);
       } else {
@@ -138,7 +137,6 @@ export default function DoctorDashboard() {
 
   const handleSelectGroup = (group: PatientGroup) => {
     setSelectedGroup(group);
-    // Select the first report in the group that matches the active tab's criteria, or just the first report overall
     const reportsForTab = group.reports.filter(r => {
         if (activeTab === 'Pending') return r.status === 'pending-doctor-review';
         if (activeTab === 'Reviewed') return r.status === 'doctor-approved' || r.status === 'doctor-modified';
@@ -159,278 +157,190 @@ export default function DoctorDashboard() {
     }
   };
 
-  const handleDecision = async (decision: 'doctor-approved' | 'rejected') => {
-    if (!selectedReport || !selectedReport.id) {
-        toast({ title: 'Error', description: 'No report selected.', variant: 'destructive'});
-        return;
-    }
-    setIsSubmitting(true);
-    try {
-        await updateReportByDoctor(selectedReport.id, decision, doctorNotes);
-        toast({ title: 'Success', description: `Report has been ${decision === 'doctor-approved' ? 'approved' : 'rejected'}.` });
-    } catch (e) {
-        console.error("Failed to update report:", e);
-        toast({ title: 'Error', description: 'Could not update the report status.', variant: 'destructive'});
-    } finally {
-        setIsSubmitting(false);
-    }
-  }
-
   const getPatientInitials = (name: string | undefined) => {
     if (!name) return '?';
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
+
+  const getPendingReviewsCount = () => {
+    return patientGroups.reduce((acc, group) => acc + group.unreadCount, 0);
+  }
   
   const sidebarNavItems = [
     { href: '/doctor/dashboard', icon: MessageSquare, title: 'Patient Cases' },
     { href: '/doctor/analytics', icon: LayoutGrid, title: 'Analytics' },
+    { href: '/doctor/calendar', icon: Calendar, title: 'Calendar' },
     { href: '/doctor/settings', icon: Settings, title: 'Settings' },
   ];
-  
-  const getLikelihoodColor = (likelihood: 'High' | 'Medium' | 'Low') => {
-    switch (likelihood) {
-      case 'High': return 'bg-red-100 text-red-800';
-      case 'Medium': return 'bg-yellow-100 text-yellow-800';
-      case 'Low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
 
   if (isLoading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-background">
+      <div className="flex h-screen w-screen items-center justify-center bg-gray-50">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="ml-4 text-lg">Loading Dashboard...</p>
       </div>
     );
   }
 
   const filteredPatientGroups = patientGroups.filter(group => {
-    if (activeTab === 'Pending') {
-      return group.reports.some(r => r.status === 'pending-doctor-review');
-    }
-    if (activeTab === 'Reviewed') {
-      return group.reports.some(r => r.status === 'doctor-approved' || r.status === 'doctor-modified');
-    }
-    return true; // for an "All" tab if you add one
+    if (activeTab === 'Pending') return group.unreadCount > 0;
+    if (activeTab === 'Reviewed') return group.reports.some(r => r.status === 'doctor-approved' || r.status === 'doctor-modified');
+    return false;
   });
 
-
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-      {/* Sidebar */}
-       <div className="hidden border-r bg-muted/40 md:block">
-        <div className="flex h-full max-h-screen flex-col gap-2">
-          <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-            <Link href="/" className="flex items-center gap-2 font-semibold">
-              <FileText className="h-6 w-6" />
-              <span className="">Doctor Portal</span>
-            </Link>
-          </div>
-          <div className="flex-1">
-            <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-              {sidebarNavItems.map(item => (
-                <Link
-                  key={item.title}
-                  href={item.href}
-                  className={cn(
-                    'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-                    { 'bg-muted text-primary': pathname === item.href }
-                  )}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.title}
-                </Link>
-              ))}
+    <div className="dashboard-container">
+        {/* Sidebar */}
+        <div className="sidebar">
+            <Link href="/doctor/dashboard" className="logo-sidebar">M</Link>
+            <nav className="sidebar-nav">
+               {sidebarNavItems.map(item => (
+                  <Link href={item.href} key={item.title} className={cn('nav-item', { active: pathname === item.href })} title={item.title}>
+                      <item.icon size={24} />
+                  </Link>
+               ))}
             </nav>
-          </div>
-           <div className="mt-auto p-4 border-t">
-             <div className="flex items-center gap-2 mb-4">
-                <div className="relative inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gray-100 dark:bg-gray-600">
-                     <span className="font-medium text-gray-600 dark:text-gray-300">{getPatientInitials(doctorProfile?.name)}</span>
-                </div>
-                <div>
-                    <p className="text-sm font-semibold">{doctorProfile?.name || 'Doctor'}</p>
-                    <p className="text-xs text-muted-foreground">{doctorProfile?.email}</p>
-                </div>
+            <div className="flex flex-col gap-2 items-center mt-auto">
+                <Link href="/doctor/profile" className="user-profile" title="My Profile">
+                  <User size={24} />
+                </Link>
+                <div className="user-initials" title={doctorProfile?.name}>{getPatientInitials(doctorProfile?.name)}</div>
+                 <button onClick={handleSignOut} className="nav-item !w-10 !h-10" title="Sign Out">
+                    <LogOut size={22} />
+                </button>
             </div>
-            <Button variant="ghost" size="sm" className="w-full justify-start" onClick={handleSignOut}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
-            </Button>
-          </div>
         </div>
-      </div>
-      
-      {/* Main Content */}
-      <div className="flex flex-col">
-        {/* Main Header */}
-        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
-            <div className="w-full flex-1">
-                <h1 className="text-lg font-semibold md:text-2xl">Patient Cases</h1>
-            </div>
-            <div className="w-full flex-1">
-                <form>
-                    <div className="relative">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input type="search" placeholder="Search patients..." className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"/>
-                    </div>
-                </form>
-            </div>
-            <Button variant="outline" size="icon" className="shrink-0">
-                <User className="h-5 w-5" />
-                <span className="sr-only">Toggle user menu</span>
-            </Button>
-        </header>
-        
-        {/* Main Content Area */}
-        <main className="flex flex-1 flex-row gap-4 p-4 lg:gap-6 lg:p-6 overflow-hidden">
-          <div className="flex flex-col w-1/3 border-r pr-4 overflow-y-auto">
-            <div className="flex items-center">
-                <h2 className="text-xl font-semibold flex-1">Inbox</h2>
-                <div className="space-x-2">
-                    <Button variant={activeTab === 'Pending' ? 'default' : 'outline'} size="sm" onClick={() => setActiveTab('Pending')}>Pending</Button>
-                    <Button variant={activeTab === 'Reviewed' ? 'default' : 'outline'} size="sm" onClick={() => setActiveTab('Reviewed')}>Reviewed</Button>
-                </div>
-            </div>
-            <div className="mt-4 space-y-2">
-             {filteredPatientGroups.length > 0 ? filteredPatientGroups.map((group) => (
-              <div 
-                key={group.patientProfile.uid} 
-                className={cn('p-3 rounded-lg cursor-pointer hover:bg-muted', { 'bg-muted': selectedGroup?.patientProfile.uid === group.patientProfile.uid })}
-                onClick={() => handleSelectGroup(group)}
-              >
-                <div className="flex items-center gap-3">
-                    <div className="relative inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gray-100 dark:bg-gray-600">
-                         <span className="font-medium text-gray-600 dark:text-gray-300">{getPatientInitials(group.patientProfile.name)}</span>
-                    </div>
-                    <div className="flex-1">
-                        <p className="font-semibold">{group.patientProfile.name}</p>
-                        <p className="text-sm text-muted-foreground">{group.reports.length} reports • {group.lastUpdate}</p>
-                    </div>
-                    {group.unreadCount > 0 && <Badge>{group.unreadCount}</Badge>}
-                </div>
-              </div>
-             )) : (
-              <div className="text-center text-muted-foreground py-16">
-                <Inbox size={48} className="mx-auto" />
-                <p>No {activeTab.toLowerCase()} patient cases.</p>
-              </div>
-             )}
-            </div>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto">
-          {selectedGroup && selectedReport ? (
-            <div className="space-y-6">
-                {/* Report Header */}
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h2 className="text-2xl font-bold">Reports for {selectedGroup.patientProfile.name}</h2>
-                        <p className="text-muted-foreground">Dermatology Case • Age: {selectedGroup.patientProfile.age} • {selectedGroup.patientProfile.gender}</p>
-                    </div>
-                    <div className="space-x-2">
-                        <Button variant="outline"><History className="mr-2 h-4 w-4"/> View History</Button>
-                        <Button variant="outline"><Phone className="mr-2 h-4 w-4"/> Call Patient</Button>
-                    </div>
-                </div>
 
-                {/* Horizontal Report Items */}
-                <div className="flex space-x-2 overflow-x-auto pb-2">
-                  {selectedGroup.reports.map(report => (
-                      <div key={report.id} className={cn('p-4 rounded-md cursor-pointer border-2 min-w-[200px]', {'border-primary': report.id === selectedReport.id})} onClick={() => handleSelectReport(report)}>
-                          <p className="font-semibold">{report.reportName}</p>
-                          <p className="text-sm text-muted-foreground">{new Date((report.createdAt as any).seconds * 1000).toLocaleDateString()}</p>
-                          <Badge className={cn('mt-2', {
-                              'bg-yellow-500': report.status === 'pending-doctor-review',
-                              'bg-green-500': report.status === 'doctor-approved' || report.status === 'doctor-modified',
-                              'bg-red-500': report.status === 'rejected'
-                          })}>
-                              {report.status.includes('pending') ? 'Pending' : (report.status.includes('doctor') ? 'Reviewed' : 'Rejected')}
-                          </Badge>
-                      </div>
-                  ))}
-                </div>
-              
-              {/* AI Report Section */}
-              <div className="p-4 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Bot size={20}/>
-                    <h3 className="text-lg font-semibold">AI GENERATED REPORT</h3>
-                  </div>
-                  <p className="font-bold text-2xl">{selectedReport.reportName}</p>
-              </div>
-
-              {/* Details Grid */}
-              <div className="grid grid-cols-3 gap-4 text-sm">
-                <div><span className="font-semibold">Patient Name:</span> {selectedGroup.patientProfile.name}</div>
-                <div><span className="font-semibold">Age:</span> {selectedGroup.patientProfile.age}</div>
-                <div><span className="font-semibold">Gender:</span> {selectedGroup.patientProfile.gender}</div>
-                <div><span className="font-semibold">Region:</span> {selectedGroup.patientProfile.region}</div>
-                <div><span className="font-semibold">Skin Tone:</span> {selectedGroup.patientProfile.skinTone}</div>
-                <div><span className="font-semibold">Submitted:</span> {new Date((selectedReport.createdAt as any).seconds * 1000).toLocaleString()}</div>
-              </div>
-
-              {/* Symptoms Section */}
-              <div>
-                <h3 className="text-lg font-semibold mb-2">📝 Reported Symptoms & Home Remedies</h3>
-                <div className="p-4 bg-muted rounded-md space-y-4">
-                  <div className="flex items-start gap-4">
-                      <Pill className="h-5 w-5 text-primary mt-1"/>
-                      <div>
-                          <p className="font-semibold text-primary">Potential Conditions</p>
-                          <div className="flex flex-wrap gap-2 mt-1">
-                            {selectedReport.aiReport.potentialConditions.map((condition, index) => (
-                              <Badge key={index} className={cn('text-sm', getLikelihoodColor(condition.likelihood))}>
-                                {condition.name} ({(condition.confidence * 100).toFixed(0)}%)
-                              </Badge>
-                            ))}
-                          </div>
-                      </div>
-                  </div>
-                   <div className="flex items-start gap-4">
-                      <Home className="h-5 w-5 text-green-600 mt-1"/>
-                      <div>
-                          <p className="font-semibold text-green-600">Home Remedies</p>
-                          <p className="text-muted-foreground text-sm">{selectedReport.aiReport.homeRemedies}</p>
-                      </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Section */}
-              <div>
-                <h3 className="text-lg font-semibold mb-2">🩺 Doctor's Assessment & Action</h3>
-                <Textarea 
-                    placeholder="Enter your key notes and assessment here..." 
-                    value={doctorNotes}
-                    onChange={(e) => setDoctorNotes(e.target.value)}
-                    className="min-h-[120px]"
-                />
-                <div className="flex justify-end gap-2 mt-2">
-                    <Button variant="destructive" onClick={() => handleDecision('rejected')} disabled={isSubmitting}>
-                        {isSubmitting ? <Loader2 className="animate-spin" /> : <><X className="mr-2 h-4 w-4"/> Reject</>}
-                    </Button>
-                    <Button onClick={() => handleDecision('doctor-approved')} disabled={isSubmitting}>
-                        {isSubmitting ? <Loader2 className="animate-spin" /> : <><Check className="mr-2 h-4 w-4"/> Approve</>}
-                    </Button>
-                </div>
-              </div>
-
-            </div>
-          ) : (
-             <div className="flex h-full items-center justify-center text-center text-muted-foreground">
+        {/* Main Content */}
+        <main className="main-content-area">
+            <header className="main-header-dash">
                 <div>
-                    <Inbox size={48} className="mx-auto" />
-                    <h3 className="text-xl font-semibold">Select a Patient</h3>
-                    <p>Choose a patient from the list to view their case details.</p>
+                    <h1 className="text-2xl font-bold text-gray-800">Dr. {doctorProfile?.name}'s Dashboard</h1>
+                    <Badge variant="outline" className="mt-1 bg-yellow-100 text-yellow-800 border-yellow-300">{getPendingReviewsCount()} pending reviews</Badge>
+                </div>
+                <div className="flex items-center gap-4">
+                     <div className="relative w-96">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <Input type="search" placeholder="Search patients..." className="w-full pl-10 rounded-full bg-white border-gray-200 focus:border-primary"/>
+                    </div>
+                </div>
+            </header>
+
+            <div className="content-grid">
+                <div className="patient-list">
+                     <div className="flex items-center gap-2 mb-4">
+                        <Button variant={activeTab === 'Pending' ? 'default' : 'outline'} onClick={() => setActiveTab('Pending')} className="rounded-full">Pending</Button>
+                        <Button variant={activeTab === 'Reviewed' ? 'default' : 'outline'} onClick={() => setActiveTab('Reviewed')} className="rounded-full">Reviewed</Button>
+                    </div>
+
+                    <div className="space-y-2">
+                       {filteredPatientGroups.length > 0 ? filteredPatientGroups.map((group) => (
+                        <div 
+                          key={group.patientProfile.uid} 
+                          className={cn('patient-card', { 'selected': selectedGroup?.patientProfile.uid === group.patientProfile.uid })}
+                          onClick={() => handleSelectGroup(group)}
+                        >
+                          <div className="flex items-center gap-3">
+                              <div className="patient-initials">{getPatientInitials(group.patientProfile.name)}</div>
+                              <div className="flex-1">
+                                  <p className="font-semibold text-gray-800">{group.patientProfile.name}</p>
+                                  <p className="text-sm text-gray-500">{group.reports.length} reports • {group.lastUpdate}</p>
+                              </div>
+                              {group.unreadCount > 0 && <div className="unread-badge">{group.unreadCount}</div>}
+                          </div>
+                        </div>
+                       )) : (
+                        <div className="text-center text-gray-500 py-16">
+                          <Inbox size={48} className="mx-auto text-gray-400" />
+                          <p className="mt-2">No {activeTab.toLowerCase()} cases.</p>
+                        </div>
+                       )}
+                    </div>
+                </div>
+
+                <div className="report-details">
+                {selectedGroup && selectedReport ? (
+                    <div className="bg-white p-6 rounded-2xl shadow-sm h-full flex flex-col">
+                        <div className="flex justify-between items-center mb-6">
+                            <div>
+                                <h2 className="text-xl font-bold text-gray-800">Reports for {selectedGroup.patientProfile.name}</h2>
+                                <p className="text-sm text-gray-500">Dermatology Case • Age: {selectedGroup.patientProfile.age} • {selectedGroup.patientProfile.gender}</p>
+                            </div>
+                            <div className="space-x-2">
+                                <Button variant="outline" size="sm"><History className="mr-2 h-4 w-4"/> History</Button>
+                                <Button variant="outline" size="sm"><Phone className="mr-2 h-4 w-4"/> Call</Button>
+                            </div>
+                        </div>
+                        
+                        <div className="report-list mb-6">
+                            {selectedGroup.reports.map(report => (
+                                <div key={report.id} className={cn('report-item', {'selected': report.id === selectedReport.id})} onClick={() => handleSelectReport(report)}>
+                                    <div className="flex-1">
+                                        <p className="font-semibold text-gray-700">{report.reportName}</p>
+                                        <p className="text-xs text-gray-500">{new Date((report.createdAt as any).seconds * 1000).toLocaleString()}</p>
+                                    </div>
+                                    <Badge className={cn({
+                                        'bg-yellow-100 text-yellow-800': report.status === 'pending-doctor-review',
+                                        'bg-green-100 text-green-800': report.status === 'doctor-approved' || report.status === 'doctor-modified',
+                                        'bg-red-100 text-red-800': report.status === 'rejected',
+                                        'bg-blue-100 text-blue-800': report.status === 'pending-patient-input',
+                                    })}>Pending</Badge>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="ai-report-header">
+                            <Bot size={16}/>
+                            <span>AI GENERATED REPORT</span>
+                        </div>
+                        <h3 className="text-xl font-bold text-white p-4 bg-primary-darker rounded-b-lg mb-4">{selectedReport.reportName}</h3>
+
+                        <div className="grid grid-cols-3 gap-4 mb-6 text-sm">
+                            <div className="info-box">
+                                <label>PATIENT NAME</label>
+                                <p>{selectedGroup.patientProfile.name}</p>
+                            </div>
+                            <div className="info-box">
+                                <label>AGE</label>
+                                <p>{selectedGroup.patientProfile.age} years</p>
+                            </div>
+                            <div className="info-box">
+                                <label>GENDER</label>
+                                <p>{selectedGroup.patientProfile.gender}</p>
+                            </div>
+                            <div className="info-box">
+                                <label>REGION</label>
+                                <p>{selectedGroup.patientProfile.region}</p>
+                            </div>
+                             <div className="info-box">
+                                <label>SKIN TONE</label>
+                                <p>{selectedGroup.patientProfile.skinTone}</p>
+                            </div>
+                            <div className="info-box">
+                                <label>SUBMITTED</label>
+                                <p>{new Date((selectedReport.createdAt as any).seconds * 1000).toLocaleString()}</p>
+                            </div>
+                        </div>
+
+                        <div className="mt-auto">
+                            <h4 className="font-semibold text-gray-700 mb-2">Reported Symptoms:</h4>
+                            {/* This is where the AI report details would go. Placeholder for now. */}
+                            <div className="p-4 bg-gray-50 rounded-lg text-sm text-gray-600 min-h-[100px]">
+                                 {selectedReport.aiReport.report}
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex h-full items-center justify-center text-center text-gray-500 bg-white rounded-2xl shadow-sm">
+                        <div>
+                            <Inbox size={48} className="mx-auto text-gray-400" />
+                            <h3 className="text-xl font-semibold mt-2">Select a Patient</h3>
+                            <p>Choose a patient case from the list to view details.</p>
+                        </div>
+                    </div>
+                )}
                 </div>
             </div>
-          )}
-          </div>
         </main>
-      </div>
     </div>
   );
 }

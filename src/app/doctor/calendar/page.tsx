@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -13,7 +12,7 @@ import { DoctorProfile, getUserProfile, saveDoctorNote, getDoctorNotesForMonth, 
 import { useRouter, usePathname } from 'next/navigation';
 import { Calendar } from '@/components/ui/calendar';
 import { Textarea } from '@/components/ui/textarea';
-import { format, getYear, getMonth } from 'date-fns';
+import { format, getYear, getMonth, isToday } from 'date-fns';
 
 export default function DoctorCalendar() {
   const { toast } = useToast();
@@ -66,6 +65,11 @@ export default function DoctorCalendar() {
 
     fetchNotes();
   }, [doctorProfile, currentMonth]);
+  
+  const getPatientInitials = (name: string | undefined) => {
+    if (!name) return '?';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
 
   const handleSignOut = async () => {
     if (auth) {
@@ -94,29 +98,28 @@ export default function DoctorCalendar() {
     }
   };
 
-  const DayWithNoteIndicator = ({ date, children }: { date: Date } & React.HTMLAttributes<HTMLDivElement>) => {
+  const DayWithNoteIndicator: React.FC<{ date: Date } & React.HTMLAttributes<HTMLDivElement>> = ({ date, ...props }) => {
     const dateKey = format(date, 'yyyy-MM-dd');
     const hasNote = !!notes[dateKey];
+  
     return (
-      <div className="relative w-full h-full flex items-center justify-center">
-        {children}
+      <div className={cn("relative w-full h-full flex items-center justify-center", props.className)}>
+        {props.children}
         {hasNote && <span className="absolute bottom-1 right-1 w-2 h-2 bg-green-500 rounded-full"></span>}
       </div>
     );
   };
   
-
   const sidebarNavItems = [
     { href: '/doctor/dashboard', icon: MessageSquare, title: 'Patient Cases' },
     { href: '/doctor/analytics', icon: LayoutGrid, title: 'Analytics' },
     { href: '/doctor/calendar', icon: CalendarIcon, title: 'Calendar' },
-    { href: '#', icon: FileText, title: 'Documents' },
     { href: '/doctor/settings', icon: Settings, title: 'Settings' },
   ];
 
   if (isLoading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-background">
+      <div className="flex h-screen w-screen items-center justify-center bg-gray-50">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
         <p className="ml-4 text-lg">Loading Calendar...</p>
       </div>
@@ -136,9 +139,10 @@ export default function DoctorCalendar() {
                ))}
             </nav>
             <div className="flex flex-col gap-2 items-center mt-auto">
-                <Link href="/doctor/profile" className="user-profile" title="Dr. Profile">
+                <Link href="/doctor/profile" className="user-profile" title="My Profile">
                   <User size={24} />
                 </Link>
+                <div className="user-initials" title={doctorProfile?.name}>{getPatientInitials(doctorProfile?.name)}</div>
                  <button onClick={handleSignOut} className="nav-item !w-10 !h-10" title="Sign Out">
                     <LogOut size={22} />
                 </button>
@@ -146,7 +150,7 @@ export default function DoctorCalendar() {
         </div>
 
         {/* Main Calendar Panel */}
-        <div className="flex-1 flex flex-col bg-gray-50 overflow-y-auto">
+        <div className="main-content-area">
              <div className="p-8">
                 <header className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-800">My Calendar</h1>
@@ -164,13 +168,27 @@ export default function DoctorCalendar() {
                         onMonthChange={setCurrentMonth}
                         classNames={{
                           day_selected: "bg-primary text-primary-foreground hover:bg-primary/90 focus:bg-primary/90",
-                          day_today: "bg-accent text-accent-foreground rounded-full",
+                          day_today: "bg-accent text-accent-foreground",
                           day_outside: "text-muted-foreground/50",
                           head_cell: "text-muted-foreground font-semibold",
                           caption_label: "text-lg font-bold"
                         }}
                         components={{
-                          DayContent: DayWithNoteIndicator,
+                          Day: ({ date, displayMonth }) => {
+                             const dateKey = format(date, 'yyyy-MM-dd');
+                             const hasNote = !!notes[dateKey];
+                             return (
+                               <div
+                                 className={cn(
+                                   'relative h-9 w-9 p-0 font-normal',
+                                   isToday(date) && 'bg-accent text-accent-foreground rounded-full'
+                                 )}
+                               >
+                                 {date.getDate()}
+                                 {hasNote && <span className="absolute bottom-1 right-1 w-2 h-2 bg-green-500 rounded-full"></span>}
+                               </div>
+                             );
+                           },
                         }}
                       />
                     </CardContent>
