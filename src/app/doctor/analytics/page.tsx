@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, User, MessageSquare, LayoutGrid, Settings, FileText, LogOut, Activity, BarChart, PieChartIcon, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, Settings, FileText, LogOut, Activity, BarChart, PieChartIcon, Clock, CheckCircle, XCircle, MessageSquare, LayoutGrid } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -32,6 +32,7 @@ export default function DoctorAnalytics() {
     const currentUser = auth.currentUser;
 
     if (!currentUser || !db) {
+      router.push('/login?role=doctor');
       return;
     }
 
@@ -67,6 +68,11 @@ export default function DoctorAnalytics() {
     }
   };
 
+  const getPatientInitials = (name: string | undefined) => {
+    if (!name) return '?';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
   const stats = {
     total: reports.length,
     pending: reports.filter(r => r.status === 'pending-doctor-review').length,
@@ -75,10 +81,11 @@ export default function DoctorAnalytics() {
   };
 
   const statusData = [
-    { name: 'Pending', value: stats.pending, fill: 'var(--color-pending)' },
-    { name: 'Reviewed', value: stats.reviewed, fill: 'var(--color-reviewed)' },
-    { name: 'Rejected', value: stats.rejected, fill: 'var(--color-rejected)' },
+    { name: 'Pending', value: stats.pending, fill: 'hsl(var(--chart-2))' },
+    { name: 'Reviewed', value: stats.reviewed, fill: 'hsl(var(--chart-1))' },
+    { name: 'Rejected', value: stats.rejected, fill: 'hsl(var(--chart-3))' },
   ];
+  
   const chartConfig = {
     pending: { label: 'Pending', color: 'hsl(var(--chart-2))' },
     reviewed: { label: 'Reviewed', color: 'hsl(var(--chart-1))' },
@@ -113,13 +120,13 @@ export default function DoctorAnalytics() {
   }
 
   return (
-    <div className="grid h-screen w-screen grid-cols-1 overflow-hidden md:grid-cols-[280px_1fr]">
+    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
        {/* Sidebar */}
        <div className="hidden border-r bg-muted/40 md:block">
             <div className="flex h-full max-h-screen flex-col gap-2">
                 <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
                     <Link href="/" className="flex items-center gap-2 font-semibold">
-                        <Bot className="h-6 w-6" />
+                        <FileText className="h-6 w-6" />
                         <span>Doctor Portal</span>
                     </Link>
                 </div>
@@ -143,7 +150,7 @@ export default function DoctorAnalytics() {
                 <div className="mt-auto p-4 border-t">
                      <div className="flex items-center gap-2 mb-4">
                         <div className="relative inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gray-100 dark:bg-gray-600">
-                             <span className="font-medium text-gray-600 dark:text-gray-300">{(doctorProfile?.name || '?').split(' ').map(n=>n[0]).join('').toUpperCase()}</span>
+                             <span className="font-medium text-gray-600 dark:text-gray-300">{getPatientInitials(doctorProfile?.name)}</span>
                         </div>
                         <div>
                             <p className="text-sm font-semibold">{doctorProfile?.name || 'Doctor'}</p>
@@ -159,60 +166,59 @@ export default function DoctorAnalytics() {
         </div>
 
         {/* Main Analytics Panel */}
-        <div className="flex-1 flex flex-col bg-gray-50 overflow-y-auto">
-             <div className="p-8">
-                <header className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-800">Analytics Dashboard</h1>
-                    <p className="text-gray-500">Welcome back, {doctorProfile ? `Dr. ${doctorProfile.name}` : 'Doctor'}</p>
-                </header>
-
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <Card className="bg-blue-100 border-blue-200 rounded-xl">
+        <div className="flex flex-col">
+             <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+                <div className="w-full flex-1">
+                    <h1 className="text-lg font-semibold md:text-2xl">Analytics Dashboard</h1>
+                </div>
+            </header>
+            <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-auto">
+                 <p className="text-muted-foreground">Welcome back, {doctorProfile ? `Dr. ${doctorProfile.name}` : 'Doctor'}</p>
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-blue-800">Total Reports Received</CardTitle>
-                            <Activity className="h-4 w-4 text-blue-600" />
+                            <CardTitle className="text-sm font-medium">Total Reports</CardTitle>
+                            <Activity className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-blue-900">{stats.total}</div>
-                            <p className="text-xs text-blue-700">All-time patient reports</p>
+                            <div className="text-2xl font-bold">{stats.total}</div>
+                            <p className="text-xs text-muted-foreground">All-time patient reports</p>
                         </CardContent>
                     </Card>
-                    <Card className="bg-amber-100 border-amber-200 rounded-xl">
+                    <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-amber-800">Pending Review</CardTitle>
-                            <Clock className="h-4 w-4 text-amber-600" />
+                            <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
+                            <Clock className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-amber-900">{stats.pending}</div>
-                            <p className="text-xs text-amber-700">Reports waiting for your assessment</p>
+                            <div className="text-2xl font-bold">{stats.pending}</div>
+                            <p className="text-xs text-muted-foreground">Reports awaiting assessment</p>
                         </CardContent>
                     </Card>
-                    <Card className="bg-green-100 border-green-200 rounded-xl">
+                    <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-green-800">Reviewed Cases</CardTitle>
-                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <CardTitle className="text-sm font-medium">Reviewed Cases</CardTitle>
+                            <CheckCircle className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-green-900">{stats.reviewed}</div>
-                            <p className="text-xs text-green-700">Reports you have approved or modified</p>
+                            <div className="text-2xl font-bold">{stats.reviewed}</div>
+                            <p className="text-xs text-muted-foreground">Approved or modified reports</p>
                         </CardContent>
                     </Card>
-                     <Card className="bg-red-100 border-red-200 rounded-xl">
+                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-red-800">Disqualified / More Info</CardTitle>
-                            <XCircle className="h-4 w-4 text-red-600" />
+                            <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+                            <XCircle className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-red-900">{stats.rejected}</div>
-                            <p className="text-xs text-red-700">Reports needing patient follow-up</p>
+                            <div className="text-2xl font-bold">{stats.rejected}</div>
+                            <p className="text-xs text-muted-foreground">Reports needing more info</p>
                         </CardContent>
                     </Card>
                 </div>
                 
-                {/* Charts */}
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                    <Card className="lg:col-span-3 rounded-xl">
+                    <Card className="lg:col-span-3">
                          <CardHeader>
                             <CardTitle className="flex items-center gap-2"><BarChart/> Weekly Activity</CardTitle>
                             <CardDescription>Number of reports received per day this week.</CardDescription>
@@ -222,13 +228,13 @@ export default function DoctorAnalytics() {
                                 <RechartsBarChart data={weeklyChartData}>
                                     <XAxis dataKey="day" stroke="#888888" fontSize={12} tickLine={false} axisLine={false}/>
                                     <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                                    <Tooltip contentStyle={{ background: "white", border: "1px solid #ccc", borderRadius: "8px" }} />
+                                    <Tooltip contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "var(--radius)" }} />
                                     <Bar dataKey="reports" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                                 </RechartsBarChart>
                             </ResponsiveContainer>
                          </CardContent>
                     </Card>
-                     <Card className="lg:col-span-2 rounded-xl">
+                     <Card className="lg:col-span-2">
                          <CardHeader>
                             <CardTitle className="flex items-center gap-2"><PieChartIcon/> Report Status Breakdown</CardTitle>
                             <CardDescription>A summary of all your report statuses.</CardDescription>
@@ -248,8 +254,7 @@ export default function DoctorAnalytics() {
                          </CardContent>
                     </Card>
                 </div>
-
-            </div>
+            </main>
         </div>
     </div>
   );
