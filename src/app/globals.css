@@ -129,7 +129,7 @@
   .notification-close { @apply bg-transparent border-none text-white text-xl cursor-pointer ml-2.5; }
 
   /* Doctor Dashboard New Design */
-  .dashboard-container { @apply grid h-screen w-screen bg-white overflow-hidden; grid-template-columns: 80px 384px 384px 1fr; }
+  .dashboard-container { @apply grid h-screen w-screen bg-white overflow-hidden; grid-template-columns: 80px 384px 1fr; }
   .sidebar { @apply w-20 bg-gradient-to-b from-[#4F46E5] to-[#7C3AED] flex flex-col items-center py-6 relative z-50; }
   .logo-sidebar { @apply w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-white text-2xl font-bold mb-8 backdrop-blur-sm; }
   .sidebar-nav { @apply flex flex-col gap-4 w-full items-center; }
@@ -160,10 +160,15 @@
   .patient-time { @apply text-xs text-gray-400; }
   .patient-status { @apply flex flex-col items-end gap-1; }
   .unread-count { @apply bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold; }
-  .report-detail-panel { @apply flex-1 flex flex-col min-h-0; border-l: 1px solid theme('colors.gray.200'); }
+  
+  .main-content-area { @apply flex-1 grid grid-cols-2 min-h-0; }
+  .report-list-column { @apply w-full border-r border-gray-200 flex flex-col; }
+  .report-detail-panel { @apply flex-1 flex flex-col min-h-0; }
+  .report-list-container { @apply flex-1 overflow-y-auto; }
+  .report-list-title { @apply text-sm font-semibold text-gray-600 px-6 pt-4 pb-2; }
 
   .chat-header-new { @apply p-6 border-b border-gray-200 flex items-center justify-between; }
-  .report-card { @apply p-3 mb-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors; }
+  .report-card { @apply p-3 mb-2 mx-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors; }
   .report-card.active { @apply bg-blue-50 border-blue-400; }
 
   .report-header-new { @apply bg-cyan-500 text-white p-6 rounded-t-lg; }

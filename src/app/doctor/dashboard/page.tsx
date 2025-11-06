@@ -27,12 +27,12 @@ type PatientGroup = {
     unreadCount: number;
 };
 
-const statusMap: { [key in Report['status']]: { label: string; badgeClass: string; } } = {
-  'pending-doctor-review': { label: 'Pending', badgeClass: 'status-pending' },
-  'doctor-approved': { label: 'Reviewed', badgeClass: 'status-reviewed' },
-  'doctor-modified': { label: 'Reviewed', badgeClass: 'status-reviewed' },
-  'rejected': { label: 'Disqualified', badgeClass: 'status-reviewed' },
-  'pending-patient-input': { label: 'Draft', badgeClass: 'status-reviewed' },
+const statusMap: { [key in Report['status']]: { label: string; badgeClass: string; variant: 'default' | 'destructive' | 'secondary' } } = {
+  'pending-doctor-review': { label: 'Pending', badgeClass: 'status-pending', variant: 'destructive' },
+  'doctor-approved': { label: 'Reviewed', badgeClass: 'status-reviewed', variant: 'default' },
+  'doctor-modified': { label: 'Reviewed', badgeClass: 'status-reviewed', variant: 'default' },
+  'rejected': { label: 'Disqualified', badgeClass: 'status-rejected', variant: 'secondary' },
+  'pending-patient-input': { label: 'Draft', badgeClass: 'status-draft', variant: 'secondary' },
 };
 
 
@@ -287,7 +287,7 @@ export default function DoctorDashboard() {
 
                         <div className="symptoms-list">
                             <div className="symptoms-title">Reported Symptoms:</div>
-                            <div className="symptoms-content">{selectedReport.aiReport.symptomInputs || 'No symptoms reported by the patient.'}</div>
+                            <div className="symptoms-content">{selectedReport.symptomInputs || 'No symptoms reported by the patient.'}</div>
                         </div>
 
                         <div className="analysis-sections">
@@ -428,60 +428,66 @@ export default function DoctorDashboard() {
                 )}
             </div>
         </div>
-
-        {/* Chat Panel */}
-        {selectedGroup ? (
-          <div className="flex-1 flex flex-col bg-white">
-            <div className="chat-header-new">
-                 <h3 className="text-xl font-semibold text-gray-800">Reports for {selectedGroup.patientProfile.name}</h3>
-            </div>
-            <div className="flex-1 flex flex-col min-h-0">
-                 <div className="w-full border-r overflow-y-auto">
-                    <h4 className="text-sm font-semibold text-gray-600 px-6 pt-4 pb-2">Pending Reports ({selectedGroup.reports.filter(r => r.status === 'pending-doctor-review').length})</h4>
-                    <div className="px-4">
-                        {selectedGroup.reports.filter(r => r.status === 'pending-doctor-review').map(report => (
-                            <div
-                               key={report.id}
-                               className={cn("report-card", { "active": selectedReport?.id === report.id })}
-                               onClick={() => setSelectedReport(report)}
-                            >
-                                <div className="font-semibold text-sm">{report.reportName}</div>
-                                <div className="text-xs text-gray-500">{report.createdAt ? new Date((report.createdAt as any).seconds * 1000).toLocaleString() : ''}</div>
-                                <Badge className="mt-1" variant="destructive">{statusMap[report.status]?.label}</Badge>
-                            </div>
-                        ))}
-                    </div>
-                    
-                    <h4 className="text-sm font-semibold text-gray-600 px-6 pt-4 pb-2">Reviewed Reports ({selectedGroup.reports.filter(r => r.status !== 'pending-doctor-review').length})</h4>
-                     <div className="px-4">
-                         {selectedGroup.reports.filter(r => r.status !== 'pending-doctor-review').map(report => (
-                            <div
-                               key={report.id}
-                               className={cn("report-card", { "active": selectedReport?.id === report.id })}
-                               onClick={() => setSelectedReport(report)}
-                            >
-                                <div className="font-semibold text-sm">{report.reportName}</div>
-                                <div className="text-xs text-gray-500">{report.createdAt ? new Date((report.createdAt as any).seconds * 1000).toLocaleString() : ''}</div>
-                                <Badge className="mt-1" variant="default">{statusMap[report.status]?.label}</Badge>
-                            </div>
-                        ))}
-                    </div>
-                 </div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex-1 flex items-center justify-center bg-gray-50 text-center">
-            <div>
-              <MessageSquare size={48} className="mx-auto text-gray-300 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-700">Select a patient case</h3>
-              <p className="text-gray-500">Choose a case from the list to view details, or wait for new cases to arrive.</p>
-            </div>
-          </div>
-        )}
         
-        {/* Report Detail Panel */}
-        <div className="report-detail-panel">
-            <MainChatPanel />
+        {/* Main Content Area */}
+        <div className="main-content-area">
+            {selectedGroup ? (
+                <>
+                    {/* Report List Column */}
+                    <div className="report-list-column">
+                        <div className="chat-header-new">
+                            <h3 className="text-xl font-semibold text-gray-800">Reports for {selectedGroup.patientProfile.name}</h3>
+                        </div>
+                        <div className="report-list-container">
+                            <h4 className="report-list-title">Pending Reports ({selectedGroup.reports.filter(r => r.status === 'pending-doctor-review').length})</h4>
+                            <div className="px-4">
+                                {selectedGroup.reports.filter(r => r.status === 'pending-doctor-review').map(report => (
+                                    <div
+                                    key={report.id}
+                                    className={cn("report-card", { "active": selectedReport?.id === report.id })}
+                                    onClick={() => setSelectedReport(report)}
+                                    >
+                                        <div className="font-semibold text-sm">{report.reportName}</div>
+                                        <div className="text-xs text-gray-500">{report.createdAt ? new Date((report.createdAt as any).seconds * 1000).toLocaleString() : ''}</div>
+                                        <Badge className="mt-1" variant={statusMap[report.status]?.variant || 'secondary'}>
+                                            {statusMap[report.status]?.label}
+                                        </Badge>
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            <h4 className="report-list-title">Reviewed Reports ({selectedGroup.reports.filter(r => r.status !== 'pending-doctor-review').length})</h4>
+                            <div className="px-4">
+                                {selectedGroup.reports.filter(r => r.status !== 'pending-doctor-review').map(report => (
+                                    <div
+                                    key={report.id}
+                                    className={cn("report-card", { "active": selectedReport?.id === report.id })}
+                                    onClick={() => setSelectedReport(report)}
+                                    >
+                                        <div className="font-semibold text-sm">{report.reportName}</div>
+                                        <div className="text-xs text-gray-500">{report.createdAt ? new Date((report.createdAt as any).seconds * 1000).toLocaleString() : ''}</div>
+                                        <Badge className="mt-1" variant={statusMap[report.status]?.variant || 'secondary'}>
+                                            {statusMap[report.status]?.label}
+                                        </Badge>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                    {/* Report Detail Column */}
+                    <div className="report-detail-panel">
+                        <MainChatPanel />
+                    </div>
+                </>
+            ) : (
+            <div className="flex-1 flex items-center justify-center bg-gray-50 text-center col-span-2">
+                <div>
+                <MessageSquare size={48} className="mx-auto text-gray-300 mb-4" />
+                <h3 className="text-xl font-semibold text-gray-700">Select a patient case</h3>
+                <p className="text-gray-500">Choose a case from the list to view details, or wait for new cases to arrive.</p>
+                </div>
+            </div>
+            )}
         </div>
     </div>
   );
