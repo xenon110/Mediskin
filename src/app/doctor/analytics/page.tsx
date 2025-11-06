@@ -81,15 +81,15 @@ export default function DoctorAnalytics() {
   };
 
   const statusData = [
-    { name: 'Pending', value: stats.pending, fill: 'hsl(221.2 83.2% 53.3%)' },
-    { name: 'Reviewed', value: stats.reviewed, fill: 'hsl(142.1 76.2% 36.3%)' },
-    { name: 'Rejected', value: stats.rejected, fill: 'hsl(0 84.2% 60.2%)' },
+    { name: 'Pending', value: stats.pending },
+    { name: 'Reviewed', value: stats.reviewed },
+    { name: 'Rejected', value: stats.rejected },
   ];
   
   const chartConfig = {
-    pending: { label: 'Pending', color: 'hsl(221.2 83.2% 53.3%)' },
-    reviewed: { label: 'Reviewed', color: 'hsl(142.1 76.2% 36.3%)' },
-    rejected: { label: 'Rejected', color: 'hsl(0 84.2% 60.2%)' },
+    pending: { label: 'Pending', color: 'hsl(var(--chart-1))' },
+    reviewed: { label: 'Reviewed', color: 'hsl(var(--chart-2))' },
+    rejected: { label: 'Rejected', color: 'hsl(var(--chart-3))' },
   }
 
   const weeklyActivity = reports.reduce((acc, report) => {
@@ -174,41 +174,41 @@ export default function DoctorAnalytics() {
             </header>
             <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-auto">
                  <p className="text-muted-foreground">Welcome back, {doctorProfile ? `Dr. ${doctorProfile.name}` : 'Doctor'}</p>
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <Card className="rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-primary/15 border-primary/25">
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Total Reports</CardTitle>
-                            <Activity className="h-4 w-4 text-primary" />
+                            <Activity className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{stats.total}</div>
                             <p className="text-xs text-muted-foreground">All-time patient reports</p>
                         </CardContent>
                     </Card>
-                    <Card className="rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-blue-500/15 border-blue-500/25">
+                    <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
-                            <Clock className="h-4 w-4 text-blue-500" />
+                            <Clock className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{stats.pending}</div>
                             <p className="text-xs text-muted-foreground">Reports awaiting assessment</p>
                         </CardContent>
                     </Card>
-                    <Card className="rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-green-500/15 border-green-500/25">
+                    <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Reviewed Cases</CardTitle>
-                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <CheckCircle className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{stats.reviewed}</div>
                             <p className="text-xs text-muted-foreground">Approved or modified reports</p>
                         </CardContent>
                     </Card>
-                     <Card className="rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-red-500/15 border-red-500/25">
+                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Rejected</CardTitle>
-                            <XCircle className="h-4 w-4 text-red-500" />
+                            <XCircle className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{stats.rejected}</div>
@@ -217,7 +217,7 @@ export default function DoctorAnalytics() {
                     </Card>
                 </div>
                 
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
                     <Card className="lg:col-span-3">
                          <CardHeader>
                             <CardTitle className="flex items-center gap-2"><BarChart/> Weekly Activity</CardTitle>
@@ -245,7 +245,7 @@ export default function DoctorAnalytics() {
                                 <ChartTooltip content={<ChartTooltipContent nameKey="name" hideLabel />} />
                                 <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
                                    {statusData.map((entry, index) => (
-                                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                                      <Cell key={`cell-${index}`} fill={`var(--color-${entry.name.toLowerCase()})`} />
                                   ))}
                                 </Pie>
                                 <Legend/>
