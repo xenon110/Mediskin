@@ -350,7 +350,10 @@ export default function DoctorDashboard() {
                       <Image src={selectedReport.photoDataUri} alt="Uploaded skin condition" width={300} height={200} className="rounded-lg object-cover w-full" />
                     </div>
                   )}
-                  <div className="md:col-span-2 space-y-4">
+                  <div className={cn(
+                    "space-y-4",
+                    selectedReport.photoDataUri ? "md:col-span-2" : "md:col-span-3"
+                  )}>
                     <div className="recommendation-box !bg-blue-50 !border-blue-200">
                         <p className="recommendation-text !text-blue-800">
                           {selectedReport.aiReport.report}
