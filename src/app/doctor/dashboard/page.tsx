@@ -220,6 +220,7 @@ export default function DoctorDashboard() {
   const sidebarNavItems = [
     { href: '/doctor/dashboard', icon: MessageSquare, title: 'Patient Cases' },
     { href: '/doctor/analytics', icon: LayoutGrid, title: 'Analytics' },
+    { href: '/doctor/calendar', icon: Calendar, title: 'Calendar' },
     { href: '#', icon: FileText, title: 'Documents' },
     { href: '/doctor/settings', icon: Settings, title: 'Settings' },
   ];
@@ -237,7 +238,7 @@ export default function DoctorDashboard() {
         )
       }
       return (
-        <div className="chat-panel">
+        <div className="flex-1 flex flex-col min-h-0">
             <div className="chat-header">
                  <div className="chat-patient-info">
                     {selectedGroup && (
@@ -256,119 +257,121 @@ export default function DoctorDashboard() {
                 </div>
             </div>
             
-            <div className="chat-messages">
-                <div className="message-group fade-in">
-                    <div className="message-date">{selectedReport.createdAt ? formatDistanceToNow(new Date((selectedReport.createdAt as any).seconds * 1000), { addSuffix: true }) : 'N/A'}</div>
+            <div className="flex-1 overflow-y-auto">
+                <div className="chat-messages">
+                    <div className="message-group fade-in">
+                        <div className="message-date">{selectedReport.createdAt ? formatDistanceToNow(new Date((selectedReport.createdAt as any).seconds * 1000), { addSuffix: true }) : 'N/A'}</div>
+                        
+                        <div className="ai-report">
+                            <div className="report-header">
+                                <div className="ai-badge"><Bot size={14} className="inline mr-1" /> AI GENERATED REPORT</div>
+                                <div className="report-title">{selectedReport.reportName || 'Dermatological Analysis'}</div>
+                            </div>
+
+                            <div className="patient-details-section">
+                                <div className="details-grid">
+                                    <div className="detail-item">
+                                        <div className="detail-label">Patient Name</div>
+                                        <div className="detail-value">{selectedGroup?.patientProfile.name || 'N/A'}</div>
+                                    </div>
+                                    <div className="detail-item">
+                                        <div className="detail-label">Age</div>
+                                        <div className="detail-value">{selectedGroup?.patientProfile.age || 'NA'} years</div>
+                                    </div>
+                                    <div className="detail-item">
+                                        <div className="detail-label">Gender</div>
+                                        <div className="detail-value">{selectedGroup?.patientProfile.gender || 'N/A'}</div>
+                                    </div>
+                                    <div className="detail-item">
+                                        <div className="detail-label">Region</div>
+                                        <div className="detail-value">{selectedGroup?.patientProfile.region || 'N/A'}</div>
+                                    </div>
+                                    <div className="detail-item">
+                                        <div className="detail-label">Skin Tone</div>
+                                        <div className="detail-value">{selectedGroup?.patientProfile.skinTone || 'N/A'}</div>
+                                    </div>
+                                    <div className="detail-item">
+                                        <div className="detail-label">Submitted</div>
+                                        <div className="detail-value">{selectedReport.createdAt && (selectedReport.createdAt as any).seconds ? new Date((selectedReport.createdAt as any).seconds * 1000).toLocaleString() : 'N/A'}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="symptoms-list">
+                                <div className="symptoms-title">Reported Symptoms:</div>
+                                <div className="symptoms-content">{selectedReport.aiReport.symptomInputs}</div>
+                            </div>
+
+                            {selectedReport.photoDataUri && (
+                                <div className="image-analysis">
+                                    <h4 className="font-semibold text-sm text-gray-700 mb-2 flex items-center gap-2"><Camera /> Uploaded Skin Image</h4>
+                                    <div className="relative w-full aspect-video rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+                                        <Image src={selectedReport.photoDataUri} alt="Patient's skin condition" layout="fill" objectFit="contain" />
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="analysis-sections">
+                                <div className="analysis-section">
+                                    <h4 className="section-title text-green-600">
+                                        <Home size={18} /> Home Remedies Recommendation
+                                    </h4>
+                                    <div className="section-content whitespace-pre-wrap">
+                                    {selectedReport.aiReport.homeRemedies}
+                                    </div>
+                                </div>
+
+                                <div className="analysis-section medical">
+                                    <h4 className="section-title text-amber-600">
+                                        <Pill size={18} /> Medical Recommendation
+                                    </h4>
+                                    <div className="section-content whitespace-pre-wrap">
+                                    {selectedReport.aiReport.medicalRecommendation}
+                                    </div>
+                                </div>
+
+                            {selectedReport.aiReport.doctorConsultationSuggestion && (
+                                <div className="analysis-section consultation">
+                                    <h4 className="section-title text-red-600">
+                                        <AlertTriangle size={18}/> Professional Consultation Required
+                                    </h4>
+                                    <div className="section-content">
+                                        Based on the analysis, we recommend sharing this report with a doctor.
+                                    </div>
+                                </div>
+                            )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="doctor-response">
+                    <div className="response-header">
+                        <h3 className="response-title">Your Professional Assessment</h3>
+                        <div className="response-actions">
+                            <button className={cn('quick-action', {'active': activeResponseTab === 'approve'})} onClick={() => setActiveResponseTab('approve')}>✅ Approve AI Report</button>
+                            <button className={cn('quick-action', {'active': activeResponseTab === 'customize'})} onClick={() => setActiveResponseTab('customize')}>✏️ Customize</button>
+                            <button className="quick-action" onClick={() => setAssessment('The submitted image is unclear. Please provide a clearer photo of the affected area.')}>❓ Request More Info</button>
+                        </div>
+                    </div>
+
+                    <textarea 
+                        className="response-editor" 
+                        placeholder="Add your professional assessment, modifications, or additional recommendations..."
+                        value={assessment}
+                        onChange={(e) => setAssessment(e.target.value)}
+                        disabled={isSubmitting}
+                    />
                     
-                    <div className="ai-report">
-                        <div className="report-header">
-                            <div className="ai-badge"><Bot size={14} className="inline mr-1" /> AI GENERATED REPORT</div>
-                            <div className="report-title">{selectedReport.reportName || 'Dermatological Analysis'}</div>
-                        </div>
-
-                         <div className="patient-details-section">
-                            <div className="details-grid">
-                                <div className="detail-item">
-                                    <div className="detail-label">Patient Name</div>
-                                    <div className="detail-value">{selectedGroup?.patientProfile.name || 'N/A'}</div>
-                                </div>
-                                <div className="detail-item">
-                                    <div className="detail-label">Age</div>
-                                    <div className="detail-value">{selectedGroup?.patientProfile.age || 'NA'} years</div>
-                                </div>
-                                <div className="detail-item">
-                                    <div className="detail-label">Gender</div>
-                                    <div className="detail-value">{selectedGroup?.patientProfile.gender || 'N/A'}</div>
-                                </div>
-                                <div className="detail-item">
-                                    <div className="detail-label">Region</div>
-                                    <div className="detail-value">{selectedGroup?.patientProfile.region || 'N/A'}</div>
-                                </div>
-                                <div className="detail-item">
-                                    <div className="detail-label">Skin Tone</div>
-                                    <div className="detail-value">{selectedGroup?.patientProfile.skinTone || 'N/A'}</div>
-                                </div>
-                                <div className="detail-item">
-                                    <div className="detail-label">Submitted</div>
-                                    <div className="detail-value">{selectedReport.createdAt && (selectedReport.createdAt as any).seconds ? new Date((selectedReport.createdAt as any).seconds * 1000).toLocaleString() : 'N/A'}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="symptoms-list">
-                            <div className="symptoms-title">Reported Symptoms:</div>
-                            <div className="symptoms-content">{selectedReport.aiReport.symptomInputs}</div>
-                        </div>
-
-                        {selectedReport.photoDataUri && (
-                            <div className="image-analysis">
-                                <h4 className="font-semibold text-sm text-gray-700 mb-2 flex items-center gap-2"><Camera /> Uploaded Skin Image</h4>
-                                <div className="relative w-full aspect-video rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
-                                    <Image src={selectedReport.photoDataUri} alt="Patient's skin condition" layout="fill" objectFit="contain" />
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="analysis-sections">
-                             <div className="analysis-section">
-                                <h4 className="section-title text-green-600">
-                                    <Home size={18} /> Home Remedies Recommendation
-                                </h4>
-                                <div className="section-content whitespace-pre-wrap">
-                                   {selectedReport.aiReport.homeRemedies}
-                                </div>
-                            </div>
-
-                            <div className="analysis-section medical">
-                                <h4 className="section-title text-amber-600">
-                                    <Pill size={18} /> Medical Recommendation
-                                </h4>
-                                <div className="section-content whitespace-pre-wrap">
-                                   {selectedReport.aiReport.medicalRecommendation}
-                                </div>
-                            </div>
-
-                           {selectedReport.aiReport.doctorConsultationSuggestion && (
-                             <div className="analysis-section consultation">
-                                <h4 className="section-title text-red-600">
-                                    <AlertTriangle size={18}/> Professional Consultation Required
-                                </h4>
-                                <div className="section-content">
-                                    Based on the analysis, we recommend sharing this report with a doctor.
-                                </div>
-                            </div>
-                           )}
-                        </div>
+                    <div className="editor-toolbar">
+                    <div className="file-upload">
+                            <Paperclip size={16}/>
+                            <span>Attach Prescription</span>
                     </div>
-                </div>
-            </div>
-
-            <div className="doctor-response">
-                <div className="response-header">
-                    <h3 className="response-title">Your Professional Assessment</h3>
-                    <div className="response-actions">
-                        <button className={cn('quick-action', {'active': activeResponseTab === 'approve'})} onClick={() => setActiveResponseTab('approve')}>✅ Approve AI Report</button>
-                        <button className={cn('quick-action', {'active': activeResponseTab === 'customize'})} onClick={() => setActiveResponseTab('customize')}>✏️ Customize</button>
-                        <button className="quick-action" onClick={() => setAssessment('The submitted image is unclear. Please provide a clearer photo of the affected area.')}>❓ Request More Info</button>
+                    <button className="send-response" onClick={handleSendAssessment} disabled={isSubmitting}>
+                            {isSubmitting ? <Loader2 className="animate-spin" /> : <>Send Assessment &rarr;</>}
+                        </button>
                     </div>
-                </div>
-
-                <textarea 
-                    className="response-editor" 
-                    placeholder="Add your professional assessment, modifications, or additional recommendations..."
-                    value={assessment}
-                    onChange={(e) => setAssessment(e.target.value)}
-                    disabled={isSubmitting}
-                />
-                
-                <div className="editor-toolbar">
-                   <div className="file-upload">
-                        <Paperclip size={16}/>
-                        <span>Attach Prescription</span>
-                   </div>
-                   <button className="send-response" onClick={handleSendAssessment} disabled={isSubmitting}>
-                        {isSubmitting ? <Loader2 className="animate-spin" /> : <>Send Assessment &rarr;</>}
-                    </button>
                 </div>
             </div>
         </div>
@@ -455,7 +458,7 @@ export default function DoctorDashboard() {
             <div className="p-4 border-b">
                  <h3 className="font-semibold text-lg">Reports for {selectedGroup.patientProfile.name}</h3>
             </div>
-            <div className="flex-1 flex">
+            <div className="flex-1 flex min-h-0">
                  <div className="w-1/3 border-r overflow-y-auto">
                     {selectedGroup.reports.map(report => (
                          <div
