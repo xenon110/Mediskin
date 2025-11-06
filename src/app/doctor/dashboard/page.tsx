@@ -402,5 +402,3 @@ export default function DoctorDashboard() {
     </div>
   );
 }
-
-    
