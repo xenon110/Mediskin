@@ -433,50 +433,52 @@ export default function DoctorDashboard() {
         <div className="main-content-area">
             {selectedGroup ? (
                 <>
-                    {/* Report List Column */}
-                    <div className="report-list-column">
-                        <div className="chat-header-new">
-                            <h3 className="text-xl font-semibold text-gray-800">Reports for {selectedGroup.patientProfile.name}</h3>
-                        </div>
-                        <div className="report-list-container">
-                            <h4 className="report-list-title">Pending Reports ({selectedGroup.reports.filter(r => r.status === 'pending-doctor-review').length})</h4>
-                            <div className="px-4">
-                                {selectedGroup.reports.filter(r => r.status === 'pending-doctor-review').map(report => (
-                                    <div
-                                    key={report.id}
-                                    className={cn("report-card", { "active": selectedReport?.id === report.id })}
-                                    onClick={() => setSelectedReport(report)}
-                                    >
-                                        <div className="font-semibold text-sm">{report.reportName}</div>
-                                        <div className="text-xs text-gray-500">{report.createdAt ? new Date((report.createdAt as any).seconds * 1000).toLocaleString() : ''}</div>
-                                        <Badge className="mt-1" variant={statusMap[report.status]?.variant || 'secondary'}>
-                                            {statusMap[report.status]?.label}
-                                        </Badge>
-                                    </div>
-                                ))}
-                            </div>
-                            
-                            <h4 className="report-list-title">Reviewed Reports ({selectedGroup.reports.filter(r => r.status !== 'pending-doctor-review').length})</h4>
-                            <div className="px-4">
-                                {selectedGroup.reports.filter(r => r.status !== 'pending-doctor-review').map(report => (
-                                    <div
-                                    key={report.id}
-                                    className={cn("report-card", { "active": selectedReport?.id === report.id })}
-                                    onClick={() => setSelectedReport(report)}
-                                    >
-                                        <div className="font-semibold text-sm">{report.reportName}</div>
-                                        <div className="text-xs text-gray-500">{report.createdAt ? new Date((report.createdAt as any).seconds * 1000).toLocaleString() : ''}</div>
-                                        <Badge className="mt-1" variant={statusMap[report.status]?.variant || 'secondary'}>
-                                            {statusMap[report.status]?.label}
-                                        </Badge>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                    <div className="main-content-header">
+                        <h3 className="text-xl font-semibold text-gray-800">Reports for {selectedGroup.patientProfile.name}</h3>
                     </div>
-                    {/* Report Detail Column */}
-                    <div className="report-detail-panel">
-                        <MainChatPanel />
+                    <div className="main-content-body">
+                        {/* Report List Column */}
+                        <div className="report-list-column">
+                            <div className="report-list-container">
+                                <h4 className="report-list-title">Pending Reports ({selectedGroup.reports.filter(r => r.status === 'pending-doctor-review').length})</h4>
+                                <div className="px-4">
+                                    {selectedGroup.reports.filter(r => r.status === 'pending-doctor-review').map(report => (
+                                        <div
+                                        key={report.id}
+                                        className={cn("report-card", { "active": selectedReport?.id === report.id })}
+                                        onClick={() => setSelectedReport(report)}
+                                        >
+                                            <div className="font-semibold text-sm">{report.reportName}</div>
+                                            <div className="text-xs text-gray-500">{report.createdAt ? new Date((report.createdAt as any).seconds * 1000).toLocaleString() : ''}</div>
+                                            <Badge className="mt-1" variant={statusMap[report.status]?.variant || 'secondary'}>
+                                                {statusMap[report.status]?.label}
+                                            </Badge>
+                                        </div>
+                                    ))}
+                                </div>
+                                
+                                <h4 className="report-list-title">Reviewed Reports ({selectedGroup.reports.filter(r => r.status !== 'pending-doctor-review').length})</h4>
+                                <div className="px-4">
+                                    {selectedGroup.reports.filter(r => r.status !== 'pending-doctor-review').map(report => (
+                                        <div
+                                        key={report.id}
+                                        className={cn("report-card", { "active": selectedReport?.id === report.id })}
+                                        onClick={() => setSelectedReport(report)}
+                                        >
+                                            <div className="font-semibold text-sm">{report.reportName}</div>
+                                            <div className="text-xs text-gray-500">{report.createdAt ? new Date((report.createdAt as any).seconds * 1000).toLocaleString() : ''}</div>
+                                            <Badge className="mt-1" variant={statusMap[report.status]?.variant || 'secondary'}>
+                                                {statusMap[report.status]?.label}
+                                            </Badge>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        {/* Report Detail Column */}
+                        <div className="report-detail-panel">
+                            <MainChatPanel />
+                        </div>
                     </div>
                 </>
             ) : (
