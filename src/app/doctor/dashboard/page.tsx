@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -347,4 +348,13 @@ export default function DoctorDashboard() {
                   <div className="flex flex-col h-full items-center justify-center text-center text-gray-500 p-8">
                     <Inbox size={48} className="mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-gray-700">Select a Patient</h3>
-                    <p>Choose a patient from the list on the left to view their case details.</
+                    <p>Choose a patient from the list on the left to view their case details.</p>
+                  </div>
+                )}
+            </div>
+        </main>
+    </div>
+  );
+}
+
+    
