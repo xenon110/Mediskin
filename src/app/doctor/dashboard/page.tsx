@@ -268,18 +268,6 @@ export default function DoctorDashboard() {
                   <Button variant="outline" className="btn-icon gap-2"><Phone size={16}/> Call</Button>
                 </div>
               </div>
-              
-              <div className="report-items">
-                {selectedGroup.reports.map(report => (
-                  <div key={report.id} className={cn('report-item', {'active': selectedReport.id === report.id})} onClick={() => handleSelectReport(report)}>
-                    <div className="report-item-info">
-                      <h4>{report.reportName}</h4>
-                      <p>{new Date((report.createdAt as any).seconds * 1000).toLocaleString()}</p>
-                    </div>
-                    <span className="status-badge status-pending">Pending</span>
-                  </div>
-                ))}
-              </div>
 
               <div className="ai-report-section">
                 <span className="ai-badge"><Bot size={14}/> AI GENERATED REPORT</span>
@@ -343,6 +331,21 @@ export default function DoctorDashboard() {
                 </div>
               </div>
 
+               {/* Horizontal Report Items at the bottom */}
+              <div className="report-items-horizontal-container">
+                  <h3 className="section-title">Patient Case History</h3>
+                  <div className="report-items-horizontal">
+                    {selectedGroup.reports.map(report => (
+                      <div key={report.id} className={cn('report-item-h', {'active': selectedReport.id === report.id})} onClick={() => handleSelectReport(report)}>
+                        <div className="report-item-h-info">
+                          <h4>{report.reportName}</h4>
+                          <p>{new Date((report.createdAt as any).seconds * 1000).toLocaleDateString()}</p>
+                        </div>
+                        <span className="status-badge status-pending">Pending</span>
+                      </div>
+                    ))}
+                  </div>
+              </div>
 
             </div>
           ) : (

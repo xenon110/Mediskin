@@ -550,9 +550,56 @@
     background: #e74c3c;
     color: white;
   }
+
+  .report-items-horizontal-container {
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 2px solid #f1f3f5;
+  }
+  
+  .report-items-horizontal {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding-bottom: 15px;
+  }
+  
+  .report-item-h {
+    background: #f8f9fa;
+    padding: 16px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    width: 220px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    cursor: pointer;
+  }
+
+  .report-item-h.active {
+    border-color: #667eea;
+    background: #f0f3ff;
+  }
+
+  .report-item-h:hover {
+      border-color: #cbd5e0;
+  }
+  .report-item-h-info h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+  }
+  .report-item-h-info p {
+      font-size: 12px;
+      color: #7f8c8d;
+  }
   
   ::-webkit-scrollbar {
       width: 6px;
+      height: 6px;
   }
   ::-webkit-scrollbar-track {
       background: #f1f3f5;
