@@ -496,7 +496,7 @@
     margin: 0 auto;
 }
 
-.login-card, .benefit-card {
+.login-card {
     background: #4B0082; /* Dark Indigo/Purple */
     border: 1px solid #6A5ACD;
     border-radius: 20px;
@@ -505,19 +505,41 @@
     box-shadow: 0 4px 6px rgba(0,0,0,0.2);
 }
 
-.login-card:hover, .benefit-card:hover {
+.login-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
     border-color: #9370DB; /* Medium Purple */
 }
 
-.login-icon, .benefit-icon {
+.benefit-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 2.5rem;
+    transition: all 0.3s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.benefit-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    border-color: #9370DB; /* Medium Purple */
+}
+
+.login-icon {
     font-size: 2.5rem;
     margin-bottom: 1.5rem;
     color: #9370DB; /* Medium Purple */
 }
 
-.login-card h3, .benefit-card h3 {
+.benefit-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    color: #9370DB; /* Medium Purple */
+}
+
+
+.login-card h3 {
     font-size: 1.5rem;
     font-weight: 600;
     color: #FFFFFF;
@@ -525,8 +547,22 @@
     font-family: 'Playfair Display', serif;
 }
 
-.login-card p, .benefit-card p {
+.benefit-card h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #4B0082;
+    margin-bottom: 1rem;
+    font-family: 'Playfair Display', serif;
+}
+
+.login-card p {
     color: #E6E6FA; /* Lavender */
+    line-height: 1.6;
+    margin: 0;
+}
+
+.benefit-card p {
+    color: #6A5ACD;
     line-height: 1.6;
     margin: 0;
 }
@@ -1004,5 +1040,7 @@
     opacity: 0.9;
     box-shadow: 0 4px 15px hsla(var(--primary), 0.3);
 }
+
+    
 
     
