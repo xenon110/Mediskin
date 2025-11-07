@@ -74,7 +74,7 @@ export const createUserProfile = async (uid: string, data: CreateUserProfileData
 
   if (data.role === 'doctor') {
     (userData as Partial<DoctorProfile>).experience = data.experience;
-    (userData as Partial<DoctorProfile>).verificationStatus = 'pending';
+    (userData as Partial<DoctorProfile>).verificationStatus = 'approved';
   }
 
   await setDoc(userRef, userData, { merge: true });
