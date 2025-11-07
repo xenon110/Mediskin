@@ -255,7 +255,7 @@ export default function PatientDashboard() {
     if (auth) {
         await auth.signOut();
         toast({ title: 'Signed Out', description: 'You have been successfully signed out.' });
-        router.push('/login?role=patient');
+        router.push('/');
     }
   };
 

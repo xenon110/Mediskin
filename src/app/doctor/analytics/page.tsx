@@ -64,7 +64,7 @@ export default function DoctorAnalytics() {
     if (auth) {
         await auth.signOut();
         toast({ title: 'Signed Out', description: 'You have been successfully signed out.' });
-        router.push('/login?role=doctor');
+        router.push('/');
     }
   };
 
