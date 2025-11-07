@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader2, Send, ChevronLeft, Star, Stethoscope } from 'lucide-react';
+import { Loader2, Send, ChevronLeft, Star, Stethoscope, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getDoctors, getReportsForPatient, sendReportToDoctor, DoctorProfile, Report } from '@/lib/firebase-services';
 import { auth } from '@/lib/firebase';
