@@ -29,7 +29,7 @@ const signupSchema = z.object({
   region: z.string().min(1, 'Please select your state.'),
   mobile: z.string().regex(/^\d{10}$/, 'Please enter a valid 10-digit mobile number.'),
   email: z.string().email().regex(/^[a-zA-Z0-9._%+-]+@gmail\.com$/, 'Please enter a valid Gmail address.'),
-  password: z.string().min(6, 'Password must be at least 6 characters.'),
+  password: z.string(),
 });
 
 
@@ -199,7 +199,7 @@ export default function SignupForm() {
                 <FormItem><FormLabel>Gmail Address</FormLabel><FormControl><Input type="email" placeholder="you@gmail.com" {...field} /></FormControl><FormMessage /></FormItem>
               )} />
               <FormField control={form.control} name="password" render={({ field }) => (
-                <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormItem>
               )} />
 
               <Button type="submit" disabled={isLoading} className="w-full bg-primary text-primary-foreground">
