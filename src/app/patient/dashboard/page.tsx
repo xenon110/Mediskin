@@ -318,9 +318,6 @@ export default function PatientDashboard() {
                 <Link href="/patient/reports">My Reports</Link>
                 <Link href="/patient/consult">Consult</Link>
                 <Link href="/help">Contact</Link>
-                <Button variant="ghost" onClick={handleSignOut} className="text-muted-foreground hover:text-primary">
-                    <LogOut className="mr-2 h-4 w-4" /> Sign Out
-                </Button>
                 <button className="emergency-btn" onClick={handleEmergencyClick}>🚨 Emergency</button>
             </nav>
         </header>
@@ -461,3 +458,5 @@ export default function PatientDashboard() {
     </>
   );
 }
+
+    

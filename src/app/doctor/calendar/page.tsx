@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -75,7 +76,7 @@ export default function DoctorCalendar() {
     if (auth) {
         await auth.signOut();
         toast({ title: 'Signed Out', description: 'You have been successfully signed out.' });
-        router.push('/login?role=doctor');
+        router.push('/');
     }
   };
 
@@ -220,3 +221,5 @@ export default function DoctorCalendar() {
     </div>
   );
 }
+
+    
