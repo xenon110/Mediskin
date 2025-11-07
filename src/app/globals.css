@@ -305,7 +305,7 @@
 
 /* ===== LANDING PAGE STYLES ===== */
 .landing-body {
-    background: linear-gradient(135deg, #1f2937, #111827);
+    background: linear-gradient(135deg, #667eea, #764ba2);
     color: #e5e7eb;
     font-family: 'Inter', sans-serif;
 }
@@ -1125,4 +1125,3 @@
 .fade-in-up {
     animation: fade-in-up 0.5s ease-out forwards;
 }
-
