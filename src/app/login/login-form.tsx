@@ -111,19 +111,19 @@ export default function LoginForm() {
   return (
     <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-login">
       <Card className="w-full max-w-md shadow-2xl">
-        <CardHeader className="text-center">
-          <CardTitle className="font-headline text-3xl">Login</CardTitle>
+        <CardHeader className="text-center space-y-2">
+          <CardTitle className="text-3xl font-bold">Login</CardTitle>
           <CardDescription>
-            Access your {role} account.
+            Enter your credentials to access your {role} account.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <FormField control={form.control} name="email" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Email</FormLabel>
-                        <FormControl><Input type="email" placeholder="you@example.com" {...field} /></FormControl>
+                        <FormControl><Input type="email" placeholder="xyz@gmail.com" {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -136,16 +136,16 @@ export default function LoginForm() {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" disabled={isLoading} className="w-full bg-gradient-login text-white">
-                    {isLoading ? <Loader2 className="animate-spin" /> : 'Login with Email'}
+                  <Button type="submit" disabled={isLoading} className="w-full bg-primary text-primary-foreground">
+                    {isLoading ? <Loader2 className="animate-spin" /> : 'Login'}
                   </Button>
               </form>
             </Form>
         </CardContent>
-        <CardFooter className="flex flex-col items-stretch gap-4">
+        <CardFooter className="flex flex-col items-center gap-4">
           <div className="text-center text-sm text-muted-foreground">
             Don't have an account?{' '}
-            <Button variant="link" asChild className="p-0 h-auto">
+            <Button variant="link" asChild className="p-0 h-auto font-semibold">
               <Link href={`/signup?role=${role}`}>Sign up</Link>
             </Button>
           </div>

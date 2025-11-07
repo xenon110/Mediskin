@@ -980,7 +980,7 @@
 
 /* Login Page */
 .bg-gradient-login {
-  background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--secondary)) 100%);
+  background-color: #6A5ACD;
 }
 
 
