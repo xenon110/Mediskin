@@ -333,9 +333,9 @@ export default function DoctorDashboard() {
                             </div>
                             <h3 className="text-xl font-bold text-white p-4 bg-primary-darker rounded-b-lg -mt-1">{selectedReport.reportName}</h3>
                            
-                            {selectedReport.aiReport.photoDataUri && (
+                            {selectedReport.photoDataUri && (
                                  <div className="relative w-full aspect-video rounded-lg overflow-hidden border">
-                                     <Image src={selectedReport.aiReport.photoDataUri} alt="Patient's skin condition" layout="fill" objectFit="contain" />
+                                     <Image src={selectedReport.photoDataUri} alt="Patient's skin condition" layout="fill" objectFit="contain" />
                                  </div>
                             )}
 
@@ -426,5 +426,6 @@ export default function DoctorDashboard() {
     </div>
   );
 }
+
 
     

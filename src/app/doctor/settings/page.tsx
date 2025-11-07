@@ -9,7 +9,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useRouter, usePathname } from "next/navigation";
-import { LogOut, FileText, Settings, MessageSquare, LayoutGrid, User } from "lucide-react";
+import { LogOut, FileText, Settings, MessageSquare, LayoutGrid, User, CalendarIcon } from "lucide-react";
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -32,6 +32,7 @@ export default function SettingsPage() {
   const sidebarNavItems = [
     { href: '/doctor/dashboard', icon: MessageSquare, title: 'Patient Cases' },
     { href: '/doctor/analytics', icon: LayoutGrid, title: 'Analytics' },
+    { href: '/doctor/calendar', icon: CalendarIcon, title: 'Calendar' },
     { href: '/doctor/settings', icon: Settings, title: 'Settings' },
   ];
 
