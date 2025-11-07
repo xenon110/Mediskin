@@ -211,8 +211,10 @@ export default function ReportPage() {
                     {report.photoDataUri && (
                     <section>
                         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Camera /> Uploaded Image</h2>
-                        <div className="relative w-full aspect-video rounded-lg overflow-hidden border-2 border-border">
-                            <Image src={report.photoDataUri} alt="Uploaded skin condition" layout="fill" objectFit="contain" />
+                        <div className="flex justify-center">
+                            <div className="relative w-full max-w-lg h-96 rounded-lg overflow-hidden border-4 border-black shadow-lg">
+                                <Image src={report.photoDataUri} alt="Uploaded skin condition" layout="fill" objectFit="contain" />
+                            </div>
                         </div>
                     </section>
                     )}
