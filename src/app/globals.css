@@ -11,13 +11,13 @@
     --card-foreground: 224 71.4% 4.1%;
     --popover: 0 0% 100%;
     --popover-foreground: 224 71.4% 4.1%;
-    --primary: 255 75% 58%; /* Corresponds to #667eea */
+    --primary: 217 91% 60%; /* Corresponds to a nice blue */
     --primary-foreground: 210 20% 98%;
     --secondary: 220 14.3% 95.9%;
     --secondary-foreground: 220.9 39.3% 11%;
     --muted: 220 14.3% 95.9%; /* Corresponds to #f8f9fa */
     --muted-foreground: 220 8.9% 46.1%; /* Corresponds to #6c757d */
-    --accent: 275 82% 66%; /* A gentle teal, corresponds to #4DB6AC -> Changed to a violet for gradient */
+    --accent: 217 91% 60%; /* Same as primary for a monolithic blue theme */
     --accent-foreground: 210 20% 98%;
     --destructive: 0 84.2% 60.2%; /* Corresponds to #e74c3c */
     --destructive-foreground: 210 20% 98%;
@@ -27,7 +27,7 @@
     --warning-foreground: 40 93% 25%;
     --border: 220 13% 91%; /* Corresponds to #e1e8ed */
     --input: 220 13% 91%;
-    --ring: 255 75% 58%;
+    --ring: 217 91% 60%;
     --chart-1: 221.2 83.2% 53.3%;
     --chart-2: 142.1 76.2% 36.3%;
     --chart-3: 0 84.2% 60.2%;
@@ -40,13 +40,13 @@
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 255 75% 58%;
+    --primary: 217 91% 60%;
     --primary-foreground: 210 20% 98%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 275 82% 76%;
+    --accent: 217 91% 76%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
@@ -56,7 +56,7 @@
     --warning-foreground: 240 5.9% 10%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 255 75% 58%;
+    --ring: 217 91% 60%;
     --chart-1: 221.2 83.2% 53.3%;
     --chart-2: 142.1 76.2% 36.3%;
     --chart-3: 0 84.2% 60.2%;
@@ -308,7 +308,7 @@
 
 /* ===== LANDING PAGE STYLES ===== */
 .landing-body {
-    background: #6366f1;
+    background-color: #111827; /* Dark Gray */
     color: #e5e7eb;
     font-family: 'Inter', sans-serif;
 }
@@ -340,7 +340,7 @@
 .landing-logo-icon {
     width: 40px;
     height: 40px;
-    background: linear-gradient(135deg, #818cf8, #a78bfa);
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -363,7 +363,7 @@
     height: 2px;
     bottom: -5px;
     left: 0;
-    background: linear-gradient(135deg, #818cf8, #a78bfa);
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
     transition: width 0.3s;
 }
 
@@ -438,20 +438,19 @@
 }
 
 .cta-btn {
-    background: linear-gradient(135deg, #818cf8, #a78bfa);
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
     color: white;
     padding: 1.2rem 3rem;
     font-size: 1.1rem;
     font-weight: 600;
     border-radius: 9999px;
     transition: all 0.3s;
-    box-shadow: 0 4px 20px rgba(129, 140, 248, 0.4);
-    animation: fade-in-up 1.1s ease-out;
+    box-shadow: 0 4px 20px hsla(var(--primary), 0.4);
 }
 
 .cta-btn:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 25px rgba(129, 140, 248, 0.5);
+    box-shadow: 0 6px 25px hsla(var(--primary), 0.5);
 }
 
 .login-section, .why-choose {
@@ -460,7 +459,7 @@
 }
 
 .why-choose {
-    background: #6366f1;
+    background-color: #1F2937; /* Lighter Gray for contrast */
 }
 
 .login-section h2, .why-choose h2 {
@@ -486,7 +485,7 @@
 }
 
 .login-card, .benefit-card {
-    background: rgba(255, 255, 255, 0.05);
+    background: #374151; /* Darker card background */
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 2.5rem;
@@ -495,7 +494,7 @@
 
 .login-card:hover, .benefit-card:hover {
     transform: translateY(-5px);
-    border-color: #a78bfa;
+    border-color: hsl(var(--accent));
 }
 
 .login-icon, .benefit-icon {
@@ -535,7 +534,7 @@
 
 .feature-list li::before {
     content: '✓';
-    color: #a78bfa;
+    color: hsl(var(--accent));
     font-weight: bold;
     font-size: 1rem;
 }
@@ -552,7 +551,7 @@
 }
 
 .patient-btn {
-    background: linear-gradient(135deg, #818cf8, #a78bfa);
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
     color: white;
 }
 
@@ -562,7 +561,7 @@
 }
 
 .patient-btn:hover {
-    box-shadow: 0 4px 20px rgba(167, 139, 250, 0.4);
+    box-shadow: 0 4px 20px hsla(var(--accent), 0.4);
 }
 
 .doctor-btn:hover {
@@ -570,7 +569,7 @@
 }
 
 .landing-footer {
-    background: #6366f1;
+    background-color: #111827;
     padding: 3rem 5%;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     text-align: center;
@@ -929,7 +928,7 @@
 
 /* Login Page */
 .bg-gradient-login {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--secondary)) 100%);
 }
 
 
@@ -959,4 +958,33 @@
 
 .fade-in-up {
     animation: fade-in-up 0.5s ease-out forwards;
+}
+
+.consult-page-bg {
+    background-color: #f3f4f8; /* A light gray-blue background */
+}
+
+.doctor-card-consult {
+    background: white;
+    border-radius: 1.5rem; /* More rounded corners */
+    overflow: hidden;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease-in-out;
+    border: 1px solid transparent;
+}
+
+.doctor-card-consult:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border-color: hsl(var(--primary));
+}
+
+.gradient-btn-consult {
+    background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--accent)));
+    transition: all 0.3s ease-in-out;
+}
+
+.gradient-btn-consult:hover {
+    opacity: 0.9;
+    box-shadow: 0 4px 15px hsla(var(--primary), 0.3);
 }
