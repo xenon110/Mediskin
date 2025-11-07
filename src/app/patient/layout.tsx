@@ -32,22 +32,10 @@ export default function PatientLayout({
           
           if (userProfile && userProfile.role === 'patient') {
             const patientProfile = userProfile as PatientProfile;
-            // If the profile is NOT complete and they aren't already on the complete-profile page...
-            if (!isProfileComplete(patientProfile) && pathname !== '/patient/complete-profile') {
-                // ...redirect them to complete it.
-                router.replace('/patient/complete-profile');
-                // No need to set loading to false, redirect will handle it.
-                return;
-            }
             
-            // If the profile IS complete and they are trying to access the complete-profile page...
-            if(isProfileComplete(patientProfile) && pathname === '/patient/complete-profile'){
-                //...redirect them to the dashboard.
-                router.replace('/patient/dashboard');
-                return;
-            }
-
+            // If profile is complete, they are authorized.
             setIsAuthorized(true);
+
           } else {
             // This user is not a patient, or has no profile.
             toast({

@@ -13,16 +13,15 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import { Loader2, UploadCloud } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
-import { createUserProfile, uploadVerificationDocument } from '@/lib/firebase-services';
+import { createUserProfile } from '@/lib/firebase-services';
 import { indianStates } from '@/lib/indian-states';
 import { FirebaseError } from 'firebase/app';
 import { Separator } from '@/components/ui/separator';
 
-// Patient schema, no document validation
-const patientSchema = z.object({
+const signupSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
   age: z.coerce.number().min(1, 'Age must be a positive number.').max(120),
   gender: z.string().min(1, 'Please select a gender.'),
@@ -31,25 +30,9 @@ const patientSchema = z.object({
   mobile: z.string().regex(/^\d{10}$/, 'Please enter a valid 10-digit mobile number.'),
   email: z.string().email().regex(/^[a-zA-Z0-9._%+-]+@gmail\.com$/, 'Please enter a valid Gmail address.'),
   password: z.string().min(6, 'Password must be at least 6 characters.'),
-  degree: z.any().optional(),
-  license: z.any().optional(),
 });
 
-// Doctor schema, requires document validation
-const doctorSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters.'),
-  age: z.coerce.number().min(1, 'Age must be a positive number.').max(120),
-  gender: z.string().min(1, 'Please select a gender.'),
-  skinTone: z.string().min(1, 'Please select your skin tone.'),
-  region: z.string().min(1, 'Please select your state.'),
-  mobile: z.string().regex(/^\d{10}$/, 'Please enter a valid 10-digit mobile number.'),
-  email: z.string().email().regex(/^[a-zA-Z0-9._%+-]+@gmail\.com$/, 'Please enter a valid Gmail address.'),
-  password: z.string().min(6, 'Password must be at least 6 characters.'),
-  degree: z.any().refine(files => files?.length > 0, 'Degree certificate is required.'),
-  license: z.any().refine(files => files?.length > 0, 'Medical license is required.'),
-});
-
-type SignupFormValues = z.infer<typeof patientSchema> | z.infer<typeof doctorSchema>;
+type SignupFormValues = z.infer<typeof signupSchema>;
 
 
 export default function SignupForm() {
@@ -59,12 +42,11 @@ export default function SignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const role = searchParams.get('role') === 'doctor' ? 'doctor' : 'patient';
 
-  // Choose schema based on role
   const form = useForm<SignupFormValues>({
-    resolver: zodResolver(role === 'doctor' ? doctorSchema : patientSchema),
+    resolver: zodResolver(signupSchema),
     defaultValues: {
       name: '',
-      age: '' as any,
+      age: 0,
       gender: '',
       skinTone: '',
       region: '',
@@ -86,35 +68,21 @@ export default function SignupForm() {
         return;
     }
     
-    if (role === 'doctor' && (!data.degree || !data.degree[0] || !data.license || !data.license[0])) {
-        toast({ variant: 'destructive', title: 'Missing Documents', description: 'Please upload both your degree and license.' });
-        setIsLoading(false);
-        return;
-    }
-
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
         const user = userCredential.user;
 
         await createUserProfile(user.uid, { ...data, role: role as 'patient' | 'doctor', experience: 0 });
         
+        toast({
+            title: 'Account Created!',
+            description: "You've been successfully signed up.",
+        });
+
         if (role === 'doctor') {
-            await Promise.all([
-                uploadVerificationDocument(user.uid, data.degree[0], 'degree'),
-                uploadVerificationDocument(user.uid, data.license[0], 'license')
-            ]);
-             toast({
-                title: 'Account Created!',
-                description: "Your verification is pending approval. You'll be notified once it's complete.",
-            });
-             await auth.signOut();
-             router.push('/login?role=doctor');
+            router.push('/doctor/dashboard');
         } else {
-             toast({
-                title: 'Account Created!',
-                description: "You've been successfully signed up.",
-            });
-            router.push('/patient/complete-profile');
+            router.push('/patient/dashboard');
         }
 
     } catch (error) {
@@ -137,26 +105,6 @@ export default function SignupForm() {
     }
   };
   
-  const FileUploadInput = ({ field, label }: { field: any, label: string }) => (
-    <FormItem className="flex flex-col">
-        <FormLabel>{label}</FormLabel>
-        <FormControl>
-            <div className="relative">
-                <Input 
-                    type="file" 
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    onChange={(e) => field.onChange(e.target.files)}
-                />
-                <div className="flex items-center justify-center gap-2 h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-muted-foreground">
-                    <UploadCloud className="h-4 w-4" />
-                    <span>{field.value?.[0]?.name || `Choose ${label.toLowerCase()} file...`}</span>
-                </div>
-            </div>
-        </FormControl>
-        <FormMessage />
-    </FormItem>
-  );
-
   return (
     <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-subtle">
       <Card className="w-full max-w-2xl shadow-2xl">
@@ -226,16 +174,6 @@ export default function SignupForm() {
                     </FormItem>
                   )} />
               </div>
-              
-              {role === 'doctor' && (
-                <>
-                  <Separator />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField control={form.control} name="degree" render={({ field }) => <FileUploadInput field={field} label="Upload Degree" />} />
-                    <FormField control={form.control} name="license" render={({ field }) => <FileUploadInput field={field} label="Upload License" />} />
-                  </div>
-                </>
-              )}
 
               <Separator />
 
