@@ -24,12 +24,7 @@ const TranslateReportOutputSchema = z.object({
     name: z.string().describe('The translated name of the potential skin condition.'),
     description: z.string().describe('The translated brief description of the condition.'),
   })),
-  report: z.object({
-    primaryDiagnosis: z.string().describe("The translated primary diagnosis."),
-    detailedSummary: z.string().describe("The translated 4-5 line detailed summary."),
-    keyObservations: z.string().describe("The translated key observations."),
-    severityAssessment: z.string().describe("The translated severity assessment.")
-  }).describe('The translated structured summary of the analysis and findings.'),
+  report: z.string().describe('The translated detailed analysis of the condition.'),
   homeRemedies: z.string().describe('The translated applicable home remedies.'),
   medicalRecommendation: z.string().describe('The translated general medical advice or dermatologist recommendation.'),
 });
@@ -59,10 +54,7 @@ const prompt = ai.definePrompt({
   {{/each}}
 
   **Detailed Analysis:**
-  - Primary Diagnosis: {{{report.report.primaryDiagnosis}}}
-  - Detailed Summary: {{{report.report.detailedSummary}}}
-  - Key Observations: {{{report.report.keyObservations}}}
-  - Severity Assessment: {{{report.report.severityAssessment}}}
+  {{{report.report}}}
 
   **Home Remedies:**
   {{{report.homeRemedies}}}
