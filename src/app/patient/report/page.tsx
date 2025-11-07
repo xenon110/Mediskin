@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, AlertTriangle, FileText, Pill, Home, Stethoscope, Languages, ChevronLeft, Download, Camera } from 'lucide-react';
+import { Loader2, AlertTriangle, FileText, Pill, Home, Stethoscope, Languages, ChevronLeft, Download, Camera, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -212,7 +212,7 @@ export default function ReportPage() {
                     <section>
                         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Camera /> Uploaded Image</h2>
                         <div className="flex justify-center">
-                            <div className="relative w-full max-w-lg h-96 rounded-lg overflow-hidden border-4 border-black shadow-lg">
+                             <div className="relative w-full max-w-lg h-96 rounded-lg overflow-hidden border-4 border-black shadow-lg">
                                 <Image src={report.photoDataUri} alt="Uploaded skin condition" layout="fill" objectFit="contain" />
                             </div>
                         </div>
@@ -277,13 +277,13 @@ export default function ReportPage() {
 
                     {report.aiReport.doctorConsultationSuggestion && (
                          <div className="!mt-12 text-center print-hidden">
-                             <Card className="bg-gradient-to-r from-primary/10 to-accent/10 p-6 inline-block">
-                                <h3 className="text-xl font-bold mb-2">Doctor Consultation Recommended</h3>
-                                <p className="text-muted-foreground mb-4">Based on the analysis, we recommend sharing this report with a doctor.</p>
-                                <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => router.push('/patient/consult')}>
-                                    <Stethoscope className="mr-2"/> Consult a Doctor Now
+                             <div className="bg-gradient-to-r from-primary to-accent p-8 rounded-lg inline-block text-white shadow-lg">
+                                <h3 className="text-2xl font-bold mb-2">Doctor Consultation Recommended</h3>
+                                <p className="opacity-90 mb-6 max-w-xl mx-auto">Based on the analysis, we recommend scheduling a consultation with a dermatologist for proper diagnosis and treatment plan.</p>
+                                <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-white/90" onClick={() => router.push('/patient/consult')}>
+                                    <Calendar className="mr-2 h-4 w-4"/> Schedule Consultation
                                 </Button>
-                             </Card>
+                             </div>
                          </div>
                     )}
                 </CardContent>
