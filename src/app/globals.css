@@ -305,7 +305,7 @@
 
 /* ===== LANDING PAGE STYLES ===== */
 .landing-body {
-    background: #111827;
+    background: #6366f1;
     color: #e5e7eb;
     font-family: 'Inter', sans-serif;
 }
@@ -337,7 +337,7 @@
 .landing-logo-icon {
     width: 40px;
     height: 40px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -360,7 +360,7 @@
     height: 2px;
     bottom: -5px;
     left: 0;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
     transition: width 0.3s;
 }
 
@@ -410,7 +410,7 @@
 
 .landing-hero p {
     font-size: 1.2rem;
-    color: #9ca3af;
+    color: #d1d5db;
     max-width: 600px;
     margin-bottom: 2.5rem;
     animation: fade-in-up 0.7s ease-out;
@@ -426,29 +426,29 @@
 }
 
 .feature-btn {
-    background: rgba(55, 65, 81, 0.5);
-    color: #d1d5db;
+    background: rgba(255, 255, 255, 0.1);
+    color: #e5e7eb;
     padding: 0.6rem 1.2rem;
     border-radius: 9999px;
     font-weight: 500;
-    border: 1px solid rgba(75, 85, 99, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .cta-btn {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
     color: white;
     padding: 1.2rem 3rem;
     font-size: 1.1rem;
     font-weight: 600;
     border-radius: 9999px;
     transition: all 0.3s;
-    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 20px rgba(129, 140, 248, 0.4);
     animation: fade-in-up 1.1s ease-out;
 }
 
 .cta-btn:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+    box-shadow: 0 6px 25px rgba(129, 140, 248, 0.5);
 }
 
 .login-section, .why-choose {
@@ -457,7 +457,7 @@
 }
 
 .why-choose {
-    background: #111827;
+    background: #6366f1;
 }
 
 .login-section h2, .why-choose h2 {
@@ -468,7 +468,7 @@
 }
 
 .login-section p, .why-choose p {
-    color: #9ca3af;
+    color: #d1d5db;
     font-size: 1.1rem;
     max-width: 600px;
     margin: 0 auto 3rem;
@@ -483,8 +483,8 @@
 }
 
 .login-card, .benefit-card {
-    background: #1f2937;
-    border: 1px solid #374151;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 2.5rem;
     transition: all 0.3s;
@@ -492,7 +492,7 @@
 
 .login-card:hover, .benefit-card:hover {
     transform: translateY(-5px);
-    border-color: #667eea;
+    border-color: #a78bfa;
 }
 
 .login-icon, .benefit-icon {
@@ -508,7 +508,7 @@
 }
 
 .login-card p, .benefit-card p {
-    color: #9ca3af;
+    color: #d1d5db;
     line-height: 1.6;
     margin: 0;
 }
@@ -532,7 +532,7 @@
 
 .feature-list li::before {
     content: '✓';
-    color: #667eea;
+    color: #a78bfa;
     font-weight: bold;
     font-size: 1rem;
 }
@@ -549,27 +549,27 @@
 }
 
 .patient-btn {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
     color: white;
 }
 
 .doctor-btn {
-    background: #374151;
+    background: rgba(255, 255, 255, 0.1);
     color: #e5e7eb;
 }
 
 .patient-btn:hover {
-    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 20px rgba(167, 139, 250, 0.4);
 }
 
 .doctor-btn:hover {
-    background: #4b5563;
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .landing-footer {
-    background: #111827;
+    background: #6366f1;
     padding: 3rem 5%;
-    border-top: 1px solid #374151;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     text-align: center;
 }
 
@@ -581,7 +581,7 @@
 }
 
 .footer-links a {
-    color: #9ca3af;
+    color: #d1d5db;
     text-decoration: none;
     transition: color 0.3s;
 }
@@ -591,7 +591,7 @@
 }
 
 .footer-bottom p {
-    color: #6b7280;
+    color: #d1d5db;
     font-size: 0.9rem;
 }
 
@@ -725,7 +725,7 @@
 .new-dashboard-bg .upload-icon-large {
     width: 60px;
     height: 60px;
-    background: linear-gradient(45deg, #a0aec0, #718096);
+    background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--accent)));
     color: white;
     border-radius: 50%;
     display: flex;
@@ -816,11 +816,13 @@
 .new-dashboard-bg .voice-btn:hover { background: #cbd5e0; }
 
 .new-dashboard-bg .send-btn {
-    background: #4a5568;
+    background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--accent)));
     color: white;
     padding: 0 1.5rem;
 }
-.new-dashboard-bg .send-btn:hover { background: #2d3748; }
+.new-dashboard-bg .send-btn:hover { 
+    opacity: 0.9;
+}
 
 .new-dashboard-bg .analyze-btn {
     width: 100%;
