@@ -25,7 +25,7 @@ const signupSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
   age: z.coerce.number().min(1, 'Age must be a positive number.').max(120),
   gender: z.string().min(1, 'Please select a gender.'),
-  skinTone: z.string().min(1, 'Please select a skin tone.'),
+  skinTone: z.string().min(1, 'Please select your skin tone.'),
   region: z.string().min(1, 'Please select your state.'),
   mobile: z.string().regex(/^\d{10}$/, 'Please enter a valid 10-digit mobile number.'),
   email: z.string().email().regex(/^[a-zA-Z0-9._%+-]+@gmail\.com$/, 'Please enter a valid Gmail address.'),
@@ -48,7 +48,7 @@ export default function SignupForm() {
     resolver: zodResolver(signupSchema),
     defaultValues: {
       name: '',
-      age: undefined,
+      age: '' as any,
       gender: '',
       skinTone: '',
       region: '',
@@ -247,5 +247,3 @@ export default function SignupForm() {
     </div>
   );
 }
-
-    

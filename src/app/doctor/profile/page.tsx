@@ -46,6 +46,13 @@ export default function ProfilePage() {
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
+    defaultValues: {
+      name: '',
+      age: '' as any,
+      gender: '',
+      experience: '' as any,
+      specialization: 'Dermatology',
+    }
   });
 
   useEffect(() => {
