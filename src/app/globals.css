@@ -944,8 +944,8 @@
 }
 
 /* Consult Page */
-.new-consult-bg {
-    background-color: #eef2ff;
+.consult-page-bg {
+    background-color: #f8f9fa;
 }
 
 .page-container {
@@ -974,7 +974,8 @@
 }
 
 .back-button:hover {
-    background-color: #e0e7ff;
+    background-color: #eef2ff;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
 .page-header {
@@ -984,115 +985,91 @@
 .page-title {
     font-size: 2.5rem;
     font-weight: 800;
-    color: #312e81;
+    color: #1f2937;
 }
 
 .page-subtitle {
-    color: #64748b;
+    color: #6b7280;
     font-size: 1.125rem;
     margin-top: 0.5rem;
 }
 
 .doctors-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 1.5rem;
 }
 
-.doctor-card {
+.consult-doctor-card {
     background: #fff;
-    border-radius: 1.5rem;
+    border-radius: 1rem;
     padding: 1.5rem;
-    border: 1px solid #e0e7ff;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
     transition: all 0.3s ease;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
+    display: flex;
 }
 
-.doctor-card:hover {
+.consult-doctor-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-    border-color: #a5b4fc;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    border-color: #d1d5db;
 }
 
-.status-indicator {
-    position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
-    width: 12px;
-    height: 12px;
-    background-color: #22c55e;
-    border-radius: 9999px;
-    border: 2px solid #fff;
-}
-
-.doctor-info {
+.consult-doctor-info {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    width: 100%;
 }
 
-.doctor-avatar {
-    width: 80px;
-    height: 80px;
+.consult-doctor-avatar {
+    width: 56px;
+    height: 56px;
     background: linear-gradient(135deg, #818cf8, #a78bfa);
     color: #fff;
-    border-radius: 1.25rem;
+    border-radius: 0.75rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
-    font-weight: 700;
+    font-size: 1.5rem;
+    font-weight: 600;
     flex-shrink: 0;
 }
 
-.doctor-details {
-    flex-grow: 1;
-}
-
-.doctor-name {
-    font-size: 1.5rem;
+.consult-doctor-name {
+    font-size: 1.25rem;
     font-weight: 700;
-    color: #312e81;
+    color: #111827;
 }
 
-.doctor-specialty {
-    color: #4f46e5;
-    font-weight: 600;
-    margin-top: 0.25rem;
+.consult-doctor-specialty {
+    color: #6b7280;
+    font-weight: 500;
+    margin-top: 0.125rem;
+    font-size: 0.9rem;
 }
 
-.doctor-rating {
+.consult-doctor-rating {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-top: 0.75rem;
-    color: #64748b;
-}
-
-.stars {
-    display: flex;
-    color: #f59e0b;
-}
-
-.star.fill-current {
-    fill: #f59e0b;
+    margin-top: 1rem;
+    color: #4b5563;
 }
 
 .rating-text {
     font-size: 0.875rem;
     font-weight: 500;
+    color: #6b7280;
 }
 
-.send-report-btn {
+.consult-send-report-btn {
     margin-top: auto;
     width: 100%;
-    background-color: #4f46e5;
+    background: linear-gradient(to right, #818cf8, #6366f1);
     color: #fff;
     padding: 0.75rem;
-    border-radius: 0.75rem;
+    border-radius: 0.5rem;
     font-weight: 600;
     display: flex;
     align-items: center;
@@ -1100,18 +1077,22 @@
     gap: 0.5rem;
     border: none;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
     margin-top: 1.5rem;
 }
 
-.send-report-btn:hover {
-    background-color: #4338ca;
+.consult-send-report-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
 
-.send-report-btn:disabled {
-    background-color: #a5b4fc;
+.consult-send-report-btn:disabled {
+    background: #a5b4fc;
     cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
+
 
 @keyframes fade-in-up {
     from {
