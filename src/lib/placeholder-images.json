@@ -1,4 +1,3 @@
-
 {
   "placeholderImages": [
     {
@@ -6,6 +5,54 @@
       "description": "A doctor reviews medical data on a futuristic interface, representing AI in healthcare.",
       "imageUrl": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=2070&h=1380&auto=format&fit=crop",
       "imageHint": "doctor technology"
+    },
+    {
+      "id": "slider-1",
+      "description": "A doctor and patient in consultation.",
+      "imageUrl": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=800&h=600&auto=format&fit=crop",
+      "imageHint": "doctor patient"
+    },
+    {
+      "id": "slider-2",
+      "description": "A scientist looking through a microscope.",
+      "imageUrl": "https://images.unsplash.com/photo-1578496479532-347458155217?q=80&w=800&h=600&auto=format&fit=crop",
+      "imageHint": "scientist microscope"
+    },
+    {
+      "id": "slider-3",
+      "description": "Close-up of a skin condition being examined.",
+      "imageUrl": "https://images.unsplash.com/photo-1621484526363-239e76453f6c?q=80&w=800&h=600&auto=format&fit=crop",
+      "imageHint": "skin dermatology"
+    },
+    {
+      "id": "slider-4",
+      "description": "A team of doctors collaborating.",
+      "imageUrl": "https://images.unsplash.com/photo-1538108149393-fbbd81895907?q=80&w=800&h=600&auto=format&fit=crop",
+      "imageHint": "doctors team"
+    },
+    {
+      "id": "slider-5",
+      "description": "A diverse group of patients.",
+      "imageUrl": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800&h=600&auto=format&fit=crop",
+      "imageHint": "people diverse"
+    },
+    {
+      "id": "slider-6",
+      "description": "Medical professional using a tablet.",
+      "imageUrl": "https://images.unsplash.com/photo-1584515933487-779824d29219?q=80&w=800&h=600&auto=format&fit=crop",
+      "imageHint": "doctor tablet"
+    },
+    {
+      "id": "slider-7",
+      "description": "A close-up of a human eye.",
+      "imageUrl": "https://images.unsplash.com/photo-1528825709944-7c5f87034a5f?q=80&w=800&h=600&auto=format&fit=crop",
+      "imageHint": "eye macro"
+    },
+    {
+      "id": "slider-8",
+      "description": "DNA strand visualization.",
+      "imageUrl": "https://images.unsplash.com/photo-1533750349088-24757b85b546?q=80&w=800&h=600&auto=format&fit=crop",
+      "imageHint": "dna science"
     },
     {
       "id": "resource-center-banner",

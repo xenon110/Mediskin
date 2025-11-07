@@ -308,8 +308,8 @@
 
 /* ===== LANDING PAGE STYLES ===== */
 .landing-body {
-    background-color: #111827; /* Dark Gray */
-    color: #e5e7eb;
+    background-color: #f9fafb;
+    color: #1f2937;
     font-family: 'Inter', sans-serif;
 }
 
@@ -322,10 +322,10 @@
     justify-content: space-between;
     align-items: center;
     padding: 1.5rem 5%;
-    background: rgba(17, 24, 39, 0.8);
+    background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     z-index: 100;
-    border-bottom: 1px solid rgba(55, 65, 81, 0.5);
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .landing-logo {
@@ -334,7 +334,7 @@
     gap: 0.5rem;
     font-size: 1.5rem;
     font-weight: 700;
-    color: white;
+    color: #111827;
 }
 
 .landing-logo-icon {
@@ -346,14 +346,16 @@
     align-items: center;
     justify-content: center;
     font-weight: 800;
+    color: white;
 }
 
 .landing-nav a {
-    color: #d1d5db;
+    color: #4b5563;
     text-decoration: none;
     font-weight: 500;
     transition: color 0.3s;
     position: relative;
+    margin: 0 0.75rem;
 }
 
 .landing-nav a::after {
@@ -368,7 +370,7 @@
 }
 
 .landing-nav a:hover {
-    color: white;
+    color: hsl(var(--primary));
 }
 
 .landing-nav a:hover::after {
@@ -398,13 +400,13 @@
     justify-content: center;
     text-align: center;
     padding: 5%;
-    background: url('/hero-bg.svg') no-repeat center center / cover;
+    background: radial-gradient(circle at top, #ffffff, #f0f8ff);
 }
 
 .landing-hero h1 {
     font-size: 4rem;
     font-weight: 800;
-    color: white;
+    color: #1f2937;
     max-width: 800px;
     margin-bottom: 1.5rem;
     line-height: 1.2;
@@ -413,7 +415,7 @@
 
 .landing-hero p {
     font-size: 1.2rem;
-    color: #d1d5db;
+    color: #4b5563;
     max-width: 600px;
     margin-bottom: 2.5rem;
     animation: fade-in-up 0.7s ease-out;
@@ -429,12 +431,12 @@
 }
 
 .feature-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: #e5e7eb;
+    background: #ffffff;
+    color: #4b5563;
     padding: 0.6rem 1.2rem;
     border-radius: 9999px;
     font-weight: 500;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid #e5e7eb;
 }
 
 .cta-btn {
@@ -459,18 +461,25 @@
 }
 
 .why-choose {
-    background-color: #1F2937; /* Lighter Gray for contrast */
+    background-color: #f0f8ff; /* Very light blue */
+}
+
+.image-slider-section {
+    padding: 4rem 0;
+    background-color: #ffffff;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .login-section h2, .why-choose h2 {
     font-size: 2.5rem;
     font-weight: 700;
-    color: white;
+    color: #1f2937;
     margin-bottom: 1rem;
 }
 
 .login-section p, .why-choose p {
-    color: #d1d5db;
+    color: #4b5563;
     font-size: 1.1rem;
     max-width: 600px;
     margin: 0 auto 3rem;
@@ -485,8 +494,8 @@
 }
 
 .login-card, .benefit-card {
-    background: #374151; /* Darker card background */
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
     border-radius: 20px;
     padding: 2.5rem;
     transition: all 0.3s;
@@ -494,6 +503,7 @@
 
 .login-card:hover, .benefit-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
     border-color: hsl(var(--accent));
 }
 
@@ -505,12 +515,12 @@
 .login-card h3, .benefit-card h3 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: white;
+    color: #1f2937;
     margin-bottom: 1rem;
 }
 
 .login-card p, .benefit-card p {
-    color: #d1d5db;
+    color: #4b5563;
     line-height: 1.6;
     margin: 0;
 }
@@ -526,7 +536,7 @@
 }
 
 .feature-list li {
-    color: #d1d5db;
+    color: #4b5563;
     display: flex;
     align-items: center;
     gap: 0.8rem;
@@ -556,8 +566,9 @@
 }
 
 .doctor-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: #e5e7eb;
+    background: #f3f4f6;
+    color: #1f2937;
+    border: 1px solid #e5e7eb;
 }
 
 .patient-btn:hover {
@@ -565,13 +576,13 @@
 }
 
 .doctor-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: #e5e7eb;
 }
 
 .landing-footer {
-    background-color: #111827;
+    background-color: #f9fafb;
     padding: 3rem 5%;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid #e5e7eb;
     text-align: center;
 }
 
@@ -583,17 +594,17 @@
 }
 
 .footer-links a {
-    color: #d1d5db;
+    color: #4b5563;
     text-decoration: none;
     transition: color 0.3s;
 }
 
 .footer-links a:hover {
-    color: white;
+    color: hsl(var(--primary));
 }
 
 .footer-bottom p {
-    color: #d1d5db;
+    color: #6b7280;
     font-size: 0.9rem;
 }
 
