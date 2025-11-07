@@ -86,14 +86,10 @@ export default function SignupForm() {
           name: data.name,
           age: data.age,
           gender: data.gender,
-          ...(role === 'patient' && {
-            region: data.region,
-            skinTone: data.skinTone,
-          }),
-          ...(role === 'doctor' && {
-             experience: 0,
-             specialization: 'Dermatology'
-          })
+          region: data.region || '',
+          skinTone: data.skinTone || '',
+          experience: data.experience || 0,
+          specialization: data.specialization || 'Dermatology'
         };
 
         await createUserProfile(user.uid, profileData);
