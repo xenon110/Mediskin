@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader2, Send, ChevronLeft, Star, Stethoscope, User } from 'lucide-react';
+import { Loader2, Send, ChevronLeft, Star, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getDoctors, getReportsForPatient, sendReportToDoctor, DoctorProfile, Report } from '@/lib/firebase-services';
 import { auth } from '@/lib/firebase';
@@ -121,7 +121,7 @@ export default function ConsultPage() {
 
     return (
         <>
-            <div className="bg-muted min-h-screen">
+            <div className="bg-background min-h-screen">
                 <div className="container mx-auto py-12">
                     <main>
                         <Button variant="outline" onClick={() => router.back()} className="mb-8">
@@ -170,7 +170,7 @@ export default function ConsultPage() {
                                 ))
                             ) : (
                                 <div className="text-center py-16 text-muted-foreground col-span-full bg-background/50 rounded-xl">
-                                    <Stethoscope size={48} className="mx-auto mb-4 text-muted-foreground" />
+                                    <User size={48} className="mx-auto mb-4 text-muted-foreground" />
                                     <h3 className="text-xl font-semibold">No Doctors Available</h3>
                                     <p>We couldn't find any approved doctors at the moment. Please check back later.</p>
                                 </div>
