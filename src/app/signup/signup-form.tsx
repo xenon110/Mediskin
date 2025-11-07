@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
-import { createUserWithEmailAndPassword, sendEmailVerification, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { createUserProfile } from '@/lib/firebase-services';
 import { indianStates } from '@/lib/indian-states';
@@ -75,20 +75,17 @@ export default function SignupForm() {
         // Step 2: Create the user profile in Firestore
         await createUserProfile(user.uid, { ...data, role: role as 'patient' | 'doctor', experience: 0 });
         
-        // Step 3: Send the verification email
-        await sendEmailVerification(user);
-
-        // Step 4: Sign the user out to force them to log in after verifying
-        await signOut(auth);
-
         toast({
-            title: 'Verification Email Sent!',
-            description: 'Please check your Gmail inbox and click the link to verify your account before logging in.',
-            duration: 8000,
+            title: 'Account Created!',
+            description: "You've been successfully signed up.",
         });
         
-        // Step 5: Redirect to the login page
-        router.push(`/login?role=${role}`);
+        // Step 3: Redirect to the appropriate dashboard
+        if (role === 'doctor') {
+            router.push('/doctor/dashboard');
+        } else {
+            router.push('/patient/dashboard');
+        }
 
     } catch (error) {
         let description = 'An unexpected error occurred. Please try again.';

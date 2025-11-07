@@ -54,17 +54,6 @@ export default function LoginForm() {
         const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
         const user = userCredential.user;
         
-        if (!user.emailVerified) {
-          await signOut(auth); // Sign out the user immediately
-          toast({
-            variant: 'destructive',
-            title: 'Email Not Verified',
-            description: 'Please check your inbox and verify your email address before logging in.',
-          });
-          setIsLoading(false);
-          return;
-        }
-
         const userProfile = await getUserProfile(user.uid);
         
         if (!userProfile) {
