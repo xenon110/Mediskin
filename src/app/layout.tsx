@@ -26,7 +26,7 @@ export default function RootLayout({
   
   const showHeader = !isDoctorRoute && !isPatientRoute && !isLandingPage;
 
-  let bodyClassName = 'font-sans antialiased min-h-screen bg-background';
+  let bodyClassName = 'antialiased min-h-screen bg-background';
   if (isLandingPage) {
     bodyClassName += ' landing-body';
   } else if (isPatientRoute) {
@@ -62,5 +62,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-    

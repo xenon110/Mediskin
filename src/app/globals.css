@@ -5,29 +5,29 @@
 
 @layer base {
   :root {
-    --background: 220 13% 98%; /* Slightly different from f5f7fa */
-    --foreground: 224 71.4% 4.1%; /* Corresponds to #2c3e50 */
+    --background: 210 100% 97%; /* Very light blue - #F0F8FF */
+    --foreground: 224 71.4% 4.1%;
     --card: 0 0% 100%;
     --card-foreground: 224 71.4% 4.1%;
     --popover: 0 0% 100%;
     --popover-foreground: 224 71.4% 4.1%;
-    --primary: 217 91% 60%; /* Corresponds to a nice blue */
+    --primary: 195 53% 64%; /* Soft blue - #72BCD4 */
     --primary-foreground: 210 20% 98%;
     --secondary: 220 14.3% 95.9%;
     --secondary-foreground: 220.9 39.3% 11%;
-    --muted: 220 14.3% 95.9%; /* Corresponds to #f8f9fa */
-    --muted-foreground: 220 8.9% 46.1%; /* Corresponds to #6c757d */
-    --accent: 217 91% 60%; /* Same as primary for a monolithic blue theme */
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+    --accent: 174 44% 56%; /* Gentle teal - #4DB6AC */
     --accent-foreground: 210 20% 98%;
-    --destructive: 0 84.2% 60.2%; /* Corresponds to #e74c3c */
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 20% 98%;
-    --success: 142.1 76.2% 36.3%; /* Corresponds to #2e7d32 */
+    --success: 142.1 76.2% 36.3%;
     --success-foreground: 210 20% 98%;
-    --warning: 38 92% 50%; /* Corresponds to #fff3cd/#856404 combo */
+    --warning: 38 92% 50%;
     --warning-foreground: 40 93% 25%;
-    --border: 220 13% 91%; /* Corresponds to #e1e8ed */
+    --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 217 91% 60%;
+    --ring: 195 53% 64%;
     --chart-1: 221.2 83.2% 53.3%;
     --chart-2: 142.1 76.2% 36.3%;
     --chart-3: 0 84.2% 60.2%;
@@ -40,13 +40,13 @@
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217 91% 60%;
+    --primary: 195 53% 64%;
     --primary-foreground: 210 20% 98%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217 91% 76%;
+    --accent: 174 44% 56%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
@@ -56,7 +56,7 @@
     --warning-foreground: 240 5.9% 10%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 217 91% 60%;
+    --ring: 195 53% 64%;
     --chart-1: 221.2 83.2% 53.3%;
     --chart-2: 142.1 76.2% 36.3%;
     --chart-3: 0 84.2% 60.2%;
@@ -308,9 +308,9 @@
 
 /* ===== LANDING PAGE STYLES ===== */
 .landing-body {
-    background-color: #f9fafb;
-    color: #1f2937;
-    font-family: 'Inter', sans-serif;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: 'PT Sans', sans-serif;
 }
 
 .landing-header {
@@ -325,7 +325,7 @@
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     z-index: 100;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid hsl(var(--border));
 }
 
 .landing-logo {
@@ -334,7 +334,8 @@
     gap: 0.5rem;
     font-size: 1.5rem;
     font-weight: 700;
-    color: #111827;
+    color: hsl(var(--foreground));
+    font-family: 'Playfair Display', serif;
 }
 
 .landing-logo-icon {
@@ -350,7 +351,7 @@
 }
 
 .landing-nav a {
-    color: #4b5563;
+    color: hsl(var(--muted-foreground));
     text-decoration: none;
     font-weight: 500;
     transition: color 0.3s;
@@ -400,22 +401,23 @@
     justify-content: center;
     text-align: center;
     padding: 5%;
-    background: radial-gradient(circle at top, #ffffff, #f0f8ff);
+    background: radial-gradient(circle at top, hsl(var(--background)), hsl(var(--background)));
 }
 
 .landing-hero h1 {
     font-size: 4rem;
     font-weight: 800;
-    color: #1f2937;
+    color: hsl(var(--foreground));
     max-width: 800px;
     margin-bottom: 1.5rem;
     line-height: 1.2;
     animation: fade-in-up 0.5s ease-out;
+    font-family: 'Playfair Display', serif;
 }
 
 .landing-hero p {
     font-size: 1.2rem;
-    color: #4b5563;
+    color: hsl(var(--muted-foreground));
     max-width: 600px;
     margin-bottom: 2.5rem;
     animation: fade-in-up 0.7s ease-out;
@@ -432,11 +434,11 @@
 
 .feature-btn {
     background: #ffffff;
-    color: #4b5563;
+    color: hsl(var(--muted-foreground));
     padding: 0.6rem 1.2rem;
     border-radius: 9999px;
     font-weight: 500;
-    border: 1px solid #e5e7eb;
+    border: 1px solid hsl(var(--border));
 }
 
 .cta-btn {
@@ -461,25 +463,26 @@
 }
 
 .why-choose {
-    background-color: #f0f8ff; /* Very light blue */
+    background-color: hsl(var(--background));
 }
 
 .image-slider-section {
     padding: 4rem 0;
     background-color: #ffffff;
-    border-top: 1px solid #e5e7eb;
-    border-bottom: 1px solid #e5e7eb;
+    border-top: 1px solid hsl(var(--border));
+    border-bottom: 1px solid hsl(var(--border));
 }
 
 .login-section h2, .why-choose h2 {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #1f2937;
+    color: hsl(var(--foreground));
     margin-bottom: 1rem;
+    font-family: 'Playfair Display', serif;
 }
 
 .login-section p, .why-choose p {
-    color: #4b5563;
+    color: hsl(var(--muted-foreground));
     font-size: 1.1rem;
     max-width: 600px;
     margin: 0 auto 3rem;
@@ -495,10 +498,11 @@
 
 .login-card, .benefit-card {
     background: #ffffff;
-    border: 1px solid #e5e7eb;
+    border: 1px solid hsl(var(--border));
     border-radius: 20px;
     padding: 2.5rem;
     transition: all 0.3s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
 }
 
 .login-card:hover, .benefit-card:hover {
@@ -510,17 +514,19 @@
 .login-icon, .benefit-icon {
     font-size: 2.5rem;
     margin-bottom: 1.5rem;
+    color: hsl(var(--primary));
 }
 
 .login-card h3, .benefit-card h3 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #1f2937;
+    color: hsl(var(--foreground));
     margin-bottom: 1rem;
+    font-family: 'Playfair Display', serif;
 }
 
 .login-card p, .benefit-card p {
-    color: #4b5563;
+    color: hsl(var(--muted-foreground));
     line-height: 1.6;
     margin: 0;
 }
@@ -536,7 +542,7 @@
 }
 
 .feature-list li {
-    color: #4b5563;
+    color: hsl(var(--muted-foreground));
     display: flex;
     align-items: center;
     gap: 0.8rem;
@@ -580,9 +586,9 @@
 }
 
 .landing-footer {
-    background-color: #f9fafb;
+    background-color: hsl(var(--background));
     padding: 3rem 5%;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid hsl(var(--border));
     text-align: center;
 }
 
@@ -594,7 +600,7 @@
 }
 
 .footer-links a {
-    color: #4b5563;
+    color: hsl(var(--muted-foreground));
     text-decoration: none;
     transition: color 0.3s;
 }
@@ -604,7 +610,7 @@
 }
 
 .footer-bottom p {
-    color: #6b7280;
+    color: hsl(var(--muted-foreground));
     font-size: 0.9rem;
 }
 
