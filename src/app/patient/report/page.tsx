@@ -15,6 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Image from 'next/image';
+import Link from 'next/link';
 
 type TranslatedReport = Omit<TranslateReportOutput, 'potentialConditions'> & {
   potentialConditions: { name: string; description: string }[];
@@ -280,8 +281,10 @@ export default function ReportPage() {
                              <div className="bg-gradient-to-r from-primary to-accent p-8 rounded-2xl inline-block text-white shadow-lg">
                                 <h3 className="text-2xl font-bold mb-2">Doctor Consultation Recommended</h3>
                                 <p className="opacity-90 mb-6 max-w-xl mx-auto">Based on the analysis, we recommend scheduling a consultation with a dermatologist for proper diagnosis and treatment plan.</p>
-                                <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-white/90 rounded-full">
-                                    <Calendar className="mr-2 h-4 w-4"/> Schedule Consultation
+                                <Button size="lg" variant="secondary" asChild className="bg-white text-primary hover:bg-white/90 rounded-full">
+                                    <Link href="/patient/consult">
+                                        <Calendar className="mr-2 h-4 w-4"/> Schedule Consultation
+                                    </Link>
                                 </Button>
                              </div>
                          </div>
