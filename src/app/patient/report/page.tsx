@@ -280,7 +280,7 @@ export default function ReportPage() {
                              <div className="bg-gradient-to-r from-primary to-accent p-8 rounded-2xl inline-block text-white shadow-lg">
                                 <h3 className="text-2xl font-bold mb-2">Doctor Consultation Recommended</h3>
                                 <p className="opacity-90 mb-6 max-w-xl mx-auto">Based on the analysis, we recommend scheduling a consultation with a dermatologist for proper diagnosis and treatment plan.</p>
-                                <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-white/90" onClick={() => router.push('/patient/consult')}>
+                                <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-white/90 rounded-full" onClick={() => router.push('/patient/consult')}>
                                     <Calendar className="mr-2 h-4 w-4"/> Schedule Consultation
                                 </Button>
                              </div>
@@ -292,5 +292,3 @@ export default function ReportPage() {
     </div>
   );
 }
-
-    
