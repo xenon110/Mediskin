@@ -69,6 +69,8 @@ export default {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
+        'sky-50': '#f0f9ff',
+        'sky-200': '#bae6fd',
       },
       borderRadius: {
         lg: 'var(--radius)',

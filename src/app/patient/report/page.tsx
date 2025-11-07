@@ -252,7 +252,7 @@ export default function ReportPage() {
                     {/* Detailed Analysis */}
                     <section>
                         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><FileText /> Detailed Analysis</h2>
-                        <div className="prose prose-blue dark:prose-invert max-w-none text-foreground/80 p-6 rounded-2xl shadow-inner border bg-muted/20">
+                        <div className="prose prose-blue dark:prose-invert max-w-none text-foreground/80 p-6 rounded-2xl shadow-inner border border-sky-200 bg-sky-50">
                            <p>{displayReport.report}</p>
                         </div>
                     </section>
@@ -263,13 +263,13 @@ export default function ReportPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <section>
                             <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Home/> Home Remedies</h2>
-                             <div className="prose prose-blue dark:prose-invert max-w-none text-foreground/80 p-6 rounded-2xl shadow-inner border bg-muted/20">
+                             <div className="prose prose-blue dark:prose-invert max-w-none text-foreground/80 p-6 rounded-2xl shadow-inner border border-sky-200 bg-sky-50">
                                 <p>{displayReport.homeRemedies}</p>
                             </div>
                         </section>
                         <section>
                             <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Stethoscope/> Medical Recommendation</h2>
-                            <div className="prose prose-blue dark:prose-invert max-w-none text-foreground/80 p-6 rounded-2xl shadow-inner border bg-muted/20">
+                            <div className="prose prose-blue dark:prose-invert max-w-none text-foreground/80 p-6 rounded-2xl shadow-inner border border-sky-200 bg-sky-50">
                                 <p>{displayReport.medicalRecommendation}</p>
                             </div>
                         </section>
