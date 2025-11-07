@@ -17,7 +17,7 @@
     --secondary-foreground: 220.9 39.3% 11%;
     --muted: 220 14.3% 95.9%; /* Corresponds to #f8f9fa */
     --muted-foreground: 220 8.9% 46.1%; /* Corresponds to #6c757d */
-    --accent: 255 75% 58%; /* Using primary for accent */
+    --accent: 275 82% 66%; /* A gentle teal, corresponds to #4DB6AC -> Changed to a violet for gradient */
     --accent-foreground: 210 20% 98%;
     --destructive: 0 84.2% 60.2%; /* Corresponds to #e74c3c */
     --destructive-foreground: 210 20% 98%;
@@ -46,7 +46,7 @@
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 275 82% 76%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
@@ -824,7 +824,7 @@
 
 .new-dashboard-bg .analyze-btn {
     width: 100%;
-    background: linear-gradient(45deg, #667eea, #764ba2);
+    background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--accent)));
     color: white;
     border: none;
     padding: 1rem;

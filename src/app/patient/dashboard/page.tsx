@@ -356,7 +356,7 @@ export default function PatientDashboard() {
                         </>
                     ) : (
                         <>
-                           <div className="upload-icon-large">⬆️</div>
+                           <div className="upload-icon-large" style={{background: 'linear-gradient(45deg, hsl(var(--primary)), hsl(var(--accent)))'}}>⬆️</div>
                            <div className="upload-text">Click to upload or drag and drop</div>
                            <div className="upload-subtext">PNG, JPG up to 10MB</div>
                         </>
@@ -413,6 +413,7 @@ export default function PatientDashboard() {
                       className="send-btn" 
                       onClick={handleSymptomSubmit}
                       disabled={isChatbotLoading || !symptomInput.trim()}
+                      style={{background: 'linear-gradient(45deg, hsl(var(--primary)), hsl(var(--accent)))'}}
                     >
                       {isChatbotLoading ? <Loader2 className="animate-spin mx-auto" /> : 'Send'}
                     </button>
@@ -460,5 +461,3 @@ export default function PatientDashboard() {
     </>
   );
 }
-
-    
