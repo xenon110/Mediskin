@@ -76,25 +76,25 @@ export const createUserProfile = async (uid: string, data: CreateUserProfileData
     photoURL: '',
   };
 
-  let userData: PatientProfile | DoctorProfile;
-
   if (data.role === 'patient') {
-    userData = {
+    const patientData: PatientProfile = {
       ...commonData,
       role: 'patient',
     };
+    await setDoc(userRef, patientData, { merge: true });
+    return patientData;
+
   } else { // Doctor
-    userData = {
+    const doctorData: DoctorProfile = {
       ...commonData,
       role: 'doctor',
       experience: 0,
       specialization: 'Dermatology',
       verificationStatus: 'pending', // Doctors start as pending
     };
+    await setDoc(userRef, doctorData, { merge: true });
+    return doctorData;
   }
-
-  await setDoc(userRef, userData, { merge: true });
-  return userData;
 };
 
 // This function retrieves a user's profile from either collection.
