@@ -52,7 +52,7 @@ const prompt = ai.definePrompt({
       - 'description': A concise medical description of the condition.
   4.  **Structured Report:** You must generate a 'report' object containing a structured summary of your analytical process. This object must have three fields:
       - 'primaryDiagnosis': Start with the features observed and state the most likely diagnosis.
-      - 'keyObservations': Describe the specific visual details (e.g., color, shape, texture) that support your diagnosis.
+      - 'keyObservations': Describe the specific visual details (e.g., color, shape, texture) that support your diagnosis. **This must be formatted as a bulleted or numbered list within the string.**
       - 'severityAssessment': Provide a visual analysis of the severity and state whether medical attention is warranted.
   5.  **Actionable Recommendations:** You must provide safe, relevant 'homeRemedies' and a clear 'medicalRecommendation'.
   6.  **Consultation Flag:** Set 'doctorConsultationSuggestion' to true if there is any uncertainty or if the condition appears serious.
