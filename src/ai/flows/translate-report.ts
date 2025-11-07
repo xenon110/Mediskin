@@ -26,7 +26,6 @@ const TranslateReportOutputSchema = z.object({
   })),
   report: z.object({
     primaryDiagnosis: z.string().describe("The translated primary diagnosis."),
-    detailedSummary: z.string().describe("The translated detailed summary."),
     keyObservations: z.string().describe("The translated key observations."),
     severityAssessment: z.string().describe("The translated severity assessment.")
   }).describe('The translated structured summary of the analysis and findings.'),
@@ -60,7 +59,6 @@ const prompt = ai.definePrompt({
 
   **Detailed Analysis:**
   - Primary Diagnosis: {{{report.report.primaryDiagnosis}}}
-  - Detailed Summary: {{{report.report.detailedSummary}}}
   - Key Observations: {{{report.report.keyObservations}}}
   - Severity Assessment: {{{report.report.severityAssessment}}}
 

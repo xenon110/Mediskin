@@ -212,7 +212,7 @@ export default function ReportPage() {
                     <section>
                         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Camera /> Uploaded Image</h2>
                         <div className="flex justify-center">
-                             <div className="relative w-full max-w-lg h-96 rounded-lg overflow-hidden border-4 border-black shadow-lg">
+                             <div className="relative w-full max-w-md h-80 rounded-lg overflow-hidden border-4 border-black shadow-lg">
                                 <Image src={report.photoDataUri} alt="Uploaded skin condition" layout="fill" objectFit="contain" />
                             </div>
                         </div>
@@ -257,23 +257,10 @@ export default function ReportPage() {
                                   <FileText className="h-5 w-5" /> Detailed Analysis
                               </CardTitle>
                           </CardHeader>
-                          <CardContent className="space-y-4 text-sm">
-                              <div>
-                                  <h4 className="font-semibold text-foreground">Primary Diagnosis</h4>
-                                  <p className="text-muted-foreground">{displayReport.report.primaryDiagnosis}</p>
-                              </div>
-                               <div>
-                                  <h4 className="font-semibold text-foreground mt-4">Detailed Summary</h4>
-                                  <p className="text-muted-foreground">{displayReport.report.detailedSummary}</p>
-                              </div>
-                              <div>
-                                  <h4 className="font-semibold text-foreground mt-4">Key Observations</h4>
-                                  <p className="text-muted-foreground">{displayReport.report.keyObservations}</p>
-                              </div>
-                              <div>
-                                  <h4 className="font-semibold text-foreground mt-4">Severity Assessment</h4>
-                                  <p className="text-muted-foreground">{displayReport.report.severityAssessment}</p>
-                              </div>
+                          <CardContent className="space-y-4 text-sm text-foreground/90">
+                              <p><span className="font-semibold text-foreground">Primary Diagnosis:</span> {displayReport.report.primaryDiagnosis}</p>
+                              <p><span className="font-semibold text-foreground">Key Observations:</span> {displayReport.report.keyObservations}</p>
+                              <p><span className="font-semibold text-foreground">Severity Assessment:</span> {displayReport.report.severityAssessment}</p>
                           </CardContent>
                       </Card>
                     </section>
