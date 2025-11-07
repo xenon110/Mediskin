@@ -86,21 +86,28 @@ export default function SignupForm() {
           name: data.name,
           age: data.age,
           gender: data.gender,
-          region: data.region || '',
+          // Patient specific fields, provide empty strings for doctor
+          region: data.region || '', 
           skinTone: data.skinTone || '',
-          experience: data.experience || 0,
-          specialization: data.specialization || 'Dermatology'
+          // Doctor specific fields, provide defaults
+          experience: 0,
+          specialization: 'Dermatology'
         };
 
         await createUserProfile(user.uid, profileData);
         
         toast({
             title: 'Account Created!',
-            description: "You've been successfully signed up.",
+            description: role === 'doctor' 
+              ? "Your account is pending approval. You will be notified once verified."
+              : "You've been successfully signed up.",
         });
 
+        // For doctors, we can redirect them to a pending page or just the login.
+        // For patients, redirect to the dashboard.
         if (role === 'doctor') {
-            router.push('/doctor/dashboard');
+            await auth.signOut(); // Sign out doctor until they are approved
+            router.push('/login?role=doctor&status=pending');
         } else {
             router.push('/patient/dashboard');
         }

@@ -41,8 +41,8 @@ export type CreateUserProfileData = {
   age: number;
   gender: string;
   // Patient-specific fields
-  skinTone: string;
-  region: string;
+  skinTone?: string;
+  region?: string;
   // Doctor-specific fields
   experience?: number;
   specialization?: string;
@@ -81,8 +81,8 @@ export const createUserProfile = async (uid: string, data: CreateUserProfileData
     userData = {
       ...commonData,
       role: 'patient',
-      region: data.region,
-      skinTone: data.skinTone,
+      region: data.region || 'not-set',
+      skinTone: data.skinTone || 'not-set',
     };
   } else { // Doctor
     userData = {
@@ -90,7 +90,7 @@ export const createUserProfile = async (uid: string, data: CreateUserProfileData
       role: 'doctor',
       experience: 0,
       specialization: 'Dermatology',
-      verificationStatus: 'approved', // Auto-approved
+      verificationStatus: 'pending', // Doctors start as pending
     };
   }
 
