@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -107,9 +108,14 @@ export default function DoctorDashboard() {
          const currentSelectedReport = currentSelectedGroup.reports.find(r => r.id === selectedReport?.id);
          setSelectedReport(currentSelectedReport || currentSelectedGroup.reports[0] || null);
       } else if (patientGroupsArray.length > 0) {
-        const firstGroup = patientGroupsArray.find(g => g.unreadCount > 0) || patientGroupsArray[0];
+        const firstGroupWithPending = patientGroupsArray.find(g => g.unreadCount > 0);
+        const firstGroup = firstGroupWithPending || patientGroupsArray[0];
+        
         setSelectedGroup(firstGroup);
-        setSelectedReport(firstGroup.reports[0] || null);
+
+        const firstPendingReport = firstGroup.reports.find(r => r.status === 'pending-doctor-review');
+        setSelectedReport(firstPendingReport || firstGroup.reports[0] || null);
+
       } else {
         setSelectedGroup(null);
         setSelectedReport(null);
@@ -137,12 +143,14 @@ export default function DoctorDashboard() {
 
   const handleSelectGroup = (group: PatientGroup) => {
     setSelectedGroup(group);
-    const reportsForTab = group.reports.filter(r => {
+    // Find the first report that matches the current tab filter
+    const reportForTab = group.reports.find(r => {
         if (activeTab === 'Pending') return r.status === 'pending-doctor-review';
         if (activeTab === 'Reviewed') return r.status === 'doctor-approved' || r.status === 'doctor-modified';
-        return true;
-    });
-    setSelectedReport(reportsForTab[0] || group.reports[0] || null);
+        return false; // Default case
+    })
+    // If no report matches, fallback to the first report of the group
+    setSelectedReport(reportForTab || group.reports[0] || null);
   };
   
   const handleSelectReport = (report: Report) => {
@@ -154,6 +162,35 @@ export default function DoctorDashboard() {
         await auth.signOut();
         toast({ title: 'Signed Out', description: 'You have been successfully signed out.' });
         router.push('/login?role=doctor');
+    }
+  };
+  
+  const handleReportAction = async (action: 'approve' | 'reject') => {
+    if (!selectedReport) return;
+    
+    setIsSubmitting(true);
+    let newStatus: Report['status'];
+    if (action === 'approve') {
+        newStatus = doctorNotes ? 'doctor-modified' : 'doctor-approved';
+    } else {
+        newStatus = 'rejected';
+    }
+
+    try {
+        await updateReportByDoctor(selectedReport.id, newStatus, doctorNotes);
+        toast({
+            title: `Report ${action === 'approve' ? 'Approved' : 'Rejected'}`,
+            description: "The patient will be notified of your review.",
+        });
+    } catch(e) {
+        console.error("Failed to update report:", e);
+        toast({
+            variant: "destructive",
+            title: "Update Failed",
+            description: "Could not update the report status.",
+        });
+    } finally {
+        setIsSubmitting(false);
     }
   };
 
@@ -287,45 +324,90 @@ export default function DoctorDashboard() {
                                 </div>
                             ))}
                         </div>
+                        
+                        <div className="flex-1 overflow-y-auto pr-2 space-y-6">
 
-                        <div className="ai-report-header">
-                            <Bot size={16}/>
-                            <span>AI GENERATED REPORT</span>
-                        </div>
-                        <h3 className="text-xl font-bold text-white p-4 bg-primary-darker rounded-b-lg mb-4">{selectedReport.reportName}</h3>
+                            <div className="ai-report-header">
+                                <Bot size={16}/>
+                                <span>AI GENERATED REPORT</span>
+                            </div>
+                            <h3 className="text-xl font-bold text-white p-4 bg-primary-darker rounded-b-lg -mt-1">{selectedReport.reportName}</h3>
+                           
+                            {selectedReport.photoDataUri && (
+                                 <div className="relative w-full aspect-video rounded-lg overflow-hidden border">
+                                     <Image src={selectedReport.photoDataUri} alt="Patient's skin condition" layout="fill" objectFit="contain" />
+                                 </div>
+                            )}
 
-                        <div className="grid grid-cols-3 gap-4 mb-6 text-sm">
-                            <div className="info-box">
-                                <label>PATIENT NAME</label>
-                                <p>{selectedGroup.patientProfile.name}</p>
+                            <div className="grid grid-cols-3 gap-4 text-sm">
+                                <div className="info-box"><label>PATIENT NAME</label><p>{selectedGroup.patientProfile.name}</p></div>
+                                <div className="info-box"><label>AGE</label><p>{selectedGroup.patientProfile.age} years</p></div>
+                                <div className="info-box"><label>GENDER</label><p>{selectedGroup.patientProfile.gender}</p></div>
+                                <div className="info-box"><label>REGION</label><p>{selectedGroup.patientProfile.region}</p></div>
+                                <div className="info-box"><label>SKIN TONE</label><p>{selectedGroup.patientProfile.skinTone}</p></div>
+                                <div className="info-box"><label>SUBMITTED</label><p>{new Date((selectedReport.createdAt as any).seconds * 1000).toLocaleString()}</p></div>
                             </div>
-                            <div className="info-box">
-                                <label>AGE</label>
-                                <p>{selectedGroup.patientProfile.age} years</p>
+                            
+                            <div>
+                                <h4 className="font-semibold text-gray-700 mb-2">Patient's Described Symptoms:</h4>
+                                <div className="p-4 bg-gray-50 rounded-lg text-sm text-gray-600 min-h-[50px]">
+                                    <p className="italic">{selectedReport.aiReport.symptomInputs || 'No additional symptoms provided.'}</p>
+                                </div>
                             </div>
-                            <div className="info-box">
-                                <label>GENDER</label>
-                                <p>{selectedGroup.patientProfile.gender}</p>
-                            </div>
-                            <div className="info-box">
-                                <label>REGION</label>
-                                <p>{selectedGroup.patientProfile.region}</p>
-                            </div>
-                             <div className="info-box">
-                                <label>SKIN TONE</label>
-                                <p>{selectedGroup.patientProfile.skinTone}</p>
-                            </div>
-                            <div className="info-box">
-                                <label>SUBMITTED</label>
-                                <p>{new Date((selectedReport.createdAt as any).seconds * 1000).toLocaleString()}</p>
-                            </div>
-                        </div>
 
-                        <div className="mt-auto">
-                            <h4 className="font-semibold text-gray-700 mb-2">Reported Symptoms:</h4>
-                            {/* This is where the AI report details would go. Placeholder for now. */}
-                            <div className="p-4 bg-gray-50 rounded-lg text-sm text-gray-600 min-h-[100px]">
-                                 {selectedReport.aiReport.report}
+                            <div>
+                                <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2"><Pill/> AI: Potential Conditions</h4>
+                                <div className="space-y-2">
+                                  {selectedReport.aiReport.potentialConditions.map((c, i) => (
+                                      <div key={i} className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                          <div className="flex justify-between items-center">
+                                              <span className="font-semibold text-blue-800">{c.name}</span>
+                                              <Badge className={cn('text-xs', {'bg-red-100 text-red-800': c.likelihood === 'High', 'bg-yellow-100 text-yellow-800': c.likelihood === 'Medium'})}>{c.likelihood} Likelihood</Badge>
+                                          </div>
+                                          <p className="text-xs text-gray-600 mt-1">{c.description}</p>
+                                      </div>
+                                  ))}
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2"><FileText/> AI: Detailed Analysis</h4>
+                                <div className="p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
+                                     {selectedReport.aiReport.report}
+                                </div>
+                            </div>
+                            
+                             <div>
+                                <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2"><Home/> AI: Home Remedies</h4>
+                                <div className="p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
+                                     {selectedReport.aiReport.homeRemedies}
+                                </div>
+                            </div>
+                            
+                            <div className="mt-auto">
+                                <h4 className="font-semibold text-gray-700 mb-2">Doctor's Notes & Actions</h4>
+                                <Textarea 
+                                  placeholder="Add your notes here. Your notes will be shared with the patient."
+                                  value={doctorNotes}
+                                  onChange={(e) => setDoctorNotes(e.target.value)}
+                                  className="min-h-[120px] mb-4"
+                                  disabled={selectedReport.status !== 'pending-doctor-review'}
+                                />
+                                {selectedReport.status === 'pending-doctor-review' && (
+                                     <div className="flex justify-end gap-2">
+                                        <Button variant="destructive" onClick={() => handleReportAction('reject')} disabled={isSubmitting}>
+                                          {isSubmitting ? <Loader2 className="animate-spin" /> : <><X className="mr-2 h-4 w-4"/> Reject</>}
+                                        </Button>
+                                        <Button variant="default" onClick={() => handleReportAction('approve')} disabled={isSubmitting} className="bg-green-600 hover:bg-green-700">
+                                            {isSubmitting ? <Loader2 className="animate-spin" /> : <><Check className="mr-2 h-4 w-4"/> Approve / Send Notes</>}
+                                        </Button>
+                                    </div>
+                                )}
+                                {selectedReport.status !== 'pending-doctor-review' && (
+                                     <div className="p-4 bg-gray-100 rounded-lg text-center text-sm text-gray-600">
+                                        This report has already been reviewed.
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -344,3 +426,5 @@ export default function DoctorDashboard() {
     </div>
   );
 }
+
+    
