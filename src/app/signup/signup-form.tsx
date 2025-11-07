@@ -21,21 +21,12 @@ import { indianStates } from '@/lib/indian-states';
 import { FirebaseError } from 'firebase/app';
 import { Separator } from '@/components/ui/separator';
 
-const patientSchema = z.object({
+const signupSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
   age: z.coerce.number().min(1, 'Age must be a positive number.').max(120),
   gender: z.string().min(1, 'Please select a gender.'),
   skinTone: z.string().min(1, 'Please select your skin tone.'),
   region: z.string().min(1, 'Please select your state.'),
-  mobile: z.string().regex(/^\d{10}$/, 'Please enter a valid 10-digit mobile number.'),
-  email: z.string().email().regex(/^[a-zA-Z0-9._%+-]+@gmail\.com$/, 'Please enter a valid Gmail address.'),
-  password: z.string().min(6, 'Password must be at least 6 characters.'),
-});
-
-const doctorSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters.'),
-  age: z.coerce.number().min(18, 'Age must be at least 18.').max(120),
-  gender: z.string().min(1, 'Please select a gender.'),
   mobile: z.string().regex(/^\d{10}$/, 'Please enter a valid 10-digit mobile number.'),
   email: z.string().email().regex(/^[a-zA-Z0-9._%+-]+@gmail\.com$/, 'Please enter a valid Gmail address.'),
   password: z.string().min(6, 'Password must be at least 6 characters.'),
@@ -50,7 +41,7 @@ export default function SignupForm() {
   const role = searchParams.get('role') === 'doctor' ? 'doctor' : 'patient';
 
   const form = useForm({
-    resolver: zodResolver(role === 'doctor' ? doctorSchema : patientSchema),
+    resolver: zodResolver(signupSchema),
     defaultValues: {
       name: '',
       age: '' as any,
@@ -86,10 +77,8 @@ export default function SignupForm() {
           name: data.name,
           age: data.age,
           gender: data.gender,
-          // Patient specific fields, provide empty strings for doctor
-          region: data.region || '', 
-          skinTone: data.skinTone || '',
-          // Doctor specific fields, provide defaults
+          region: data.region, 
+          skinTone: data.skinTone,
           experience: 0,
           specialization: 'Dermatology'
         };
@@ -171,39 +160,38 @@ export default function SignupForm() {
                 )} />
               </div>
 
-              {role === 'patient' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField control={form.control} name="region" render={({ field }) => (
-                      <FormItem><FormLabel>State / Region</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl><SelectTrigger><SelectValue placeholder="Select your state" /></SelectTrigger></FormControl>
-                          <SelectContent>
-                            {indianStates.map(state => (
-                              <SelectItem key={state} value={state}>{state}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                  <FormField control={form.control} name="skinTone" render={({ field }) => (
-                      <FormItem><FormLabel>Skin Tone</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl><SelectTrigger><SelectValue placeholder="Select your skin tone" /></SelectTrigger></FormControl>
-                          <SelectContent>
-                            <SelectItem value="Fair">Fair</SelectItem>
-                            <SelectItem value="Wheatish">Wheatish</SelectItem>
-                            <SelectItem value="Dusky">Dusky</SelectItem>
-                            <SelectItem value="Dark">Dark</SelectItem>
-                            <SelectItem value="Olive">Olive</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                </div>
-              )}
-
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField control={form.control} name="region" render={({ field }) => (
+                    <FormItem><FormLabel>State / Region</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Select your state" /></SelectTrigger></FormControl>
+                        <SelectContent>
+                          {indianStates.map(state => (
+                            <SelectItem key={state} value={state}>{state}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                <FormField control={form.control} name="skinTone" render={({ field }) => (
+                    <FormItem><FormLabel>Skin Tone</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Select your skin tone" /></SelectTrigger></FormControl>
+                        <SelectContent>
+                          <SelectItem value="Fair">Fair</SelectItem>
+                          <SelectItem value="Wheatish">Wheatish</SelectItem>
+                          <SelectItem value="Dusky">Dusky</SelectItem>
+                          <SelectItem value="Dark">Dark</SelectItem>
+                          <SelectItem value="Olive">Olive</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+              </div>
+              
 
               <Separator />
 
@@ -211,7 +199,7 @@ export default function SignupForm() {
                 <FormItem><FormLabel>Gmail Address</FormLabel><FormControl><Input type="email" placeholder="you@gmail.com" {...field} /></FormControl><FormMessage /></FormItem>
               )} />
               <FormField control={form.control} name="password" render={({ field }) => (
-                <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" /></FormControl><FormMessage /></FormItem>
               )} />
 
               <Button type="submit" disabled={isLoading} className="w-full bg-primary text-primary-foreground">

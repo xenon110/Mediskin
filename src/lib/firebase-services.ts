@@ -15,12 +15,12 @@ export type UserProfile = {
   createdAt: FieldValue;
   gender: string;
   photoURL?: string;
+  region: string;
+  skinTone: string;
 };
 
 export type PatientProfile = UserProfile & {
   role: 'patient';
-  region: string;
-  skinTone: string;
 };
 
 export type DoctorProfile = UserProfile & {
@@ -40,9 +40,8 @@ export type CreateUserProfileData = {
   name: string;
   age: number;
   gender: string;
-  // Patient-specific fields
-  skinTone?: string;
-  region?: string;
+  skinTone: string;
+  region: string;
   // Doctor-specific fields
   experience?: number;
   specialization?: string;
@@ -71,6 +70,8 @@ export const createUserProfile = async (uid: string, data: CreateUserProfileData
     name: data.name,
     age: data.age,
     gender: data.gender,
+    region: data.region,
+    skinTone: data.skinTone,
     createdAt: serverTimestamp(),
     photoURL: '',
   };
@@ -81,8 +82,6 @@ export const createUserProfile = async (uid: string, data: CreateUserProfileData
     userData = {
       ...commonData,
       role: 'patient',
-      region: data.region || 'not-set',
-      skinTone: data.skinTone || 'not-set',
     };
   } else { // Doctor
     userData = {
