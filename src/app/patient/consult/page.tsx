@@ -1,8 +1,9 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader2, Send, ChevronLeft, Star, Stethoscope, MoreVertical } from 'lucide-react';
+import { Loader2, Send, ChevronLeft, Star, Stethoscope } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getDoctors, getReportsForPatient, sendReportToDoctor, DoctorProfile, Report } from '@/lib/firebase-services';
 import { auth } from '@/lib/firebase';
@@ -16,7 +17,8 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { cn } from '@/lib/utils';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 
 export default function ConsultPage() {
@@ -65,15 +67,6 @@ export default function ConsultPage() {
         
         return () => unsubscribe();
     }, [toast, router]);
-    
-    const getInitials = (name: string | undefined) => {
-      if (!name) return '?';
-      const nameParts = name.split(' ');
-      if (nameParts.length > 1) {
-        return `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`.toUpperCase();
-      }
-      return name.substring(0, 2).toUpperCase();
-    };
 
     const handleSendClick = (doctor: DoctorProfile) => {
         if (reports.length > 0) {
@@ -117,10 +110,10 @@ export default function ConsultPage() {
 
     if (isLoading) {
         return (
-            <div className="flex h-screen items-center justify-center bg-slate-50">
+            <div className="flex h-screen items-center justify-center bg-gradient-subtle">
                 <div className="text-center">
                     <Loader2 className="animate-spin text-primary mx-auto" size={48} />
-                    <p className="mt-4 text-lg text-slate-600">Fetching available doctors...</p>
+                    <p className="mt-4 text-lg text-muted-foreground">Fetching available doctors...</p>
                 </div>
             </div>
         );
@@ -128,63 +121,57 @@ export default function ConsultPage() {
 
     return (
         <>
-            <div className="consult-page-bg min-h-screen">
-                <div className="page-container">
-                    <main className="main-content">
-                         <button onClick={() => router.back()} className="back-button">
-                            <ChevronLeft size={20} /> Back
-                        </button>
+            <div className="bg-gradient-subtle min-h-screen">
+                <div className="container mx-auto py-12">
+                    <main>
+                        <Button variant="outline" onClick={() => router.back()} className="mb-8">
+                            <ChevronLeft className="mr-2 h-4 w-4" /> Back to Dashboard
+                        </Button>
 
-                        <div className="page-header" style={{ textAlign: 'center' }}>
-                            <h1 className="page-title">Consult a Doctor</h1>
-                            <p className="page-subtitle">Send a new report to our network of professionals for reviews.</p>
+                        <div className="text-center mb-12">
+                            <h1 className="text-4xl font-bold tracking-tight mb-2">Consult a Verified Doctor</h1>
+                            <p className="text-lg text-muted-foreground">Send your AI-generated report to a professional for expert review.</p>
                         </div>
 
-                        <div className="doctors-grid">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {doctors.length > 0 ? (
                                 doctors.map((doctor) => (
-                                    <div key={doctor.uid} className="consult-doctor-card">
-                                        <div className="consult-doctor-info">
-                                            <div className="flex items-start justify-between">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="consult-doctor-avatar">{getInitials(doctor.name)}</div>
-                                                    <div>
-                                                        <h3 className="consult-doctor-name">Dr. {doctor.name}</h3>
-                                                        <p className="consult-doctor-specialty">{doctor.specialization || 'Dermatology'}</p>
-                                                    </div>
-                                                </div>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400">
-                                                    <MoreVertical size={20} />
-                                                </Button>
+                                    <Card key={doctor.uid} className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                                        <CardContent className="p-6 text-center">
+                                            <div className="w-24 h-24 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
+                                                <User className="w-12 h-12 text-muted-foreground"/>
                                             </div>
-                                             <div className="consult-doctor-rating">
-                                                <div className="stars">
-                                                    <Star size={16} className="text-yellow-400 fill-yellow-400" />
-                                                    <Star size={16} className="text-yellow-400 fill-yellow-400" />
-                                                    <Star size={16} className="text-yellow-400 fill-yellow-400" />
-                                                    <Star size={16} className="text-yellow-400 fill-yellow-400" />
-                                                    <Star size={16} className="text-gray-300 fill-gray-300" />
-                                                </div>
-                                                <span className="rating-text">4.0 • {Math.floor(Math.random() * 100 + 10)} reviews</span>
-                                            </div>
-                                            <button 
-                                                className="consult-send-report-btn" 
+                                            <h3 className="text-xl font-semibold">Dr. {doctor.name}</h3>
+                                            <p className="text-muted-foreground">{doctor.specialization || 'Dermatology'}</p>
+                                             <div className="flex justify-center items-center gap-1 text-sm text-amber-500 mt-2">
+                                                <Star className="w-4 h-4 fill-current"/>
+                                                <Star className="w-4 h-4 fill-current"/>
+                                                <Star className="w-4 h-4 fill-current"/>
+                                                <Star className="w-4 h-4 fill-current"/>
+                                                <Star className="w-4 h-4"/>
+                                                <span className="text-muted-foreground ml-1">({Math.floor(Math.random() * 50 + 10)})</span>
+                                             </div>
+                                        </CardContent>
+                                        <div className="p-6 bg-muted/50">
+                                             <Button 
+                                                className="w-full" 
                                                 onClick={() => handleSendClick(doctor)}
                                                 disabled={isSending === doctor.uid || reports.length === 0}
                                             >
                                                 {isSending === doctor.uid ? (
-                                                    <><Loader2 size={20} className="animate-spin" /> Sending...</>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                                 ) : (
-                                                    <><FileText size={16} /> Send New Report</>
+                                                    <Send className="mr-2 h-4 w-4" />
                                                 )}
-                                            </button>
+                                                Send Report
+                                            </Button>
                                         </div>
-                                    </div>
+                                    </Card>
                                 ))
                             ) : (
-                                <div className="text-center py-16 text-slate-500 col-span-full bg-white/50 rounded-xl">
-                                    <Stethoscope size={48} className="mx-auto mb-4 text-slate-400" />
-                                    <h3 className="text-xl font-semibold text-slate-700">No Doctors Available</h3>
+                                <div className="text-center py-16 text-muted-foreground col-span-full bg-background/50 rounded-xl">
+                                    <Stethoscope size={48} className="mx-auto mb-4 text-muted-foreground" />
+                                    <h3 className="text-xl font-semibold">No Doctors Available</h3>
                                     <p>We couldn't find any approved doctors at the moment. Please check back later.</p>
                                 </div>
                             )}
@@ -194,10 +181,10 @@ export default function ConsultPage() {
             </div>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                 <DialogContent className="bg-background border-border text-foreground">
+                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Select a report to send to Dr. {targetDoctor?.name}</DialogTitle>
-                        <DialogDescription className="text-muted-foreground">
+                        <DialogDescription>
                             Choose one of your pending reports for consultation.
                         </DialogDescription>
                     </DialogHeader>
@@ -217,7 +204,7 @@ export default function ConsultPage() {
                     </div>
                     <DialogFooter>
                         <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleConfirmSend} disabled={!selectedReportId || !!isSending} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                        <Button onClick={handleConfirmSend} disabled={!selectedReportId || !!isSending}>
                             {isSending ? <Loader2 className="animate-spin" /> : 'Confirm & Send'}
                         </Button>
                     </DialogFooter>
