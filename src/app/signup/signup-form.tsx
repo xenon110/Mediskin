@@ -21,7 +21,22 @@ import { indianStates } from '@/lib/indian-states';
 import { FirebaseError } from 'firebase/app';
 import { Separator } from '@/components/ui/separator';
 
-const signupSchema = z.object({
+// Patient schema, no document validation
+const patientSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters.'),
+  age: z.coerce.number().min(1, 'Age must be a positive number.').max(120),
+  gender: z.string().min(1, 'Please select a gender.'),
+  skinTone: z.string().min(1, 'Please select your skin tone.'),
+  region: z.string().min(1, 'Please select your state.'),
+  mobile: z.string().regex(/^\d{10}$/, 'Please enter a valid 10-digit mobile number.'),
+  email: z.string().email().regex(/^[a-zA-Z0-9._%+-]+@gmail\.com$/, 'Please enter a valid Gmail address.'),
+  password: z.string().min(6, 'Password must be at least 6 characters.'),
+  degree: z.any().optional(),
+  license: z.any().optional(),
+});
+
+// Doctor schema, requires document validation
+const doctorSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
   age: z.coerce.number().min(1, 'Age must be a positive number.').max(120),
   gender: z.string().min(1, 'Please select a gender.'),
@@ -34,7 +49,7 @@ const signupSchema = z.object({
   license: z.any().refine(files => files?.length > 0, 'Medical license is required.'),
 });
 
-type SignupFormValues = z.infer<typeof signupSchema>;
+type SignupFormValues = z.infer<typeof patientSchema> | z.infer<typeof doctorSchema>;
 
 
 export default function SignupForm() {
@@ -44,8 +59,9 @@ export default function SignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const role = searchParams.get('role') === 'doctor' ? 'doctor' : 'patient';
 
+  // Choose schema based on role
   const form = useForm<SignupFormValues>({
-    resolver: zodResolver(signupSchema),
+    resolver: zodResolver(role === 'doctor' ? doctorSchema : patientSchema),
     defaultValues: {
       name: '',
       age: '' as any,
@@ -70,7 +86,7 @@ export default function SignupForm() {
         return;
     }
     
-    if (role === 'doctor' && (!data.degree[0] || !data.license[0])) {
+    if (role === 'doctor' && (!data.degree || !data.degree[0] || !data.license || !data.license[0])) {
         toast({ variant: 'destructive', title: 'Missing Documents', description: 'Please upload both your degree and license.' });
         setIsLoading(false);
         return;
@@ -87,17 +103,18 @@ export default function SignupForm() {
                 uploadVerificationDocument(user.uid, data.degree[0], 'degree'),
                 uploadVerificationDocument(user.uid, data.license[0], 'license')
             ]);
-        }
-        
-        toast({
-            title: 'Account Created!',
-            description: "You've been successfully signed up.",
-        });
-        
-        if (role === 'doctor') {
-            router.push('/doctor/dashboard');
+             toast({
+                title: 'Account Created!',
+                description: "Your verification is pending approval. You'll be notified once it's complete.",
+            });
+             await auth.signOut();
+             router.push('/login?role=doctor');
         } else {
-            router.push('/patient/dashboard');
+             toast({
+                title: 'Account Created!',
+                description: "You've been successfully signed up.",
+            });
+            router.push('/patient/complete-profile');
         }
 
     } catch (error) {
@@ -229,7 +246,7 @@ export default function SignupForm() {
                 <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormItem>
               )} />
 
-              <Button type="submit" disabled={isLoading} className="w-full bg-gradient-login text-white">
+              <Button type="submit" disabled={isLoading} className="w-full bg-primary text-primary-foreground">
                 {isLoading ? <Loader2 className="animate-spin" /> : 'Create Account'}
               </Button>
             </form>

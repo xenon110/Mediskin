@@ -66,11 +66,14 @@ export const createUserProfile = async (uid: string, data: CreateUserProfileData
     name: data.name,
     age: data.age,
     gender: data.gender,
-    region: data.region,
-    skinTone: data.skinTone,
     createdAt: serverTimestamp(),
     photoURL: '',
   };
+
+  if (data.role === 'patient') {
+    (userData as Partial<PatientProfile>).region = data.region;
+    (userData as Partial<PatientProfile>).skinTone = data.skinTone;
+  }
 
   if (data.role === 'doctor') {
     (userData as Partial<DoctorProfile>).experience = data.experience;
@@ -241,6 +244,7 @@ export const uploadProfilePicture = async (uid: string, file: File): Promise<str
     await uploadBytes(storageRef, file);
     const photoURL = await getDownloadURL(storageRef);
 
+    // After uploading, update the doctor's profile with the new URL
     await updateDoctorProfile(uid, { photoURL });
     
     return photoURL;
@@ -255,6 +259,7 @@ export const uploadVerificationDocument = async (uid: string, file: File, type: 
     await uploadBytes(storageRef, file);
     const downloadURL = await getDownloadURL(storageRef);
 
+    // Update the doctor's profile with the URL of the uploaded document
     const dataToUpdate = type === 'degree' ? { degreeUrl: downloadURL } : { additionalFileUrl: downloadURL };
     
     await updateDoctorProfile(uid, dataToUpdate);
