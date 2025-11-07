@@ -249,12 +249,29 @@ export default function ReportPage() {
                     
                     <Separator />
 
-                    {/* Summary Report */}
+                    {/* Detailed Analysis */}
                     <section>
-                        <h2 className="text-2xl font-semibold mb-4">Detailed Analysis</h2>
-                        <div className="prose prose-blue dark:prose-invert max-w-none text-foreground/80">
-                            <p>{displayReport.report}</p>
-                        </div>
+                      <Card className="bg-muted/30">
+                          <CardHeader>
+                              <CardTitle className="flex items-center gap-2 text-xl">
+                                  <FileText className="h-5 w-5" /> Detailed Analysis
+                              </CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-4 text-sm">
+                              <div>
+                                  <h4 className="font-semibold text-foreground">Primary Diagnosis</h4>
+                                  <p className="text-muted-foreground">{displayReport.report.primaryDiagnosis}</p>
+                              </div>
+                              <div>
+                                  <h4 className="font-semibold text-foreground">Key Observations</h4>
+                                  <p className="text-muted-foreground">{displayReport.report.keyObservations}</p>
+                              </div>
+                              <div>
+                                  <h4 className="font-semibold text-foreground">Severity Assessment</h4>
+                                  <p className="text-muted-foreground">{displayReport.report.severityAssessment}</p>
+                              </div>
+                          </CardContent>
+                      </Card>
                     </section>
                     
                     <Separator />
