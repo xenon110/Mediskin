@@ -50,9 +50,10 @@ const prompt = ai.definePrompt({
       - 'likelihood': Your assessment of how likely this condition is (High, Medium, or Low).
       - 'confidence': A numerical confidence score between 0.0 and 1.0 representing your certainty in this potential diagnosis based on the provided evidence. A score of 1.0 means you are highly confident.
       - 'description': A concise medical description of the condition.
-  4.  **Structured Report:** You must generate a 'report' object containing a structured summary of your analytical process. This object must have three fields:
-      - 'primaryDiagnosis': Start with the features observed and state the most likely diagnosis in 1-2 sentences.
-      - 'keyObservations': Describe the specific visual details (e.g., color, shape, texture) that support your diagnosis in 1-2 sentences.
+  4.  **Structured Report:** You must generate a 'report' object containing a structured summary of your analytical process. This object must have the following fields:
+      - 'primaryDiagnosis': State the single most likely diagnosis in 1-2 sentences.
+      - 'detailedSummary': Provide a comprehensive 4-5 line summary about the patient's likely condition based on the image analysis, explaining what the disease is.
+      - 'keyObservations': Describe the specific visual details (e.g., color, shape, texture) from the image that support your diagnosis.
       - 'severityAssessment': Provide a visual analysis of the severity and state whether medical attention is warranted in 1-2 sentences.
   5.  **Actionable Recommendations:** You must provide safe, relevant 'homeRemedies' and a clear 'medicalRecommendation'.
   6.  **Consultation Flag:** Set 'doctorConsultationSuggestion' to true if there is any uncertainty or if the condition appears serious.

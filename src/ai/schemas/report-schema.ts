@@ -15,6 +15,7 @@ export const GenerateInitialReportOutputSchema = z.object({
   })).describe('An array of potential skin conditions identified from the image and symptoms.'),
   report: z.object({
     primaryDiagnosis: z.string().describe("The most likely primary diagnosis based on the features observed."),
+    detailedSummary: z.string().describe("A 4-5 line detailed summary of the image analysis."),
     keyObservations: z.string().describe("Specific, key visual and symptomatic observations from the provided data."),
     severityAssessment: z.string().describe("An assessment of the condition's severity and whether it requires medical attention.")
   }).describe("A structured summary of the analysis and findings."),

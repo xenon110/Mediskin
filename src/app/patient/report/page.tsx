@@ -258,9 +258,22 @@ export default function ReportPage() {
                               </CardTitle>
                           </CardHeader>
                           <CardContent className="space-y-4 text-sm text-foreground/90">
-                              <p><span className="font-semibold text-foreground">Primary Diagnosis:</span> {displayReport.report.primaryDiagnosis}</p>
-                              <p><span className="font-semibold text-foreground">Key Observations:</span> {displayReport.report.keyObservations}</p>
-                              <p><span className="font-semibold text-foreground">Severity Assessment:</span> {displayReport.report.severityAssessment}</p>
+                              <div>
+                                  <p className="font-semibold text-foreground">Primary Diagnosis:</p>
+                                  <p>{displayReport.report.primaryDiagnosis}</p>
+                              </div>
+                              <div>
+                                  <p className="font-semibold text-foreground">Detailed Summary:</p>
+                                  <p>{displayReport.report.detailedSummary}</p>
+                              </div>
+                              <div>
+                                  <p className="font-semibold text-foreground">Key Observations:</p>
+                                  <p>{displayReport.report.keyObservations}</p>
+                              </div>
+                              <div>
+                                  <p className="font-semibold text-foreground">Severity Assessment:</p>
+                                  <p>{displayReport.report.severityAssessment}</p>
+                              </div>
                           </CardContent>
                       </Card>
                     </section>
