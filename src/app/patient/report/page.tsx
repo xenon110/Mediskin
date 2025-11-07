@@ -212,7 +212,7 @@ export default function ReportPage() {
                     <section>
                         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Camera /> Uploaded Image</h2>
                         <div className="flex justify-center">
-                             <div className="relative w-full max-w-md h-80 rounded-lg overflow-hidden border-4 border-black shadow-lg">
+                             <div className="relative w-full max-w-md h-80 rounded-lg overflow-hidden border-4 border-sky-200 shadow-lg">
                                 <Image src={report.photoDataUri} alt="Uploaded skin condition" layout="fill" objectFit="contain" />
                             </div>
                         </div>
@@ -292,3 +292,5 @@ export default function ReportPage() {
     </div>
   );
 }
+
+    
