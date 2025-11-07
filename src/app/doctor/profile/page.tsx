@@ -2,13 +2,13 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { User, ChevronLeft, Edit, Mail, Briefcase, Award, Gift, Camera, Loader2, BadgeCheck, Stethoscope } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { User, ChevronLeft, Edit, Mail, Briefcase, Award, Gift, Camera, Loader2, BadgeCheck, Stethoscope, UploadCloud, FileText, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useToast } from '@/hooks/use-toast';
-import { auth, db } from '@/lib/firebase';
-import { DoctorProfile, getUserProfile, updateDoctorProfile, uploadProfilePicture } from '@/lib/firebase-services';
+import { auth } from '@/lib/firebase';
+import { DoctorProfile, getUserProfile, updateDoctorProfile, uploadProfilePicture, uploadVerificationDocument } from '@/lib/firebase-services';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 const profileFormSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -35,9 +37,12 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  
+  const profilePicInputRef = useRef<HTMLInputElement>(null);
+  const degreeInputRef = useRef<HTMLInputElement>(null);
+  const licenseInputRef = useRef<HTMLInputElement>(null);
 
+  const [isUploading, setIsUploading] = useState<'profile' | 'degree' | 'license' | null>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -51,7 +56,6 @@ export default function ProfilePage() {
           if (profile && profile.role === 'doctor') {
             const docProfile = profile as DoctorProfile;
             setDoctorProfile(docProfile);
-            // Set form default values once profile is fetched
             form.reset({
               name: docProfile.name,
               age: docProfile.age,
@@ -77,25 +81,32 @@ export default function ProfilePage() {
     return () => unsubscribe();
   }, [router, toast, form]);
   
-  const handlePictureChangeClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>, type: 'profile' | 'degree' | 'license') => {
     const file = event.target.files?.[0];
     if (!file || !doctorProfile) return;
 
-    setIsUploading(true);
-    toast({ title: 'Uploading...', description: 'Your new profile picture is being uploaded.' });
+    setIsUploading(type);
+    toast({ title: 'Uploading...', description: `Your ${type} file is being uploaded.` });
+    
     try {
-      const newPhotoURL = await uploadProfilePicture(doctorProfile.uid, file);
-      setDoctorProfile(prev => prev ? { ...prev, photoURL: newPhotoURL } : null);
-      toast({ title: 'Success!', description: 'Profile picture updated successfully.' });
+      let newUrl: string;
+      if (type === 'profile') {
+        newUrl = await uploadProfilePicture(doctorProfile.uid, file);
+        setDoctorProfile(prev => prev ? { ...prev, photoURL: newUrl } : null);
+      } else {
+        newUrl = await uploadVerificationDocument(doctorProfile.uid, file, type);
+        if (type === 'degree') {
+             setDoctorProfile(prev => prev ? { ...prev, degreeUrl: newUrl } : null);
+        } else {
+             setDoctorProfile(prev => prev ? { ...prev, additionalFileUrl: newUrl } : null);
+        }
+      }
+      toast({ title: 'Success!', description: `${type.charAt(0).toUpperCase() + type.slice(1)} updated successfully.` });
     } catch (error) {
-      console.error("Failed to upload profile picture:", error);
-      toast({ title: 'Upload Failed', description: 'Could not upload the image. Please try again.', variant: 'destructive' });
+      console.error(`Failed to upload ${type}:`, error);
+      toast({ title: 'Upload Failed', description: `Could not upload the ${type}. Please try again.`, variant: 'destructive' });
     } finally {
-      setIsUploading(false);
+      setIsUploading(null);
     }
   };
 
@@ -118,6 +129,21 @@ export default function ProfilePage() {
     } finally {
       setIsUpdating(false);
     }
+  };
+  
+  const getStatusBadge = (status: DoctorProfile['verificationStatus']) => {
+    const config = {
+      approved: { text: 'Verified Professional', icon: BadgeCheck, className: 'bg-green-100 text-green-800 border-green-200' },
+      pending: { text: 'Verification Pending', icon: ShieldAlert, className: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+      rejected: { text: 'Verification Failed', icon: ShieldAlert, className: 'bg-red-100 text-red-800 border-red-200' },
+    };
+    const { text, icon: Icon, className } = config[status];
+    return (
+      <div className={cn('inline-flex items-center gap-2 py-2 px-4 rounded-full font-semibold text-sm shadow-sm', className)}>
+        <Icon size={16}/>
+        {text}
+      </div>
+    )
   };
   
   if (isLoading) {
@@ -173,23 +199,26 @@ export default function ProfilePage() {
                 <div className="text-center md:text-left">
                     <h1 className="text-4xl font-bold text-gray-800 mb-2">{doctorProfile.name}</h1>
                     <p className="text-lg font-medium text-primary mb-4">{doctorProfile.specialization || 'Dermatologist'}</p>
-                    <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
-                    <Button onClick={handlePictureChangeClick} disabled={isUploading} className="rounded-full bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white shadow-md hover:shadow-lg transition-all">
-                        {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Camera className="mr-2 h-4 w-4" />}
-                        {isUploading ? 'Uploading...' : 'Change Picture'}
+                    <input type="file" ref={profilePicInputRef} onChange={(e) => handleFileChange(e, 'profile')} accept="image/*" className="hidden" />
+                    <Button onClick={() => profilePicInputRef.current?.click()} disabled={isUploading === 'profile'} className="rounded-full bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white shadow-md hover:shadow-lg transition-all">
+                        {isUploading === 'profile' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Camera className="mr-2 h-4 w-4" />}
+                        {isUploading === 'profile' ? 'Uploading...' : 'Change Picture'}
                     </Button>
+                </div>
+                <div className="ml-auto text-center md:text-right">
+                    {getStatusBadge(doctorProfile.verificationStatus)}
                 </div>
             </div>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <div className="grid md:grid-cols-2 gap-8">
-                  <Card className="bg-white/95 backdrop-blur-2xl rounded-2xl p-8 shadow-lg border border-white/30 hover:shadow-xl transition-shadow">
+              <div className="grid md:grid-cols-3 gap-8">
+                  <Card className="md:col-span-2 bg-white/95 backdrop-blur-2xl rounded-2xl p-8 shadow-lg border border-white/30 hover:shadow-xl transition-shadow">
                       <CardHeader className="flex-row justify-between items-center p-0 mb-6">
                           <CardTitle className="text-xl font-bold flex items-center gap-3">
                               <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white">
                                  <User size={20}/>
                               </div>
-                             Personal Information
+                             Personal & Professional Info
                           </CardTitle>
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm" className="border-primary text-primary hover:bg-primary hover:text-white">
@@ -197,7 +226,7 @@ export default function ProfilePage() {
                             </Button>
                           </DialogTrigger>
                       </CardHeader>
-                      <CardContent className="p-0 space-y-4">
+                      <CardContent className="p-0 grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="flex items-center gap-4 p-4 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors">
                               <div className="w-9 h-9 flex-shrink-0 rounded-md flex items-center justify-center bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white"><Mail size={16}/></div>
                               <div>
@@ -219,23 +248,6 @@ export default function ProfilePage() {
                                   <p className="font-semibold text-gray-800">{doctorProfile.gender}</p>
                               </div>
                           </div>
-                      </CardContent>
-                  </Card>
-                   <Card className="bg-white/95 backdrop-blur-2xl rounded-2xl p-8 shadow-lg border border-white/30 hover:shadow-xl transition-shadow">
-                      <CardHeader className="flex-row justify-between items-center p-0 mb-6">
-                          <CardTitle className="text-xl font-bold flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white">
-                                 <Stethoscope size={20}/>
-                              </div>
-                             Medical Credentials
-                          </CardTitle>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" size="sm" className="border-primary text-primary hover:bg-primary hover:text-white">
-                               <Edit className="mr-2 h-4 w-4"/> Edit
-                            </Button>
-                          </DialogTrigger>
-                      </CardHeader>
-                      <CardContent className="p-0 space-y-4">
                           <div className="flex items-center gap-4 p-4 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors">
                               <div className="w-9 h-9 flex-shrink-0 rounded-md flex items-center justify-center bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white"><Briefcase size={16}/></div>
                               <div>
@@ -250,12 +262,33 @@ export default function ProfilePage() {
                                   <p className="font-semibold text-gray-800">{doctorProfile.specialization || 'Dermatology'}</p>
                               </div>
                           </div>
-                          {doctorProfile.verificationStatus === 'approved' && (
-                               <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-400 to-emerald-500 text-white py-2 px-4 rounded-full font-semibold text-sm mt-4 shadow-md">
-                                  <BadgeCheck size={16}/>
-                                  Verified Professional
+                      </CardContent>
+                  </Card>
+                   <Card className="bg-white/95 backdrop-blur-2xl rounded-2xl p-8 shadow-lg border border-white/30 hover:shadow-xl transition-shadow">
+                      <CardHeader className="p-0 mb-6">
+                           <CardTitle className="text-xl font-bold flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-amber-500 to-orange-500 text-white">
+                                 <UploadCloud size={20}/>
                               </div>
-                          )}
+                             Upload Documents
+                          </CardTitle>
+                          <CardDescription>Upload your degree and license for verification.</CardDescription>
+                      </CardHeader>
+                      <CardContent className="p-0 space-y-4">
+                          <input type="file" ref={degreeInputRef} onChange={(e) => handleFileChange(e, 'degree')} accept="application/pdf,image/*" className="hidden" />
+                          <input type="file" ref={licenseInputRef} onChange={(e) => handleFileChange(e, 'license')} accept="application/pdf,image/*" className="hidden" />
+                          
+                          <Button onClick={() => degreeInputRef.current?.click()} disabled={isUploading === 'degree'} variant="outline" className="w-full justify-between">
+                            {isUploading === 'degree' ? <Loader2 className="animate-spin" /> : <FileText />}
+                            <span>{doctorProfile.degreeUrl ? 'Degree Uploaded' : 'Upload Degree'}</span>
+                            {doctorProfile.degreeUrl ? <Link href={doctorProfile.degreeUrl} target="_blank" className="text-primary hover:underline">View</Link> : <span />}
+                          </Button>
+                          
+                           <Button onClick={() => licenseInputRef.current?.click()} disabled={isUploading === 'license'} variant="outline" className="w-full justify-between">
+                            {isUploading === 'license' ? <Loader2 className="animate-spin" /> : <FileText />}
+                            <span>{doctorProfile.additionalFileUrl ? 'License Uploaded' : 'Upload License'}</span>
+                            {doctorProfile.additionalFileUrl ? <Link href={doctorProfile.additionalFileUrl} target="_blank" className="text-primary hover:underline">View</Link> : <span />}
+                          </Button>
                       </CardContent>
                   </Card>
               </div>
@@ -316,5 +349,3 @@ export default function ProfilePage() {
     </>
   );
 }
-
-    

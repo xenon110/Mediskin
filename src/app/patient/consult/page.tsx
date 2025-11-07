@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import Image from 'next/image';
 
 
 export default function ConsultPage() {
@@ -42,7 +43,7 @@ export default function ConsultPage() {
                         getReportsForPatient(user.uid)
                     ]);
                     
-                    setDoctors(fetchedDoctors.filter(d => d.verificationStatus === 'approved'));
+                    setDoctors(fetchedDoctors); // getDoctors now only returns approved doctors
 
                     const pendingReports = fetchedReports.filter(r => r.status === 'pending-patient-input');
                     setReports(pendingReports);
@@ -138,8 +139,12 @@ export default function ConsultPage() {
                                 doctors.map((doctor) => (
                                     <Card key={doctor.uid} className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-2xl border-2 border-transparent hover:border-white">
                                         <CardContent className="p-6 text-center">
-                                            <div className="w-24 h-24 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
-                                                <User className="w-12 h-12 text-muted-foreground"/>
+                                            <div className="relative w-24 h-24 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
+                                                 {doctor.photoURL ? (
+                                                    <Image src={doctor.photoURL} alt={`Dr. ${doctor.name}`} layout="fill" className="rounded-full object-cover" />
+                                                ) : (
+                                                    <User className="w-12 h-12 text-muted-foreground"/>
+                                                )}
                                             </div>
                                             <h3 className="text-xl font-semibold">Dr. {doctor.name}</h3>
                                             <p className="text-muted-foreground">{doctor.specialization || 'Dermatology'}</p>

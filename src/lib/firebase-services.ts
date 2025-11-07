@@ -74,7 +74,7 @@ export const createUserProfile = async (uid: string, data: CreateUserProfileData
 
   if (data.role === 'doctor') {
     (userData as Partial<DoctorProfile>).experience = data.experience;
-    (userData as Partial<DoctorProfile>).verificationStatus = 'approved';
+    (userData as Partial<DoctorProfile>).verificationStatus = 'pending';
   }
 
   await setDoc(userRef, userData, { merge: true });
@@ -202,7 +202,9 @@ export const getReportsForDoctor = async (doctorId: string): Promise<Report[]> =
 export const getDoctors = async (): Promise<DoctorProfile[]> => {
   if (!db) throw new Error("Firestore is not initialized.");
   const doctorsCollection = collection(db, 'doctors');
-  const querySnapshot = await getDocs(doctorsCollection);
+  // Only fetch doctors who have been approved.
+  const q = query(doctorsCollection, where("verificationStatus", "==", "approved"));
+  const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as DoctorProfile));
 };
 
@@ -239,12 +241,27 @@ export const uploadProfilePicture = async (uid: string, file: File): Promise<str
     await uploadBytes(storageRef, file);
     const photoURL = await getDownloadURL(storageRef);
 
-    // After uploading, update the user's profile with the new photoURL.
-    // Use merge: true to avoid overwriting other fields.
-    await setDoc(doc(db, 'doctors', uid), { photoURL }, { merge: true });
+    await updateDoctorProfile(uid, { photoURL });
     
     return photoURL;
 }
+
+export const uploadVerificationDocument = async (uid: string, file: File, type: 'degree' | 'license'): Promise<string> => {
+    if (!storage || !db) throw new Error("Firebase services not initialized.");
+    
+    const filePath = `verification-documents/${uid}/${type}-${file.name}`;
+    const storageRef = ref(storage, filePath);
+
+    await uploadBytes(storageRef, file);
+    const downloadURL = await getDownloadURL(storageRef);
+
+    const dataToUpdate = type === 'degree' ? { degreeUrl: downloadURL } : { additionalFileUrl: downloadURL };
+    
+    await updateDoctorProfile(uid, dataToUpdate);
+
+    return downloadURL;
+}
+
 
 export const logEmergency = async (patientId: string) => {
     if (!db) throw new Error("Firestore is not initialized.");
