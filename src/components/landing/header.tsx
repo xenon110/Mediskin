@@ -19,11 +19,9 @@ const Header = () => {
                 <Link href="/#security">Security</Link>
                 <Link href="/help">Contact</Link>
             </nav>
-            <a onClick={() => router.push('/login')} className="landing-emergency-btn cursor-pointer">Emergency</a>
+            <a onClick={() => router.push('/emergency')} className="landing-emergency-btn cursor-pointer">Emergency</a>
         </header>
     );
 };
 
 export default Header;
-
-    
