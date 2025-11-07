@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Phone, Mail, MapPin, MessageSquare, Siren, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { Label } from "@/components/ui/label";
 
 export default function EmergencyPage() {
     const router = useRouter();
