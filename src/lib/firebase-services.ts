@@ -32,15 +32,19 @@ export type DoctorProfile = UserProfile & {
   additionalFileUrl?: string;
 };
 
+// This data comes from the signup form
 export type CreateUserProfileData = {
   email: string;
   role: 'patient' | 'doctor';
   name: string;
   age: number;
   gender: string;
-  skinTone: string;
-  region: string;
-  experience: number;
+  // Patient-specific fields
+  skinTone?: string;
+  region?: string;
+  // Doctor-specific fields
+  experience?: number;
+  specialization?: string;
 };
 
 export type DoctorNote = {
@@ -59,7 +63,7 @@ export const createUserProfile = async (uid: string, data: CreateUserProfileData
   const collectionName = data.role === 'doctor' ? 'doctors' : 'patients';
   const userRef = doc(db, collectionName, uid);
 
-  const userData: Partial<PatientProfile | DoctorProfile> = {
+  const commonData = {
     uid,
     email: data.email,
     role: data.role,
@@ -70,14 +74,23 @@ export const createUserProfile = async (uid: string, data: CreateUserProfileData
     photoURL: '',
   };
 
-  if (data.role === 'patient') {
-    (userData as Partial<PatientProfile>).region = data.region;
-    (userData as Partial<PatientProfile>).skinTone = data.skinTone;
-  }
+  let userData: PatientProfile | DoctorProfile;
 
-  if (data.role === 'doctor') {
-    (userData as Partial<DoctorProfile>).experience = data.experience;
-    (userData as Partial<DoctorProfile>).verificationStatus = 'approved';
+  if (data.role === 'patient') {
+    userData = {
+      ...commonData,
+      role: 'patient',
+      region: data.region || 'N/A',
+      skinTone: data.skinTone || 'N/A',
+    };
+  } else { // Doctor
+    userData = {
+      ...commonData,
+      role: 'doctor',
+      experience: data.experience || 0,
+      specialization: data.specialization || 'Dermatology',
+      verificationStatus: 'approved', // Auto-approved as per last request
+    };
   }
 
   await setDoc(userRef, userData, { merge: true });

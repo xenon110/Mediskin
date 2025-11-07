@@ -16,12 +16,12 @@ import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
-import { createUserProfile } from '@/lib/firebase-services';
+import { createUserProfile, CreateUserProfileData } from '@/lib/firebase-services';
 import { indianStates } from '@/lib/indian-states';
 import { FirebaseError } from 'firebase/app';
 import { Separator } from '@/components/ui/separator';
 
-const signupSchema = z.object({
+const patientSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
   age: z.coerce.number().min(1, 'Age must be a positive number.').max(120),
   gender: z.string().min(1, 'Please select a gender.'),
@@ -32,7 +32,14 @@ const signupSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters.'),
 });
 
-type SignupFormValues = z.infer<typeof signupSchema>;
+const doctorSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters.'),
+  age: z.coerce.number().min(18, 'Age must be at least 18.').max(120),
+  gender: z.string().min(1, 'Please select a gender.'),
+  mobile: z.string().regex(/^\d{10}$/, 'Please enter a valid 10-digit mobile number.'),
+  email: z.string().email().regex(/^[a-zA-Z0-9._%+-]+@gmail\.com$/, 'Please enter a valid Gmail address.'),
+  password: z.string().min(6, 'Password must be at least 6 characters.'),
+});
 
 
 export default function SignupForm() {
@@ -42,11 +49,11 @@ export default function SignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const role = searchParams.get('role') === 'doctor' ? 'doctor' : 'patient';
 
-  const form = useForm<SignupFormValues>({
-    resolver: zodResolver(signupSchema),
+  const form = useForm({
+    resolver: zodResolver(role === 'doctor' ? doctorSchema : patientSchema),
     defaultValues: {
       name: '',
-      age: 0,
+      age: '' as any,
       gender: '',
       skinTone: '',
       region: '',
@@ -56,7 +63,7 @@ export default function SignupForm() {
     },
   });
 
-  const onSubmit = async (data: SignupFormValues) => {
+  const onSubmit = async (data: any) => {
     setIsLoading(true);
     if (!auth) {
         toast({
@@ -72,7 +79,24 @@ export default function SignupForm() {
         const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
         const user = userCredential.user;
 
-        await createUserProfile(user.uid, { ...data, role: role as 'patient' | 'doctor', experience: 0 });
+        const profileData: CreateUserProfileData = {
+          uid: user.uid,
+          email: data.email,
+          role: role,
+          name: data.name,
+          age: data.age,
+          gender: data.gender,
+          ...(role === 'patient' && {
+            region: data.region,
+            skinTone: data.skinTone,
+          }),
+          ...(role === 'doctor' && {
+             experience: 0,
+             specialization: 'Dermatology'
+          })
+        };
+
+        await createUserProfile(user.uid, profileData);
         
         toast({
             title: 'Account Created!',
@@ -96,7 +120,7 @@ export default function SignupForm() {
                     description = 'The password is too weak. Please choose a stronger password.';
                     break;
                 default:
-                    description = 'Failed to create an account. Please check the details and try again.';
+                    description = `Failed to create an account. ${error.message}`;
             }
         }
         toast({ variant: 'destructive', title: 'Sign Up Failed', description });
@@ -144,36 +168,39 @@ export default function SignupForm() {
                 )} />
               </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <FormField control={form.control} name="region" render={({ field }) => (
-                    <FormItem><FormLabel>State / Region</FormLabel>
-                       <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Select your state" /></SelectTrigger></FormControl>
-                        <SelectContent>
-                          {indianStates.map(state => (
-                            <SelectItem key={state} value={state}>{state}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                 <FormField control={form.control} name="skinTone" render={({ field }) => (
-                    <FormItem><FormLabel>Skin Tone</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Select your skin tone" /></SelectTrigger></FormControl>
-                        <SelectContent>
-                          <SelectItem value="Fair">Fair</SelectItem>
-                          <SelectItem value="Wheatish">Wheatish</SelectItem>
-                          <SelectItem value="Dusky">Dusky</SelectItem>
-                          <SelectItem value="Dark">Dark</SelectItem>
-                          <SelectItem value="Olive">Olive</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-              </div>
+              {role === 'patient' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField control={form.control} name="region" render={({ field }) => (
+                      <FormItem><FormLabel>State / Region</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl><SelectTrigger><SelectValue placeholder="Select your state" /></SelectTrigger></FormControl>
+                          <SelectContent>
+                            {indianStates.map(state => (
+                              <SelectItem key={state} value={state}>{state}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  <FormField control={form.control} name="skinTone" render={({ field }) => (
+                      <FormItem><FormLabel>Skin Tone</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl><SelectTrigger><SelectValue placeholder="Select your skin tone" /></SelectTrigger></FormControl>
+                          <SelectContent>
+                            <SelectItem value="Fair">Fair</SelectItem>
+                            <SelectItem value="Wheatish">Wheatish</SelectItem>
+                            <SelectItem value="Dusky">Dusky</SelectItem>
+                            <SelectItem value="Dark">Dark</SelectItem>
+                            <SelectItem value="Olive">Olive</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                </div>
+              )}
+
 
               <Separator />
 
