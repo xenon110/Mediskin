@@ -136,7 +136,7 @@ export default function ConsultPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {doctors.length > 0 ? (
                                 doctors.map((doctor) => (
-                                    <Card key={doctor.uid} className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                                    <Card key={doctor.uid} className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-2xl">
                                         <CardContent className="p-6 text-center">
                                             <div className="w-24 h-24 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
                                                 <User className="w-12 h-12 text-muted-foreground"/>
